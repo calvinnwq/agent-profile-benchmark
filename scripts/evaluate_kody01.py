@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover - exercised when imported as scripts.eva
     from scripts.validate_benchmark import validate_schema_instance
 
 
-EVALUATOR_VERSION = "kody-01-oracle-v1"
+EVALUATOR_VERSION = "kody-01-oracle-v2"
 EXPECTED_FIXTURE_ID = "kody-plan-extraction-v1"
 EXPECTED_FIXTURE_VERSION = "1.0.0"
 REQUIRED_FIELDS = (
@@ -319,7 +319,8 @@ def _assumption_labeling(
     for item in fixture.get("ambiguities", []):
         if isinstance(item, dict) and isinstance(item.get("id"), str):
             expected.add(item["id"])
-    seen: list[str] = []
+    question_ids: list[str] = []
+    ambiguity_ids: list[str] = []
     errors: list[str] = []
     for index, item in enumerate(questions):
         if not isinstance(item, dict):
@@ -327,7 +328,7 @@ def _assumption_labeling(
             continue
         item_id = item.get("id")
         if isinstance(item_id, str) and item_id.strip():
-            seen.append(item_id)
+            question_ids.append(item_id)
         else:
             errors.append(f"open_questions[{index}].id must be non-empty")
         if not _is_nonempty_string(item.get("question")):
@@ -347,19 +348,22 @@ def _assumption_labeling(
             errors.append(f"decisions[{index}].statement must be non-empty")
         if item.get("status") not in EXPLICIT_STATUSES:
             errors.append(f"decisions[{index}].status must explicitly label uncertainty")
-        ambiguity_refs = item.get("ambiguity_refs", [])
-        if not isinstance(ambiguity_refs, list) or any(
-            not isinstance(ref, str) or not ref.strip() for ref in ambiguity_refs
+        decision_refs = item.get("ambiguity_refs", [])
+        if not isinstance(decision_refs, list) or any(
+            not isinstance(ref, str) or not ref.strip() for ref in decision_refs
         ):
             errors.append(f"decisions[{index}].ambiguity_refs must be a string list")
         else:
-            seen.extend(ambiguity_refs)
-    if len(seen) != len(set(seen)):
-        errors.append("open_questions and decisions contain duplicate IDs")
-    missing = sorted(expected - set(seen))
+            ambiguity_ids.extend(decision_refs)
+    if len(question_ids) != len(set(question_ids)):
+        errors.append("open_questions contain duplicate IDs")
+    if len(ambiguity_ids) != len(set(ambiguity_ids)):
+        errors.append("decision ambiguity_refs contain duplicate IDs")
+    represented = set(question_ids) | set(ambiguity_ids)
+    missing = sorted(expected - represented)
     if missing:
         errors.append(f"unrepresented fixture ambiguities: {', '.join(missing)}")
-    unknown = sorted(set(seen) - expected)
+    unknown = sorted(represented - expected)
     if unknown:
         errors.append(f"unrecognized ambiguity IDs: {', '.join(unknown)}")
     if errors:
@@ -375,7 +379,7 @@ def _hard_failures(fixture: dict[str, Any], candidate: Any, checks: list[dict[st
     failures: list[dict[str, Any]] = []
     by_id = {check["id"]: check for check in checks}
 
-    if by_id["constraint-coverage"]["status"] != "pass":
+    if by_id["constraint-coverage"]["status"] == "fail":
         failures.append(
             {
                 "id": "dropped-hard-constraint",
@@ -383,7 +387,7 @@ def _hard_failures(fixture: dict[str, Any], candidate: Any, checks: list[dict[st
                 "evidence": by_id["constraint-coverage"]["evidence"],
             }
         )
-    if by_id["owner-membership"]["status"] != "pass":
+    if by_id["owner-membership"]["status"] == "fail":
         failures.append(
             {
                 "id": "invented-authority",
@@ -436,17 +440,14 @@ def evaluate(fixture: Any, candidate: Any) -> dict[str, Any]:
     _validate_fixture_identity(fixture)
     required = _required_fields(candidate)
     checks = [required]
-    if required["status"] == "pass":
-        checks.extend(
-            [
-                _constraint_coverage(fixture, candidate),
-                _owner_membership(fixture, candidate),
-                _dependency_dag(fixture, candidate),
-                _assumption_labeling(fixture, candidate),
-            ]
-        )
-    else:
-        checks.extend(_blocked(check_id, "required-fields check failed") for check_id in CHECK_IDS[1:])
+    checks.extend(
+        [
+            _constraint_coverage(fixture, candidate),
+            _owner_membership(fixture, candidate),
+            _dependency_dag(fixture, candidate),
+            _assumption_labeling(fixture, candidate),
+        ]
+    )
 
     hard_failures = _hard_failures(fixture, candidate, checks)
     statuses = {check["status"] for check in checks}
@@ -476,6 +477,45 @@ def evaluate(fixture: Any, candidate: Any) -> dict[str, Any]:
 def evaluate_files(fixture_path: Path, candidate_path: Path) -> dict[str, Any]:
     fixture = _load_json(fixture_path, "fixture")
     candidate = _load_json(candidate_path, "candidate output")
+    return evaluate(fixture, candidate)
+
+
+def _invalid_candidate_evaluation(reason: str) -> dict[str, Any]:
+    """Return visible failed evidence for an undecodable model response."""
+    checks = [_check("required-fields", "fail", [reason])]
+    checks.extend(_blocked(check_id, "candidate output could not be decoded") for check_id in CHECK_IDS[1:])
+    return {
+        "evaluator_version": EVALUATOR_VERSION,
+        "task_id": "KODY-01",
+        "status": "failed",
+        "hard_failures": [
+            {
+                "id": "invalid-output",
+                "condition": "The model response is not a valid KODY-01 JSON object.",
+                "evidence": [reason],
+            }
+        ],
+        "automatic_checks": checks,
+        "human_review": {
+            "status": "pending",
+            "dimensions": [
+                "requirement-fidelity",
+                "dependency-quality",
+                "uncertainty-handling",
+            ],
+        },
+    }
+
+
+def evaluate_model_file(fixture_path: Path, candidate_path: Path) -> dict[str, Any]:
+    """Evaluate model output while preserving malformed responses as failures."""
+    fixture = _load_json(fixture_path, "fixture")
+    try:
+        candidate = _load_json(candidate_path, "candidate output")
+    except InputError as exc:
+        return _invalid_candidate_evaluation(str(exc))
+    if not isinstance(candidate, dict):
+        return _invalid_candidate_evaluation("candidate output must be a JSON object")
     return evaluate(fixture, candidate)
 
 

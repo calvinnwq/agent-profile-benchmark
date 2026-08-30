@@ -17,12 +17,19 @@ from evaluate_kody01 import (
     InputError,
     _reject_duplicate_json_keys,
     evaluate_files,
+    evaluate_model_file,
 )
 from validate_benchmark import validate_schema_instance
 
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN_SCHEMA_PATH = ROOT / "schemas" / "kody-01-run-record.schema.json"
+VALID_HARNESSES = {"local-replay", "hermes-oneshot"}
+VALID_CONDITIONS = {"known-good-control", "known-bad-control", "model-calibration"}
+HARNESS_CONDITIONS = {
+    "local-replay": {"known-good-control", "known-bad-control"},
+    "hermes-oneshot": {"model-calibration"},
+}
 
 
 def _sha256_reference(path: Path) -> str:
@@ -68,39 +75,70 @@ def replay(
     model_requested: str,
     model_resolved: str,
     output_path: Path,
+    *,
+    harness: str = "local-replay",
+    raw_output_path: Path | None = None,
+    started_at: str | None = None,
+    completed_at: str | None = None,
+    latency_ms: int | None = None,
+    usage: dict[str, Any] | None = None,
+    notes: str | None = None,
+    status_override: str | None = None,
 ) -> dict[str, Any]:
     """Evaluate one candidate and atomically write its run record."""
 
-    started_at = _utc_timestamp()
+    if harness not in VALID_HARNESSES:
+        raise InputError(f"unsupported replay harness {harness!r}")
+    if condition not in VALID_CONDITIONS:
+        raise InputError(f"unsupported replay condition {condition!r}")
+    if condition not in HARNESS_CONDITIONS[harness]:
+        raise InputError(f"replay harness {harness!r} does not support {condition!r}")
+    if status_override is not None and status_override not in {"passed", "failed", "blocked"}:
+        raise InputError(f"unsupported status override {status_override!r}")
+
+    record_started_at = started_at or _utc_timestamp()
     start = time.perf_counter()
-    evaluation = evaluate_files(fixture_path, candidate_path)
+    evaluation = (
+        evaluate_model_file(fixture_path, candidate_path)
+        if harness == "hermes-oneshot"
+        else evaluate_files(fixture_path, candidate_path)
+    )
     fixture_fingerprint = _sha256_reference(fixture_path)
     prompt_fingerprint = _sha256_reference(prompt_path)
-    completed_at = _utc_timestamp()
-    latency_ms = max(0, int((time.perf_counter() - start) * 1000))
+    record_completed_at = completed_at or _utc_timestamp()
+    record_latency_ms = (
+        max(0, int((time.perf_counter() - start) * 1000))
+        if latency_ms is None
+        else latency_ms
+    )
     record = {
         "run_id": run_id,
         "benchmark_id": "agent-profile-benchmark",
         "benchmark_version": "0.1.0",
         "task_id": "KODY-01",
         "profile_id": "kody",
-        "harness": "local-replay",
+        "harness": harness,
         "model_requested": model_requested,
         "model_resolved": model_resolved,
         "condition": condition,
         "evaluator_version": EVALUATOR_VERSION,
         "prompt_fingerprint": prompt_fingerprint,
         "fixture_fingerprint": fixture_fingerprint,
-        "started_at": started_at,
-        "completed_at": completed_at,
-        "status": evaluation["status"],
-        "raw_output_reference": _raw_output_reference(candidate_path),
+        "started_at": record_started_at,
+        "completed_at": record_completed_at,
+        "status": status_override or evaluation["status"],
+        "raw_output_reference": _raw_output_reference(raw_output_path or candidate_path),
         "automatic_checks": evaluation["automatic_checks"],
         "hard_failures": evaluation["hard_failures"],
         "human_scores": {},
-        "latency_ms": latency_ms,
-        "usage": {},
-        "notes": "Deterministic control replay; no model was called and no external action was performed.",
+        "latency_ms": record_latency_ms,
+        "usage": usage if usage is not None else {},
+        "notes": notes
+        or (
+            "Hermes one-shot model calibration; no tools were exposed and no external action was performed."
+            if harness == "hermes-oneshot"
+            else "Deterministic control replay; no model was called and no external action was performed."
+        ),
     }
     schema_errors = validate_schema_instance(record, _load_run_schema())
     if schema_errors:
@@ -123,9 +161,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fixture", type=Path, required=True, help="path to the KODY-01 fixture")
     parser.add_argument("--prompt", type=Path, required=True, help="path to the exact prompt packet")
     parser.add_argument("--candidate", type=Path, required=True, help="path to a candidate JSON output")
+    parser.add_argument("--harness", choices=sorted(VALID_HARNESSES), default="local-replay")
     parser.add_argument(
         "--condition",
-        choices=("known-good-control", "known-bad-control"),
+        choices=sorted(VALID_CONDITIONS),
         required=True,
         help="control condition represented by this replay",
     )
@@ -144,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
             args.model_requested,
             args.model_resolved,
             args.output,
+            harness=args.harness,
         )
     except InputError as exc:
         print(f"replay failed: {exc}", file=sys.stderr)

@@ -15,7 +15,7 @@
   },
   "evaluator": {
     "path": "../../scripts/evaluate_kody01.py",
-    "version": "kody-01-oracle-v1"
+    "version": "kody-01-oracle-v2"
   },
   "output_schema": {
     "path": "../../schemas/kody-01-output.schema.json"
