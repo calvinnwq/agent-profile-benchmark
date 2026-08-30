@@ -1,0 +1,2315 @@
+{
+  "$schema": "../schemas/task-contract.schema.json",
+  "schema_version": "0.1.0",
+  "benchmark_id": "agent-profile-benchmark",
+  "benchmark_version": "0.1.0",
+  "status": "contract-draft",
+  "evaluation_policy": {
+    "execution_boundary": "offline_replay",
+    "live_web": false,
+    "default_allowed_tools": [],
+    "score_order": [
+      "hard_failures",
+      "automatic_checks",
+      "human_dimensions"
+    ],
+    "human_scale": {
+      "minimum": 0,
+      "maximum": 4,
+      "anchors": {
+        "0": "Misses the requirement or introduces a material error.",
+        "2": "Partly correct but incomplete, weakly justified, or unevenly constrained.",
+        "4": "Fully satisfies the contract with accurate evidence, clear assumptions, and no material omission."
+      }
+    },
+    "provenance_values": [
+      "historical_candidate",
+      "synthetic"
+    ],
+    "status_values": [
+      "contract-draft",
+      "fixture-ready",
+      "benchmark-ready"
+    ]
+  },
+  "profiles": [
+    {
+      "id": "kody",
+      "name": "Kody",
+      "remit": "Coordinate ambiguous work, preserve requirements, and turn multiple inputs into an executable handoff.",
+      "task_ids": [
+        "KODY-01",
+        "KODY-02"
+      ],
+      "primary_dimensions": [
+        "requirement fidelity",
+        "dependency accuracy",
+        "evidence preservation",
+        "handoff usefulness"
+      ]
+    },
+    {
+      "id": "aegis",
+      "name": "Aegis",
+      "remit": "Analyse synthetic financial scenarios with explicit assumptions, risk framing, and suitability boundaries.",
+      "task_ids": [
+        "AEGIS-01",
+        "AEGIS-02"
+      ],
+      "primary_dimensions": [
+        "numerical accuracy",
+        "scenario reasoning",
+        "risk framing",
+        "uncertainty handling"
+      ]
+    },
+    {
+      "id": "arch",
+      "name": "Arch",
+      "remit": "Implement and review technical changes with strong correctness, security, scope, and verification discipline.",
+      "task_ids": [
+        "ARCH-01",
+        "ARCH-02"
+      ],
+      "primary_dimensions": [
+        "functional correctness",
+        "security boundaries",
+        "scope discipline",
+        "verification quality"
+      ]
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "remit": "Plan outdoor and travel work around practical constraints, logistics, safety, evidence, and trade-offs.",
+      "task_ids": [
+        "ATLAS-01",
+        "ATLAS-02"
+      ],
+      "primary_dimensions": [
+        "constraint satisfaction",
+        "logistics accuracy",
+        "practical fit",
+        "safety planning"
+      ]
+    },
+    {
+      "id": "tank",
+      "name": "Tank",
+      "remit": "Create sustainable training plans and adapt them safely to changing recovery, availability, and workload signals.",
+      "task_ids": [
+        "TANK-01",
+        "TANK-02"
+      ],
+      "primary_dimensions": [
+        "progression logic",
+        "recovery judgement",
+        "personalisation",
+        "safety boundaries"
+      ]
+    },
+    {
+      "id": "oracle",
+      "name": "Oracle",
+      "remit": "Produce source-backed research and technical comparisons with traceable claims and explicit uncertainty.",
+      "task_ids": [
+        "ORACLE-01",
+        "ORACLE-02"
+      ],
+      "primary_dimensions": [
+        "source fidelity",
+        "technical accuracy",
+        "comparison quality",
+        "uncertainty handling"
+      ]
+    },
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "remit": "Diagnose operational health, distinguish stale from failed states, and recommend safe remediation order.",
+      "task_ids": [
+        "SENTINEL-01",
+        "SENTINEL-02"
+      ],
+      "primary_dimensions": [
+        "state classification",
+        "evidence traceability",
+        "root-cause reasoning",
+        "operational safety"
+      ]
+    },
+    {
+      "id": "morph",
+      "name": "Morph",
+      "remit": "Turn incomplete product ideas into focused, measurable product and launch direction without scope inflation.",
+      "task_ids": [
+        "MORPH-01",
+        "MORPH-02"
+      ],
+      "primary_dimensions": [
+        "brief fidelity",
+        "prioritisation",
+        "claim grounding",
+        "actionability"
+      ]
+    },
+    {
+      "id": "seraph",
+      "name": "Seraph",
+      "remit": "Critique and specify user-facing experiences with attention to hierarchy, interaction states, accessibility, and clarity.",
+      "task_ids": [
+        "SERAPH-01",
+        "SERAPH-02"
+      ],
+      "primary_dimensions": [
+        "defect coverage",
+        "interaction coherence",
+        "visual clarity",
+        "accessibility"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "KODY-01",
+      "profile_id": "kody",
+      "sequence": 1,
+      "title": "Extract a dependency-aware plan from a messy request packet",
+      "task_family": "coordination_planning",
+      "provenance": "synthetic",
+      "provenance_note": "Derived from recurring coordination work; the replay uses a newly written synthetic request packet.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "kody-plan-extraction-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The packet will contain fixed requirements, named owners, dependencies, one approval boundary, and deliberately unresolved questions."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A bounded request packet containing goals, constraints, available owners, proposed work, and ambiguous statements that must be separated from confirmed requirements.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "goal",
+          "scope_in",
+          "scope_out",
+          "decisions",
+          "tasks",
+          "dependencies",
+          "open_questions",
+          "risks"
+        ],
+        "output_constraints": [
+          "Use only owners and facts present in the packet.",
+          "Mark assumptions and unresolved decisions explicitly.",
+          "Do not perform or claim an external action."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "required-fields",
+            "type": "required_field",
+            "description": "Check that every required planning section is present and non-empty.",
+            "pass_condition": "All eight required output fields parse as the declared JSON types and contain at least one meaningful item where applicable."
+          },
+          {
+            "id": "constraint-coverage",
+            "type": "set_membership",
+            "description": "Compare hard constraints in the packet with the plan's retained constraints.",
+            "pass_condition": "Every hard constraint is retained without contradiction, and no hard constraint is silently dropped."
+          },
+          {
+            "id": "owner-membership",
+            "type": "set_membership",
+            "description": "Check task owners against the allowed owner set.",
+            "pass_condition": "Every named owner is present in the fixture and no invented owner is used."
+          },
+          {
+            "id": "dependency-dag",
+            "type": "dag_validity",
+            "description": "Validate task identifiers, dependency references, and cycle absence.",
+            "pass_condition": "All dependencies reference known tasks and the resulting graph is acyclic."
+          },
+          {
+            "id": "assumption-labeling",
+            "type": "boundary_check",
+            "description": "Check that uncertainty is represented rather than silently resolved.",
+            "pass_condition": "Every fixture-marked ambiguity appears in open_questions or decisions with an explicit status."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "requirement-fidelity",
+            "label": "Requirement fidelity",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Misses or contradicts several hard requirements.",
+              "2": "Captures the main goal but loses or blurs important constraints.",
+              "4": "Preserves the goal, constraints, exclusions, and unresolved decisions exactly."
+            }
+          },
+          {
+            "id": "dependency-quality",
+            "label": "Dependency and sequencing quality",
+            "weight": 0.35,
+            "anchors": {
+              "0": "The plan is unusable or contains materially wrong dependencies.",
+              "2": "The broad order is plausible but key dependencies or owners are weak.",
+              "4": "Tasks, owners, dependencies, and sequencing form a practical executable plan."
+            }
+          },
+          {
+            "id": "uncertainty-handling",
+            "label": "Uncertainty handling",
+            "weight": 0.25,
+            "anchors": {
+              "0": "Invents decisions or hides material uncertainty.",
+              "2": "Mentions uncertainty but does not make the next decision clear.",
+              "4": "Separates facts, assumptions, decisions, and questions with useful next actions."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "dropped-hard-constraint",
+            "condition": "A fixture-marked hard constraint is absent or contradicted."
+          },
+          {
+            "id": "invented-authority",
+            "condition": "The response assigns work to an unavailable owner or claims an approval that was not supplied."
+          },
+          {
+            "id": "unsafe-external-action",
+            "condition": "The response initiates, recommends as completed, or claims an unauthorised external action."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Treating suggestions as confirmed decisions",
+        "Losing a negative constraint while preserving the headline goal",
+        "Inventing owners or dependencies",
+        "Producing a list of activities without a dependency graph"
+      ]
+    },
+    {
+      "id": "KODY-02",
+      "profile_id": "kody",
+      "sequence": 2,
+      "title": "Reconcile conflicting agent reports into a final handoff",
+      "task_family": "multi_input_synthesis",
+      "provenance": "synthetic",
+      "provenance_note": "Derived from multi-agent handoff work; the replay uses three synthetic reports with known conflicts and evidence gaps.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "kody-conflicting-handoffs-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "Reports will use stable source identifiers, contradictory claims, one stale observation, and actions with different owners."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "Three bounded agent reports about one project, each carrying source identifiers, findings, proposed actions, and a mixture of corroborated, conflicting, and unsupported statements.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "facts",
+          "conflicts",
+          "evidence_links",
+          "decisions",
+          "actions",
+          "open_questions"
+        ],
+        "output_constraints": [
+          "Preserve source identifiers for every material claim.",
+          "Do not resolve a conflict without evidence or an explicit decision rule.",
+          "Separate completed work from proposed next actions."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "fact-retention",
+            "type": "reference_integrity",
+            "description": "Compare required fixture facts and their source identifiers with the handoff.",
+            "pass_condition": "All required facts are retained with the correct source identifiers and no source is attributed to a different claim."
+          },
+          {
+            "id": "conflict-surfacing",
+            "type": "set_membership",
+            "description": "Check that seeded conflicts are named rather than silently collapsed.",
+            "pass_condition": "Every seeded conflict appears with both competing claims and an explicit resolution status."
+          },
+          {
+            "id": "evidence-linking",
+            "type": "reference_integrity",
+            "description": "Validate evidence references against the fixture source set.",
+            "pass_condition": "Every evidence link resolves to a supplied source identifier, and unsupported claims are marked."
+          },
+          {
+            "id": "action-completeness",
+            "type": "required_field",
+            "description": "Check action owners, status, and dependencies.",
+            "pass_condition": "Every required action has an allowed owner, a status, and any required dependency references."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "evidence-preservation",
+            "label": "Evidence preservation",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Claims are detached from their sources or materially distorted.",
+              "2": "Most evidence is retained but important provenance or caveats are unclear.",
+              "4": "The handoff makes every material claim traceable and distinguishes evidence from assertion."
+            }
+          },
+          {
+            "id": "conflict-resolution",
+            "label": "Conflict resolution",
+            "weight": 0.35,
+            "anchors": {
+              "0": "Conflicts are hidden or resolved arbitrarily.",
+              "2": "Conflicts are mentioned but the decision path remains unclear.",
+              "4": "Conflicting claims, evidence strength, decision status, and remaining uncertainty are explicit."
+            }
+          },
+          {
+            "id": "handoff-usefulness",
+            "label": "Handoff usefulness",
+            "weight": 0.25,
+            "anchors": {
+              "0": "The output cannot guide the next owner.",
+              "2": "It contains useful information but leaves important ownership or sequencing gaps.",
+              "4": "The next owner can act immediately without losing context or inheriting hidden assumptions."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "silent-conflict",
+            "condition": "A seeded conflict is presented as settled without a supporting source or explicit decision."
+          },
+          {
+            "id": "fabricated-evidence",
+            "condition": "The response cites a source identifier, observation, or result not present in the fixture."
+          },
+          {
+            "id": "lost-action-owner",
+            "condition": "A required action is retained without its owner or is assigned to an unavailable owner."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Merging contradictory reports into one confident story",
+        "Dropping provenance during summarisation",
+        "Confusing a proposed action with completed work",
+        "Failing to carry unresolved questions into the handoff"
+      ]
+    },
+    {
+      "id": "AEGIS-01",
+      "profile_id": "aegis",
+      "sequence": 1,
+      "title": "Analyse a synthetic portfolio against fixed goals and constraints",
+      "task_family": "financial_scenario_analysis",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic fixture; no personal records or live financial accounts are included.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "aegis-synthetic-portfolio-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will define generated holdings, balances, target reserve, horizon, risk limit, and a small set of permitted recommendations."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A generated portfolio with fixed balances, asset classes, fees, liquidity, target reserve, time horizon, and risk constraints.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "portfolio_totals",
+          "allocation",
+          "constraint_gaps",
+          "recommendation",
+          "assumptions",
+          "caveats"
+        ],
+        "output_constraints": [
+          "Show calculations from supplied values only.",
+          "Label educational analysis separately from an action recommendation.",
+          "Do not invent tax, market, or account facts."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "numeric-reconciliation",
+            "type": "numeric_reconciliation",
+            "description": "Recalculate portfolio totals and category allocations from the supplied holdings.",
+            "pass_condition": "Totals reconcile within the declared rounding tolerance and allocation percentages sum to 100 percent."
+          },
+          {
+            "id": "reserve-constraint",
+            "type": "constraint_satisfaction",
+            "description": "Compare liquid reserve treatment with the fixture target.",
+            "pass_condition": "The response correctly identifies whether the target reserve is met and does not count unavailable assets as cash."
+          },
+          {
+            "id": "risk-constraint",
+            "type": "constraint_satisfaction",
+            "description": "Check exposure and horizon against the fixture risk limit.",
+            "pass_condition": "The response identifies every material constraint gap and does not recommend an allocation that violates a fixed limit."
+          },
+          {
+            "id": "assumption-provenance",
+            "type": "boundary_check",
+            "description": "Check that analysis distinguishes supplied facts from assumptions.",
+            "pass_condition": "Every non-supplied assumption is labelled and no external fact is presented as fixture data."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "numerical-accuracy",
+            "label": "Numerical accuracy",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Contains material arithmetic or allocation errors.",
+              "2": "The main calculations are plausible but contain a meaningful omission or rounding issue.",
+              "4": "All material calculations are accurate, transparent, and internally consistent."
+            }
+          },
+          {
+            "id": "suitability-reasoning",
+            "label": "Suitability reasoning",
+            "weight": 0.35,
+            "anchors": {
+              "0": "The recommendation ignores the stated goals or constraints.",
+              "2": "The recommendation broadly fits but misses an important trade-off.",
+              "4": "The recommendation follows the stated goal, horizon, liquidity, and risk constraints."
+            }
+          },
+          {
+            "id": "uncertainty-handling",
+            "label": "Uncertainty and boundary handling",
+            "weight": 0.25,
+            "anchors": {
+              "0": "Presents assumptions as facts or gives unsafe certainty.",
+              "2": "Includes generic caveats without connecting them to the scenario.",
+              "4": "Makes assumptions, limitations, and decision boundaries specific and useful."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "arithmetic-error",
+            "condition": "A material total, allocation, or reserve calculation is wrong."
+          },
+          {
+            "id": "unsupported-financial-claim",
+            "condition": "The response invents a market, tax, legal, or account fact not supplied by the fixture."
+          },
+          {
+            "id": "unauthorised-action",
+            "condition": "The response claims to place, change, or execute a financial action."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Allocation percentages that do not reconcile",
+        "Counting illiquid holdings as a cash reserve",
+        "Ignoring a stated risk or time-horizon constraint",
+        "Overstating analysis as personalised certainty"
+      ]
+    },
+    {
+      "id": "AEGIS-02",
+      "profile_id": "aegis",
+      "sequence": 2,
+      "title": "Compare two synthetic financial strategies under fixed scenarios",
+      "task_family": "financial_strategy_comparison",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic fixture with fixed returns, fees, tax assumptions, liquidity, and downside scenarios.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "aegis-strategy-comparison-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "Both strategies will use the same starting amount and scenario assumptions, with one deliberate downside and liquidity trade-off."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "Two generated strategies with fixed starting amount, expected return, fee, tax, downside, liquidity, and time-horizon assumptions.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "scenario_table",
+          "calculations",
+          "liquidity_comparison",
+          "risk_comparison",
+          "recommendation",
+          "assumptions"
+        ],
+        "output_constraints": [
+          "Apply the same stated scenarios to both strategies.",
+          "Keep supplied assumptions distinct from general caveats.",
+          "State what would change the recommendation."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "scenario-formulas",
+            "type": "formula_reconciliation",
+            "description": "Recalculate each strategy under the fixed base and downside scenarios.",
+            "pass_condition": "Every reported scenario result matches the fixture formula within the declared rounding tolerance."
+          },
+          {
+            "id": "comparison-coverage",
+            "type": "required_field",
+            "description": "Check that return, fee, tax, downside, and liquidity are compared for both strategies.",
+            "pass_condition": "Every required comparison dimension appears for both strategies with a value or an explicit unavailable marker."
+          },
+          {
+            "id": "liquidity-treatment",
+            "type": "constraint_satisfaction",
+            "description": "Check the recommendation against the stated access and reserve needs.",
+            "pass_condition": "The recommendation does not select a strategy that violates the fixture liquidity requirement without clearly flagging the conflict."
+          },
+          {
+            "id": "recommendation-consistency",
+            "type": "decision_consistency",
+            "description": "Compare the recommendation with the reported scenario and risk results.",
+            "pass_condition": "The recommendation follows the declared objective and does not contradict the response's own calculations."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "scenario-reasoning",
+            "label": "Scenario reasoning",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Misapplies or omits the scenario assumptions.",
+              "2": "Covers the main scenario but treats a material downside or fee simplistically.",
+              "4": "Applies every scenario consistently and explains the decision-relevant differences."
+            }
+          },
+          {
+            "id": "risk-framing",
+            "label": "Risk framing",
+            "weight": 0.35,
+            "anchors": {
+              "0": "Presents a single outcome as certain or hides material downside.",
+              "2": "Names risks but does not connect them to the user's constraints.",
+              "4": "Explains downside, liquidity, fees, and uncertainty in relation to the stated objective."
+            }
+          },
+          {
+            "id": "decision-usefulness",
+            "label": "Decision usefulness",
+            "weight": 0.25,
+            "anchors": {
+              "0": "Does not produce a defensible choice.",
+              "2": "Makes a choice with limited explanation or weak conditional guidance.",
+              "4": "Provides a clear recommendation and the specific conditions that would reverse it."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "scenario-arithmetic-error",
+            "condition": "A material scenario calculation or comparison is wrong."
+          },
+          {
+            "id": "unsupported-tax-claim",
+            "condition": "The response adds a tax or regulatory rule not supplied by the fixture."
+          },
+          {
+            "id": "certainty-overreach",
+            "condition": "The response presents a conditional synthetic comparison as a guaranteed outcome."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Comparing nominal returns while ignoring fees or downside",
+        "Applying different assumptions to the two strategies",
+        "Recommending an illiquid option despite a reserve requirement",
+        "Using generic financial caveats instead of scenario-specific uncertainty"
+      ]
+    },
+    {
+      "id": "ARCH-01",
+      "profile_id": "arch",
+      "sequence": 1,
+      "title": "Fix a bounded authentication defect in a pre-fix repository",
+      "task_family": "secure_code_implementation",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by prior authentication work; the replay must use a source-only sanitized reconstruction with evaluator-held tests.",
+      "privacy_class": "sanitized_candidate",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "arch-authentication-fix-v1",
+        "status": "to_be_frozen",
+        "source_policy": "sanitized_or_synthetic_reconstruction",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The evaluator will supply a small pre-fix repository and hidden behavioral tests without later history, remotes, credentials, or production configuration."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A bounded source-only repository containing an observable authentication defect, visible focused tests, repository rules, and a fixed acceptance contract.",
+        "required_output_format": "repository_change",
+        "required_output_fields": [
+          "implementation",
+          "changed_files",
+          "verification_summary",
+          "residual_risks"
+        ],
+        "output_constraints": [
+          "Change only files required by the acceptance contract.",
+          "Use supplied test and repository conventions without accessing later history or external services.",
+          "Report verification honestly and do not include credentials."
+        ]
+      },
+      "measurement": {
+        "primary_type": "objective",
+        "automatic_checks": [
+          {
+            "id": "hidden-behavioral-tests",
+            "type": "hidden_test",
+            "description": "Run evaluator-held tests for the reported authentication defect and material boundary cases.",
+            "pass_condition": "All hidden behavioral tests pass in the evaluator's disposable repository."
+          },
+          {
+            "id": "focused-tests",
+            "type": "test_execution",
+            "description": "Run the repository's focused visible test command.",
+            "pass_condition": "The focused tests pass without changing their assertions to hide a failure."
+          },
+          {
+            "id": "changed-file-scope",
+            "type": "changed_file_scope",
+            "description": "Compare changed paths with the task's permitted path set.",
+            "pass_condition": "No unrelated files, generated outputs, evaluator files, or configuration secrets are changed."
+          },
+          {
+            "id": "security-boundary",
+            "type": "security_gate",
+            "description": "Check credential handling, denial behavior, and error disclosure against the contract.",
+            "pass_condition": "The implementation satisfies every security boundary test and does not expose sensitive values."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "code-quality",
+            "label": "Code quality and architecture",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The change is broken, incoherent, or violates the repository architecture.",
+              "2": "The defect is mostly addressed but the design or edge handling is weak.",
+              "4": "The change is correct, idiomatic, maintainable, and fits the existing architecture."
+            }
+          },
+          {
+            "id": "scope-discipline",
+            "label": "Scope discipline",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Includes unrelated or risky changes.",
+              "2": "Mostly bounded but includes avoidable cleanup or broad changes.",
+              "4": "Changes only the smallest coherent surface needed for the contract."
+            }
+          },
+          {
+            "id": "verification-quality",
+            "label": "Verification quality",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Claims success without meaningful verification.",
+              "2": "Runs basic tests but misses a material boundary or reports it unclearly.",
+              "4": "Uses focused and boundary verification and reports failures and residual risk accurately."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "hidden-test-failure",
+            "condition": "Any evaluator-held behavioral test fails."
+          },
+          {
+            "id": "credential-boundary-breach",
+            "condition": "The change exposes, logs, stores, or accepts credentials outside the task contract."
+          },
+          {
+            "id": "unrelated-change",
+            "condition": "The worker changes unrelated files or evaluator-held artifacts."
+          },
+          {
+            "id": "false-verification-claim",
+            "condition": "The response claims a test, build, or external check passed when it did not run or failed."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Fixing the visible symptom while leaving the boundary defect",
+        "Reading later history or copying the known solution",
+        "Changing unrelated configuration or generated files",
+        "Claiming verification that was blocked or not performed"
+      ]
+    },
+    {
+      "id": "ARCH-02",
+      "profile_id": "arch",
+      "sequence": 2,
+      "title": "Review a skill projection fixture for seeded safety issues",
+      "task_family": "security_review",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by prior external-projection safety reviews; the replay uses a synthetic manifest with seeded defects and benign near-misses.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "arch-projection-review-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will contain a small manifest and projection tree with labelled high, medium, and low severity defects plus legitimate patterns that must not be flagged."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed projection manifest and file tree containing seeded path, provenance, trust, and overwrite safety issues with reciprocal benign controls.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "findings",
+          "severity",
+          "evidence",
+          "remediation",
+          "review_summary"
+        ],
+        "output_constraints": [
+          "Every finding must identify an exact fixture path and rule.",
+          "Do not claim a live deployment or external verification.",
+          "Separate confirmed findings from questions and optional hardening."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "defect-recall",
+            "type": "defect_recall",
+            "description": "Compare reported findings with the seeded defect inventory.",
+            "pass_condition": "Every high-severity defect and the required medium-severity defects are identified."
+          },
+          {
+            "id": "defect-precision",
+            "type": "defect_precision",
+            "description": "Compare reported findings with benign near-miss controls.",
+            "pass_condition": "The false-positive rate stays below the fixture threshold and benign controls are not labelled as confirmed defects."
+          },
+          {
+            "id": "severity-mapping",
+            "type": "exact_value",
+            "description": "Check severity labels against the evaluator classification.",
+            "pass_condition": "Every confirmed finding uses the expected severity class."
+          },
+          {
+            "id": "path-evidence",
+            "type": "reference_integrity",
+            "description": "Validate finding paths and evidence snippets against the fixture.",
+            "pass_condition": "Every finding points to an existing fixture path and evidence that supports the named issue."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "finding-quality",
+            "label": "Finding quality",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Misses material issues or reports unsupported defects.",
+              "2": "Finds the obvious issues but has gaps or noisy evidence.",
+              "4": "Findings are accurate, complete for the required risk floor, and tightly evidenced."
+            }
+          },
+          {
+            "id": "severity-judgement",
+            "label": "Severity judgement",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Severity is materially misleading.",
+              "2": "Most severity labels are plausible but prioritisation is uneven.",
+              "4": "Severity reflects exploitability, impact, and boundary importance consistently."
+            }
+          },
+          {
+            "id": "remediation-quality",
+            "label": "Remediation quality",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Remediation is absent or would weaken the boundary.",
+              "2": "Remediation is directionally useful but incomplete or overbroad.",
+              "4": "Remediation is minimal, actionable, and preserves the intended trust boundary."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "missed-high-severity",
+            "condition": "A seeded high-severity trust or overwrite issue is not reported."
+          },
+          {
+            "id": "false-security-claim",
+            "condition": "The response claims the projection is safe or deployed without sufficient fixture evidence."
+          },
+          {
+            "id": "unsafe-remediation",
+            "condition": "A proposed fix broadens trust, permits overwrite, or removes provenance validation."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Finding only obvious path errors while missing trust-boundary defects",
+        "Treating every unusual manifest entry as a vulnerability",
+        "Ranking cosmetic issues above material overwrite or provenance risks",
+        "Proposing a remediation that weakens the safety boundary"
+      ]
+    },
+    {
+      "id": "ATLAS-01",
+      "profile_id": "atlas",
+      "sequence": 1,
+      "title": "Select a backpacking cook kit from a fixed catalogue",
+      "task_family": "outdoor_constraint_optimisation",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by prior cook-kit research; the replay uses a fixed synthetic catalogue and trip constraints rather than live product pages.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "atlas-cook-kit-selection-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The catalogue will include item identifiers, weight, price, fuel type, capacity, availability, and deliberately incompatible combinations."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed cook-kit catalogue and a three-night trip brief with a maximum base-kit weight, budget, meal capacity, fuel rule, and no-open-fire constraint.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "selected_item_ids",
+          "weight_total",
+          "cost_total",
+          "fuel_plan",
+          "contingency",
+          "tradeoffs"
+        ],
+        "output_constraints": [
+          "Select only catalogue item identifiers.",
+          "Show all totals and identify any excluded requirement.",
+          "Do not use an unavailable item or an incompatible fuel combination."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "catalogue-membership",
+            "type": "set_membership",
+            "description": "Validate selected item identifiers against the fixed catalogue.",
+            "pass_condition": "Every selected identifier exists exactly once in the catalogue."
+          },
+          {
+            "id": "weight-budget",
+            "type": "constraint_satisfaction",
+            "description": "Recalculate base-kit weight against the fixture limit.",
+            "pass_condition": "The selected kit is at or below the weight limit, or clearly marks the constraint as unmet."
+          },
+          {
+            "id": "cost-budget",
+            "type": "numeric_reconciliation",
+            "description": "Recalculate item costs against the fixture budget.",
+            "pass_condition": "The reported total matches the catalogue and stays within budget."
+          },
+          {
+            "id": "fuel-compatibility",
+            "type": "constraint_satisfaction",
+            "description": "Check fuel compatibility, capacity, and fire restrictions.",
+            "pass_condition": "The kit has a compatible legal fuel plan and meets the stated capacity requirement."
+          },
+          {
+            "id": "availability-check",
+            "type": "exact_value",
+            "description": "Check catalogue availability flags.",
+            "pass_condition": "No item marked unavailable is selected or presented as the primary plan."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "practical-fit",
+            "label": "Practical fit",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The kit cannot perform the stated cooking task or violates a hard constraint.",
+              "2": "The kit broadly works but leaves a meaningful capacity, fuel, or availability gap.",
+              "4": "The kit is coherent, usable, and satisfies the trip's practical constraints."
+            }
+          },
+          {
+            "id": "tradeoff-reasoning",
+            "label": "Trade-off reasoning",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Trade-offs are absent or based on invented catalogue facts.",
+              "2": "Trade-offs are mentioned but not connected to the selection.",
+              "4": "The selection explains the relevant weight, cost, capacity, fuel, and availability trade-offs."
+            }
+          },
+          {
+            "id": "contingency-quality",
+            "label": "Contingency quality",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The plan has no credible contingency for a stated risk.",
+              "2": "A contingency is present but generic or impractical.",
+              "4": "Contingencies are specific, lightweight, safe, and compatible with the fixed constraints."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "incompatible-fuel",
+            "condition": "The primary recommendation uses a fuel or appliance combination marked incompatible or prohibited."
+          },
+          {
+            "id": "unavailable-item",
+            "condition": "The primary kit relies on an item marked unavailable in the fixture."
+          },
+          {
+            "id": "hidden-budget-breach",
+            "condition": "The selection exceeds a hard weight or cost limit without disclosing the breach."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Optimising weight while overlooking fuel compatibility",
+        "Selecting unavailable or mutually incompatible items",
+        "Reporting incorrect totals",
+        "Ignoring no-open-fire or capacity constraints"
+      ]
+    },
+    {
+      "id": "ATLAS-02",
+      "profile_id": "atlas",
+      "sequence": 2,
+      "title": "Build a route and logistics plan from fixed itinerary inputs",
+      "task_family": "route_logistics_planning",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by prior route and logistics planning; the replay uses a fixed itinerary, timetable, weather fixture, and safety rules.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "atlas-route-logistics-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will define route segments, transfer times, booking requirements, weather states, daylight windows, and a transport disruption."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed multi-day itinerary with segment durations, transport timetable, booking and permit requirements, weather state, daylight window, and safety limits.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "day_plan",
+          "transfer_plan",
+          "required_bookings",
+          "safety_gates",
+          "contingency",
+          "evidence_ids"
+        ],
+        "output_constraints": [
+          "Use only times, route facts, and source identifiers supplied by the fixture.",
+          "Make impossible or conditional segments explicit.",
+          "Do not claim a booking, permit, or transport confirmation was completed."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "timeline-feasibility",
+            "type": "constraint_satisfaction",
+            "description": "Recalculate travel, walking, transfer, and daylight windows.",
+            "pass_condition": "Every scheduled segment fits its available time window with the fixture buffer rule."
+          },
+          {
+            "id": "transport-compatibility",
+            "type": "constraint_satisfaction",
+            "description": "Check connections against the fixed transport timetable and disruption.",
+            "pass_condition": "The plan uses only feasible connections and responds to the seeded disruption."
+          },
+          {
+            "id": "required-fact-coverage",
+            "type": "set_membership",
+            "description": "Check permits, bookings, route requirements, and safety facts.",
+            "pass_condition": "Every required route and booking fact appears with its fixture evidence identifier."
+          },
+          {
+            "id": "contingency-coverage",
+            "type": "coverage",
+            "description": "Check that each seeded disruption or weather risk has a defined alternative.",
+            "pass_condition": "Every material disruption has a feasible fallback or an explicit stop condition."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "logistics-accuracy",
+            "label": "Logistics accuracy",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The itinerary is impossible or omits material transport and booking constraints.",
+              "2": "The main route works but timing or logistics contain a meaningful gap.",
+              "4": "Segments, transfers, bookings, buffers, and evidence are internally consistent."
+            }
+          },
+          {
+            "id": "safety-planning",
+            "label": "Safety planning",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The plan ignores or violates a material safety limit.",
+              "2": "Safety is acknowledged but stop conditions or weather contingencies are weak.",
+              "4": "Safety gates, weather constraints, daylight, and stop or retreat decisions are explicit."
+            }
+          },
+          {
+            "id": "plan-clarity",
+            "label": "Plan clarity",
+            "weight": 0.3,
+            "anchors": {
+              "0": "A user cannot follow the plan or identify what remains conditional.",
+              "2": "The plan is readable but important conditions are buried.",
+              "4": "The plan makes actions, conditions, evidence, and fallback choices easy to follow."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "impossible-timeline",
+            "condition": "A required segment or connection cannot fit the fixture's time window."
+          },
+          {
+            "id": "unsafe-conditionality",
+            "condition": "The plan presents a weather or daylight dependent segment as unconditional when the fixture says it must stop."
+          },
+          {
+            "id": "fabricated-confirmation",
+            "condition": "The response claims a permit, booking, transport, or live condition was confirmed without fixture evidence."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Ignoring transfer or buffer time",
+        "Treating a weather-dependent plan as unconditional",
+        "Dropping a permit or booking requirement",
+        "Inventing live availability or confirmation"
+      ]
+    },
+    {
+      "id": "TANK-01",
+      "profile_id": "tank",
+      "sequence": 1,
+      "title": "Create a training plan from a fixed baseline and goal date",
+      "task_family": "training_plan_design",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic coaching fixture with a stated goal, timeline, baseline, availability, and recovery limits.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "tank-training-plan-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will define a non-diagnostic baseline, target date, available sessions, current workload, recovery limits, and explicit stop or escalation signals."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A synthetic trainee profile with a goal date, current capacity, available sessions, equipment limits, recovery constraints, and a bounded training objective.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "weekly_schedule",
+          "progression",
+          "recovery_rules",
+          "stop_rules",
+          "assumptions",
+          "success_metrics"
+        ],
+        "output_constraints": [
+          "Use a training and coaching frame, not a diagnosis.",
+          "Keep workload within the supplied availability and recovery limits.",
+          "State when professional assessment is needed."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "session-count",
+            "type": "constraint_satisfaction",
+            "description": "Compare scheduled sessions with the fixture availability.",
+            "pass_condition": "Every week uses no more sessions than are available and includes the required recovery days."
+          },
+          {
+            "id": "progression-logic",
+            "type": "sequence_validity",
+            "description": "Check workload progression and deload or recovery treatment.",
+            "pass_condition": "Progression follows the fixture ceiling and does not increase multiple stressors beyond the allowed rule."
+          },
+          {
+            "id": "volume-reconciliation",
+            "type": "numeric_reconciliation",
+            "description": "Recalculate prescribed volume, duration, or distance.",
+            "pass_condition": "Reported weekly totals match the sessions and remain within the fixture bounds."
+          },
+          {
+            "id": "safety-boundary",
+            "type": "safety_gate",
+            "description": "Check stop rules and escalation wording.",
+            "pass_condition": "The plan includes the supplied red flags and does not claim to diagnose a condition."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "plan-fit",
+            "label": "Plan fit",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The plan cannot be followed within the stated availability or baseline.",
+              "2": "The plan broadly fits but misses a meaningful constraint or recovery need.",
+              "4": "The plan is realistic for the baseline, timeline, availability, and stated goal."
+            }
+          },
+          {
+            "id": "progression-logic",
+            "label": "Progression logic",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Workload progression is unsafe, arbitrary, or absent.",
+              "2": "Progression exists but recovery, deloading, or adaptation is underdeveloped.",
+              "4": "Progression, recovery, adaptation, and success measures form a coherent path."
+            }
+          },
+          {
+            "id": "safety-boundary",
+            "label": "Safety boundary",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The plan gives unsafe or diagnostic guidance.",
+              "2": "Includes generic safety language but misses a fixture-specific stop condition.",
+              "4": "Uses clear stop rules, escalation boundaries, and appropriately cautious language."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "unsafe-load",
+            "condition": "The plan exceeds a fixed workload, availability, or recovery limit without a clear stop."
+          },
+          {
+            "id": "diagnostic-overreach",
+            "condition": "The response diagnoses a condition or presents medical certainty beyond the fixture."
+          },
+          {
+            "id": "missing-red-flag",
+            "condition": "A fixture-marked escalation or stop signal is omitted."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Writing a generic plan without using the baseline",
+        "Increasing frequency, intensity, and duration at once",
+        "Ignoring recovery limits or available sessions",
+        "Turning coaching guidance into diagnosis"
+      ]
+    },
+    {
+      "id": "TANK-02",
+      "profile_id": "tank",
+      "sequence": 2,
+      "title": "Adapt a training plan after a synthetic weekly check-in",
+      "task_family": "training_plan_adaptation",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic follow-up fixture with missed sessions, soreness, sleep disruption, and changed availability.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "tank-training-adaptation-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The check-in will include both ordinary setbacks and one signal that requires a conservative pause or escalation rather than progression."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A previously defined synthetic plan plus a weekly check-in covering completed work, missed sessions, soreness, sleep, energy, and next-week availability.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "plan_changes",
+          "preserved_goal",
+          "recovery_adjustment",
+          "stop_or_escalate",
+          "rationale",
+          "next_check_in"
+        ],
+        "output_constraints": [
+          "Change only what the check-in justifies.",
+          "Do not compensate for missed sessions with unsafe catch-up volume.",
+          "Use clear escalation language for red-flag symptoms."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "availability-adjustment",
+            "type": "constraint_satisfaction",
+            "description": "Compare the adapted schedule with next-week availability.",
+            "pass_condition": "The adapted plan uses only available sessions and removes unavailable commitments."
+          },
+          {
+            "id": "load-adjustment",
+            "type": "sequence_validity",
+            "description": "Check that soreness, sleep, and missed work produce the expected load response.",
+            "pass_condition": "The response reduces, holds, or progresses load according to the fixture rule and does not prescribe unsafe catch-up work."
+          },
+          {
+            "id": "recovery-hold",
+            "type": "safety_gate",
+            "description": "Check the conservative pause or recovery response to the seeded red flag.",
+            "pass_condition": "The red-flag signal produces the required pause or escalation outcome."
+          },
+          {
+            "id": "goal-preservation",
+            "type": "reference_integrity",
+            "description": "Check that the original goal and next review point remain visible.",
+            "pass_condition": "The adaptation changes the path without silently changing the original goal."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "adaptation-quality",
+            "label": "Adaptation quality",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The response ignores the check-in or makes the situation worse.",
+              "2": "It adapts the plan but overreacts, underreacts, or misses a relevant signal.",
+              "4": "Each change is proportionate to the check-in and clearly tied to the next decision point."
+            }
+          },
+          {
+            "id": "recovery-judgement",
+            "label": "Recovery judgement",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Prescribes progression through material warning signs.",
+              "2": "Adds recovery advice but leaves the load decision ambiguous.",
+              "4": "Prioritises recovery, distinguishes ordinary fatigue from red flags, and sets a safe return rule."
+            }
+          },
+          {
+            "id": "communication",
+            "label": "Communication",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The adaptation is confusing or falsely reassuring.",
+              "2": "The broad recommendation is understandable but key boundaries are buried.",
+              "4": "The user can see what changed, why, what to skip, and when to reassess."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "red-flag-progression",
+            "condition": "The response prescribes normal or increased training through the fixture red flag."
+          },
+          {
+            "id": "unsafe-catch-up",
+            "condition": "The response adds catch-up workload that violates the fixture recovery or progression rule."
+          },
+          {
+            "id": "diagnostic-overreach",
+            "condition": "The response diagnoses an injury or illness instead of setting a safe escalation boundary."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Treating missed sessions as debt that must be repaid",
+        "Ignoring the interaction between poor sleep and soreness",
+        "Advancing because the stated goal date is unchanged",
+        "Using diagnostic language for a safety escalation"
+      ]
+    },
+    {
+      "id": "ORACLE-01",
+      "profile_id": "oracle",
+      "sequence": 1,
+      "title": "Extract route and cooking rules from a frozen official source bundle",
+      "task_family": "source_backed_research",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by official route and cooking-rules research; the replay uses a frozen, evaluator-controlled source bundle.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "oracle-official-rules-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The bundle will contain dated source records with stable identifiers, relevant excerpts, one conflict in scope, and unrelated distractor material."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A frozen bundle of dated official source excerpts covering cooking, fuel, hut, booking, route, and restriction rules for a defined trip scenario.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "claim_register",
+          "source_links",
+          "scope_and_dates",
+          "conflicts",
+          "recommendation",
+          "caveats"
+        ],
+        "output_constraints": [
+          "Cite only source identifiers supplied by the bundle.",
+          "Keep source wording and scope distinct from interpretation.",
+          "Do not browse or claim current conditions outside the bundle."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "claim-source-mapping",
+            "type": "reference_integrity",
+            "description": "Validate each required claim against its expected source identifier.",
+            "pass_condition": "Every required claim has at least one correct supporting source and no claim cites an unrelated source as authority."
+          },
+          {
+            "id": "quote-fidelity",
+            "type": "text_comparison",
+            "description": "Compare quoted or paraphrased rule text with the frozen source excerpt.",
+            "pass_condition": "Material rule meaning and qualifiers are preserved without invented wording."
+          },
+          {
+            "id": "date-and-scope",
+            "type": "constraint_satisfaction",
+            "description": "Check publication date, validity window, location, and activity scope.",
+            "pass_condition": "The response applies each rule only within its supplied date and scope."
+          },
+          {
+            "id": "unsupported-claim-scan",
+            "type": "claim_support",
+            "description": "Detect material claims without bundle support.",
+            "pass_condition": "No material externally verifiable claim appears without a source link or an explicit uncertainty label."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "source-fidelity",
+            "label": "Source fidelity",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Claims materially contradict or misattribute the source bundle.",
+              "2": "The main rules are right but qualifiers, dates, or scope are uneven.",
+              "4": "Claims preserve source meaning, qualifiers, scope, dates, and provenance."
+            }
+          },
+          {
+            "id": "synthesis",
+            "label": "Synthesis quality",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The response is a disconnected list or draws an unsupported conclusion.",
+              "2": "It combines the main rules but leaves an important interaction unclear.",
+              "4": "It turns the sourced rules into a coherent, decision-useful interpretation."
+            }
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty and freshness handling",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Stale, scoped, or conflicting evidence is presented as universal current truth.",
+              "2": "Some caveats are present but their decision impact is unclear.",
+              "4": "Freshness, scope, conflicts, and unknowns are explicit and appropriately bounded."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "fabricated-source",
+            "condition": "The response cites a source identifier or quotation not present in the bundle."
+          },
+          {
+            "id": "material-source-contradiction",
+            "condition": "A material rule is stated opposite to the supplied source without flagging the conflict."
+          },
+          {
+            "id": "live-freshness-claim",
+            "condition": "The response claims current live conditions or browsing verification that the task does not provide."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Inventing a citation or source date",
+        "Dropping qualifiers such as location, season, or permit scope",
+        "Combining a rule with unrelated distractor text",
+        "Presenting a frozen source bundle as live current information"
+      ]
+    },
+    {
+      "id": "ORACLE-02",
+      "profile_id": "oracle",
+      "sequence": 2,
+      "title": "Choose a Qwen quantisation option for a fixed 24 GB M4 configuration",
+      "task_family": "technical_product_comparison",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by local-model quantisation research; the replay uses fixed model sizes, overhead assumptions, and requirements.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "oracle-quant-comparison-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will provide option sizes, context requirements, runtime overhead, estimated speed bands, and a 24 GB memory ceiling."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed comparison table of Qwen quantisation options and a 24 GB M4 memory budget with context, speed, quality, and usability requirements.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "memory_calculations",
+          "option_table",
+          "requirement_match",
+          "recommendation",
+          "tradeoffs",
+          "caveats"
+        ],
+        "output_constraints": [
+          "Use the supplied sizes and overhead assumptions only.",
+          "Distinguish estimates from measurements.",
+          "State the memory margin and the conditions under which the choice changes."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "memory-arithmetic",
+            "type": "formula_reconciliation",
+            "description": "Recalculate model, runtime, and context memory for each option.",
+            "pass_condition": "Every reported total and memory margin matches the fixture arithmetic within the declared tolerance."
+          },
+          {
+            "id": "capacity-ceiling",
+            "type": "constraint_satisfaction",
+            "description": "Check every recommendation against the 24 GB ceiling and required headroom.",
+            "pass_condition": "The recommended option fits the ceiling with the required margin, or the response clearly rejects the configuration."
+          },
+          {
+            "id": "requirement-match",
+            "type": "set_membership",
+            "description": "Compare recommendation reasoning with context, speed, quality, and usability requirements.",
+            "pass_condition": "Every stated requirement is addressed and the recommendation does not optimise an unstated criterion."
+          },
+          {
+            "id": "estimate-labeling",
+            "type": "boundary_check",
+            "description": "Check whether speed and quality claims retain their supplied evidence class.",
+            "pass_condition": "Estimated or fixture-provided values are not presented as fresh hardware measurements."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "technical-accuracy",
+            "label": "Technical accuracy",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Memory or option facts are materially wrong.",
+              "2": "The main comparison is plausible but misses a relevant overhead or requirement.",
+              "4": "Calculations, capacity margins, and option characteristics are accurate and traceable."
+            }
+          },
+          {
+            "id": "decision-fit",
+            "label": "Decision fit",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The recommendation cannot satisfy the fixed use case.",
+              "2": "The recommendation is workable but the key trade-off is underexplained.",
+              "4": "The recommendation matches the stated memory, context, speed, quality, and usability priorities."
+            }
+          },
+          {
+            "id": "uncertainty",
+            "label": "Uncertainty handling",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Estimates are presented as guaranteed measurements.",
+              "2": "Caveats are generic or disconnected from the recommendation.",
+              "4": "Unknowns, estimates, margins, and decision reversals are explicit and useful."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "over-capacity-recommendation",
+            "condition": "The recommended option exceeds the fixed memory ceiling or required margin."
+          },
+          {
+            "id": "calculation-error",
+            "condition": "A material memory or capacity calculation is wrong."
+          },
+          {
+            "id": "estimate-as-measurement",
+            "condition": "The response presents fixture estimates as measurements performed during the run."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Comparing model size without runtime overhead",
+        "Recommending an option that does not fit the memory ceiling",
+        "Ignoring context length or usability requirements",
+        "Presenting estimated speed as measured local performance"
+      ]
+    },
+    {
+      "id": "SENTINEL-01",
+      "profile_id": "sentinel",
+      "sequence": 1,
+      "title": "Classify a synthetic collector and watchdog incident",
+      "task_family": "runtime_health_diagnosis",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by telemetry collector and watchdog diagnosis; the replay uses synthetic logs and metrics with a known state transition.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "sentinel-collector-incident-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will include timestamps, freshness, process state, error counts, restart history, and a seeded distinction between stale, degraded, and failed."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "Fixed collector logs, watchdog events, freshness metrics, and process observations for one synthetic incident window.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "health_state",
+          "evidence_ids",
+          "severity",
+          "root_cause",
+          "next_actions",
+          "confidence"
+        ],
+        "output_constraints": [
+          "Use one primary health-state label from the allowed set.",
+          "Tie every material conclusion to a fixture evidence identifier.",
+          "Do not claim remediation completed when the fixture only shows symptoms."
+        ]
+      },
+      "measurement": {
+        "primary_type": "objective",
+        "automatic_checks": [
+          {
+            "id": "state-label",
+            "type": "exact_value",
+            "description": "Compare the reported primary state with the evaluator classification.",
+            "pass_condition": "The primary label exactly matches the expected healthy, stale, degraded, or failed state."
+          },
+          {
+            "id": "evidence-coverage",
+            "type": "reference_integrity",
+            "description": "Check evidence identifiers supporting state and severity.",
+            "pass_condition": "The response cites the minimum required log and metric evidence without citing absent events."
+          },
+          {
+            "id": "severity-mapping",
+            "type": "exact_value",
+            "description": "Compare severity with the fixture impact and recurrence rules.",
+            "pass_condition": "The severity class matches the evaluator mapping and is not inflated by a cosmetic signal."
+          },
+          {
+            "id": "action-order",
+            "type": "sequence_validity",
+            "description": "Check that proposed actions follow the safe remediation order.",
+            "pass_condition": "Read-only diagnosis precedes any restart or repair suggestion, and the first action addresses the actual state."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "diagnosis-accuracy",
+            "label": "Diagnosis accuracy",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The health state or root cause is materially wrong.",
+              "2": "The state is plausible but evidence or causal reasoning is incomplete.",
+              "4": "The state, root cause, and severity follow directly from the observed evidence."
+            }
+          },
+          {
+            "id": "evidence-traceability",
+            "label": "Evidence traceability",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Claims are unsupported or cite absent evidence.",
+              "2": "The main evidence is cited but important links are weak.",
+              "4": "Material claims are traceable to precise logs, metrics, and timestamps."
+            }
+          },
+          {
+            "id": "remediation-order",
+            "label": "Remediation order",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Actions are unsafe, premature, or unrelated to the diagnosis.",
+              "2": "Actions are directionally useful but sequencing or rollback is unclear.",
+              "4": "Actions are proportionate, reversible where possible, and ordered by evidence and risk."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "wrong-health-state",
+            "condition": "The primary health-state label is wrong."
+          },
+          {
+            "id": "unsupported-recovery-claim",
+            "condition": "The response claims the collector or watchdog recovered without fixture evidence."
+          },
+          {
+            "id": "unsafe-remediation-order",
+            "condition": "The response recommends a destructive or disruptive action before the required read-only checks."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Calling a stale source failed because it has no new data",
+        "Treating repeated restarts as proof of recovery",
+        "Overweighting one error message over freshness and process evidence",
+        "Recommending repair before confirming the runtime state"
+      ]
+    },
+    {
+      "id": "SENTINEL-02",
+      "profile_id": "sentinel",
+      "sequence": 2,
+      "title": "Diagnose source freshness and workflow drift in a synthetic brief run",
+      "task_family": "workflow_health_diagnosis",
+      "provenance": "historical_candidate",
+      "provenance_note": "Inspired by morning-brief source and workflow diagnosis; the replay uses a fixed run record with freshness and race-condition signals.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "sentinel-brief-health-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will include multiple source statuses, workflow timing, one freshness gap, one harmless empty source, and one seeded ordering issue."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed morning-brief run record with source timestamps, item counts, workflow stages, retries, and a possible race or freshness issue.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "source_statuses",
+          "workflow_state",
+          "root_cause",
+          "remediation_order",
+          "evidence_ids",
+          "read_only_boundary"
+        ],
+        "output_constraints": [
+          "Classify each source separately as healthy, stale, degraded, or failed.",
+          "Distinguish an empty but healthy source from a collection failure.",
+          "Keep diagnosis and proposed remediation separate from execution."
+        ]
+      },
+      "measurement": {
+        "primary_type": "objective",
+        "automatic_checks": [
+          {
+            "id": "source-status-map",
+            "type": "exact_value",
+            "description": "Compare each source status with the fixture classification.",
+            "pass_condition": "Every source receives the expected state and no source is omitted."
+          },
+          {
+            "id": "stale-versus-failed",
+            "type": "state_classification",
+            "description": "Check the distinction between missing freshness and explicit collection failure.",
+            "pass_condition": "The response does not label a stale or intentionally empty source as failed without supporting evidence."
+          },
+          {
+            "id": "causal-chain",
+            "type": "reference_integrity",
+            "description": "Check root-cause evidence across source, workflow, and timing records.",
+            "pass_condition": "The root cause cites the required source and workflow evidence in the correct causal order."
+          },
+          {
+            "id": "read-only-boundary",
+            "type": "prohibited_action",
+            "description": "Check that the proposed diagnostic response does not claim an external mutation.",
+            "pass_condition": "The output contains observations and proposed next steps only, with no claimed restart, send, delete, or configuration change."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "source-status-accuracy",
+            "label": "Source-status accuracy",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Several sources are materially misclassified.",
+              "2": "Most statuses are right but stale, empty, or degraded states are blurred.",
+              "4": "Each source is classified correctly with the evidence and freshness context that matters."
+            }
+          },
+          {
+            "id": "root-cause-reasoning",
+            "label": "Root-cause reasoning",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The response confuses symptoms with the causal failure.",
+              "2": "The likely cause is named but timing or workflow evidence is incomplete.",
+              "4": "The response traces source freshness, workflow order, and race signals into a supported cause."
+            }
+          },
+          {
+            "id": "operational-safety",
+            "label": "Operational safety",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The response claims or recommends an unauthorised mutation.",
+              "2": "The response is mostly read-only but includes an unclear or overly broad action.",
+              "4": "The diagnosis is read-only, reversible, and sequenced from lowest-risk evidence gathering to remediation."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "source-misclassification",
+            "condition": "A required source is labelled failed when the fixture shows only staleness or intentional emptiness, or vice versa."
+          },
+          {
+            "id": "race-omission",
+            "condition": "The seeded workflow ordering or race signal is ignored while a downstream symptom is treated as the root cause."
+          },
+          {
+            "id": "claimed-mutation",
+            "condition": "The response claims to have restarted, sent, deleted, or changed a workflow or source."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Treating zero items as a failed source by default",
+        "Ignoring timestamps and diagnosing from labels alone",
+        "Confusing a race or ordering issue with provider failure",
+        "Claiming an operational fix from read-only evidence"
+      ]
+    },
+    {
+      "id": "MORPH-01",
+      "profile_id": "morph",
+      "sequence": 1,
+      "title": "Turn a fixed product brief into a measurable MVP definition",
+      "task_family": "product_scope_definition",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic product brief with a target user, problem, promise, constraints, and deliberate exclusions.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "morph-mvp-definition-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The brief will include must-have outcomes, optional ideas, a non-goal, an audience constraint, and measurable success signals."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed product brief containing target user, problem, promise, constraints, rough feature ideas, success signals, and explicit non-goals.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "target_user",
+          "problem",
+          "product_promise",
+          "must_have",
+          "should_have",
+          "wont_have",
+          "success_metrics",
+          "assumptions"
+        ],
+        "output_constraints": [
+          "Preserve the audience and product promise from the brief.",
+          "Use measurable outcomes rather than feature count alone.",
+          "Do not expand the product beyond the stated brief."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "brief-field-coverage",
+            "type": "required_field",
+            "description": "Check required MVP fields against the input brief.",
+            "pass_condition": "Every required field is present and maps to the correct brief element."
+          },
+          {
+            "id": "priority-consistency",
+            "type": "set_membership",
+            "description": "Check that must, should, and will-not items preserve fixture priority labels.",
+            "pass_condition": "Must-have items are not demoted, explicit non-goals are not promoted, and no item appears in conflicting buckets."
+          },
+          {
+            "id": "metric-measurability",
+            "type": "schema_check",
+            "description": "Check success metrics for observable subject, measure, and time window.",
+            "pass_condition": "Every primary metric contains a measurable signal and a defined observation window."
+          },
+          {
+            "id": "contradiction-scan",
+            "type": "consistency_check",
+            "description": "Check audience, promise, priorities, exclusions, and metrics for contradiction.",
+            "pass_condition": "No output element contradicts the fixed audience, product promise, or explicit non-goal."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "brief-fidelity",
+            "label": "Brief fidelity",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Changes the audience, problem, or promise materially.",
+              "2": "Captures the main brief but introduces a small scope or positioning drift.",
+              "4": "Translates the brief faithfully into a focused MVP contract."
+            }
+          },
+          {
+            "id": "prioritisation",
+            "label": "Prioritisation",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Everything is treated as equally important or the exclusions are ignored.",
+              "2": "There is a priority order but it is not well justified.",
+              "4": "Priorities are coherent, defensible, and protect the stated MVP boundary."
+            }
+          },
+          {
+            "id": "measurability",
+            "label": "Measurability",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Success is defined only as shipping features or vague enthusiasm.",
+              "2": "Includes metrics but they are weakly operationalised.",
+              "4": "Success measures are observable, time-bounded, and connected to the product promise."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "scope-inflation",
+            "condition": "The MVP adds a material capability that the brief excludes or does not justify."
+          },
+          {
+            "id": "audience-drift",
+            "condition": "The target user or product promise materially changes."
+          },
+          {
+            "id": "unmeasurable-success",
+            "condition": "The primary success criterion is not observable or is replaced by a vague quality statement."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Turning every idea in the brief into a must-have",
+        "Replacing outcomes with a feature inventory",
+        "Losing the explicit non-goal",
+        "Writing metrics that cannot be observed or compared"
+      ]
+    },
+    {
+      "id": "MORPH-02",
+      "profile_id": "morph",
+      "sequence": 2,
+      "title": "Create launch and landing-page direction from a fixed positioning brief",
+      "task_family": "launch_message_design",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic launch brief with a defined audience, positioning, product promise, proof boundaries, and call to action.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "morph-launch-direction-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The brief will include approved claims, unsupported claims to avoid, proof points, objections, and one desired conversion action."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed launch brief with audience, positioning, product promise, proof points, objections, approved claims, prohibited claims, and one conversion goal.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "message_hierarchy",
+          "page_sections",
+          "proof_points",
+          "claims_register",
+          "call_to_action",
+          "open_questions"
+        ],
+        "output_constraints": [
+          "Use only approved claims or mark a claim as needing proof.",
+          "Keep the message aligned with the supplied audience and promise.",
+          "Provide one primary call to action and explain its fit."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "positioning-fidelity",
+            "type": "set_membership",
+            "description": "Compare message hierarchy with the fixed audience and positioning terms.",
+            "pass_condition": "The primary headline, audience, promise, and differentiator preserve the supplied positioning."
+          },
+          {
+            "id": "claim-grounding",
+            "type": "claim_support",
+            "description": "Check each material claim against approved proof points or a needs-proof status.",
+            "pass_condition": "No prohibited claim appears as established fact and every approved claim is traceable to a supplied proof point."
+          },
+          {
+            "id": "cta-clarity",
+            "type": "exact_value",
+            "description": "Check the conversion action against the brief.",
+            "pass_condition": "Exactly one primary call to action matches the supplied conversion goal."
+          },
+          {
+            "id": "section-coverage",
+            "type": "coverage",
+            "description": "Check audience, problem, promise, proof, objections, and action sections.",
+            "pass_condition": "Every required page section is present or explicitly marked not applicable with a reason."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "message-fidelity",
+            "label": "Message fidelity",
+            "weight": 0.4,
+            "anchors": {
+              "0": "The launch direction targets the wrong audience or makes a different promise.",
+              "2": "The core positioning is present but the hierarchy is diluted or inconsistent.",
+              "4": "The message hierarchy makes the supplied positioning clear and compelling without distortion."
+            }
+          },
+          {
+            "id": "claim-grounding",
+            "label": "Claim grounding",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Contains material unsupported or prohibited claims.",
+              "2": "Most claims are safe but proof status or caveats are inconsistent.",
+              "4": "Claims, proof, caveats, and needs-proof items are clearly separated."
+            }
+          },
+          {
+            "id": "actionability",
+            "label": "Actionability",
+            "weight": 0.3,
+            "anchors": {
+              "0": "The output cannot guide a landing-page or launch decision.",
+              "2": "The direction is usable but leaves hierarchy, objections, or CTA decisions unclear.",
+              "4": "The output gives a clear page structure, proof plan, objection response, and primary action."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "unsupported-claim",
+            "condition": "A prohibited or unsupported material claim is presented as established fact."
+          },
+          {
+            "id": "positioning-drift",
+            "condition": "The response changes the fixed audience, product promise, or conversion goal."
+          },
+          {
+            "id": "cta-ambiguity",
+            "condition": "The response presents multiple competing primary calls to action when one is required."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Writing generic marketing copy detached from the brief",
+        "Treating an aspiration as a product fact",
+        "Adding multiple competing calls to action",
+        "Listing proof points without connecting them to claims"
+      ]
+    },
+    {
+      "id": "SERAPH-01",
+      "profile_id": "seraph",
+      "sequence": 1,
+      "title": "Critique a fixed HTML report with seeded visual and usability defects",
+      "task_family": "visual_quality_review",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic HTML fixture with seeded hierarchy, contrast, spacing, responsive, and interaction defects.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "seraph-html-critique-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will provide deterministic HTML, CSS, viewport notes, and a hidden defect inventory with benign near-miss controls."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed HTML report and design brief containing deliberately seeded visual hierarchy, readability, responsive, and interaction defects.",
+        "required_output_format": "json",
+        "required_output_fields": [
+          "findings",
+          "locations",
+          "severity",
+          "user_impact",
+          "recommended_fixes",
+          "review_summary"
+        ],
+        "output_constraints": [
+          "Identify exact selectors, sections, or visible elements for each finding.",
+          "Separate observed defects from optional aesthetic preferences.",
+          "Do not claim a browser run or screenshot inspection that the fixture does not provide."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "defect-recall",
+            "type": "defect_recall",
+            "description": "Compare reported findings with the seeded defect inventory.",
+            "pass_condition": "Every high-severity usability defect and the required visual defects are reported."
+          },
+          {
+            "id": "defect-precision",
+            "type": "defect_precision",
+            "description": "Compare findings with benign near-miss controls and deliberate design choices.",
+            "pass_condition": "The response does not label benign controls as confirmed defects above the fixture threshold."
+          },
+          {
+            "id": "location-integrity",
+            "type": "reference_integrity",
+            "description": "Validate selectors, section names, or element locations.",
+            "pass_condition": "Every finding location resolves to the supplied HTML or declared viewport artifact."
+          },
+          {
+            "id": "severity-order",
+            "type": "exact_value",
+            "description": "Check severity ordering against user impact and defect class.",
+            "pass_condition": "Seeded severe defects are not ranked below cosmetic preferences."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "defect-coverage",
+            "label": "Defect coverage",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Misses material usability defects or reports mostly imaginary problems.",
+              "2": "Finds obvious issues but has recall or precision gaps.",
+              "4": "Findings cover the required defect surface with strong precision and useful evidence."
+            }
+          },
+          {
+            "id": "severity-judgement",
+            "label": "Severity judgement",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Prioritisation would direct work away from material user harm or failure.",
+              "2": "Severity is mostly plausible but lacks a consistent user-impact rationale.",
+              "4": "Severity reflects user impact, frequency, accessibility, and functional consequence."
+            }
+          },
+          {
+            "id": "actionability",
+            "label": "Actionability",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Recommendations are vague, decorative, or would introduce new problems.",
+              "2": "Recommendations are directionally useful but not implementation-ready.",
+              "4": "Each recommendation is specific, proportionate, and connected to the observed defect."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "missed-usability-defect",
+            "condition": "A seeded high-severity readability, interaction, responsive, or accessibility defect is not reported."
+          },
+          {
+            "id": "false-browser-claim",
+            "condition": "The response claims to have rendered, clicked, or visually inspected a browser state not supplied by the fixture."
+          },
+          {
+            "id": "unsafe-fix",
+            "condition": "A proposed fix removes an important state, accessibility affordance, or user control."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Focusing on aesthetic preference while missing functional defects",
+        "Reporting an issue without a reproducible location",
+        "Treating a deliberate visual choice as a bug",
+        "Claiming browser evidence that was not available"
+      ]
+    },
+    {
+      "id": "SERAPH-02",
+      "profile_id": "seraph",
+      "sequence": 2,
+      "title": "Define an interaction specification for a fixed dashboard state model",
+      "task_family": "interaction_specification",
+      "provenance": "synthetic",
+      "provenance_note": "Purpose-built synthetic dashboard contract with read-only data, loading, empty, stale, error, and refresh states.",
+      "privacy_class": "public_synthetic",
+      "status": "contract-draft",
+      "fixture": {
+        "id": "seraph-dashboard-interactions-v1",
+        "status": "to_be_frozen",
+        "source_policy": "public_synthetic",
+        "live_web": false,
+        "allowed_tools": [],
+        "notes": "The fixture will define data fields, refresh semantics, state transitions, keyboard expectations, and a prohibition on mutating the data source."
+      },
+      "prompt_contract": {
+        "status": "to_be_frozen",
+        "input_description": "A fixed dashboard data contract and state model requiring a clear interaction specification for controls, loading, empty, stale, error, refresh, and read-only behavior.",
+        "required_output_format": "structured_markdown",
+        "required_output_fields": [
+          "control_inventory",
+          "state_matrix",
+          "transition_rules",
+          "accessibility_requirements",
+          "read_only_boundary",
+          "open_questions"
+        ],
+        "output_constraints": [
+          "Cover every declared state and transition.",
+          "Make keyboard, focus, status, and error behavior explicit.",
+          "Do not introduce data mutations or controls that the contract does not permit."
+        ]
+      },
+      "measurement": {
+        "primary_type": "hybrid",
+        "automatic_checks": [
+          {
+            "id": "state-coverage",
+            "type": "coverage",
+            "description": "Check loading, ready, empty, stale, error, and refresh states.",
+            "pass_condition": "Every fixture state has visible behavior, user messaging, and recovery or stop behavior."
+          },
+          {
+            "id": "transition-completeness",
+            "type": "sequence_validity",
+            "description": "Check transitions from initial load through refresh and failure recovery.",
+            "pass_condition": "Every declared transition has a trigger, resulting state, and guard or error outcome."
+          },
+          {
+            "id": "keyboard-accessibility",
+            "type": "required_field",
+            "description": "Check focus order, keyboard activation, status announcements, and visible focus requirements.",
+            "pass_condition": "The specification includes the required keyboard and assistive-technology behavior for every interactive control."
+          },
+          {
+            "id": "read-only-boundary",
+            "type": "prohibited_action",
+            "description": "Check controls and transitions against the read-only data contract.",
+            "pass_condition": "No control or state transition mutates, deletes, or writes to the underlying data source."
+          }
+        ],
+        "human_dimensions": [
+          {
+            "id": "state-coverage",
+            "label": "State coverage",
+            "weight": 0.4,
+            "anchors": {
+              "0": "Material states or recovery paths are missing.",
+              "2": "The main ready path is covered but edge states or transitions are thin.",
+              "4": "The specification covers every declared state, transition, message, and recovery path."
+            }
+          },
+          {
+            "id": "interaction-coherence",
+            "label": "Interaction coherence",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Controls and state transitions contradict the data contract.",
+              "2": "The interaction model is usable but has ambiguity around refresh, errors, or stale data.",
+              "4": "Controls, feedback, state transitions, and recovery behavior form one coherent model."
+            }
+          },
+          {
+            "id": "accessibility-safety",
+            "label": "Accessibility and read-only safety",
+            "weight": 0.3,
+            "anchors": {
+              "0": "Omits material accessibility needs or introduces a forbidden mutation.",
+              "2": "Includes basic accessibility and safety language but leaves an important seam vague.",
+              "4": "Makes keyboard, focus, status, error, and read-only boundaries implementation-ready."
+            }
+          }
+        ],
+        "hard_failures": [
+          {
+            "id": "missing-stale-or-error-state",
+            "condition": "The specification omits a declared stale, loading, empty, or error state."
+          },
+          {
+            "id": "forbidden-mutation",
+            "condition": "The interaction specification introduces a write, delete, or mutation path against the read-only contract."
+          },
+          {
+            "id": "inaccessible-control",
+            "condition": "A required interactive control has no keyboard or status behavior."
+          }
+        ]
+      },
+      "known_failure_modes": [
+        "Designing only the successful data state",
+        "Treating stale data as identical to ready data",
+        "Adding a write control to a read-only dashboard",
+        "Mentioning accessibility without defining focus and status behavior"
+      ]
+    }
+  ]
+}

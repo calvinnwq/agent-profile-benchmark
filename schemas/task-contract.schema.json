@@ -1,0 +1,563 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/schemas/task-contract.schema.json",
+  "title": "Agent Profile Benchmark Task Ledger",
+  "description": "Public contract for measurable, replayable agent-profile benchmark tasks.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "benchmark_id",
+    "benchmark_version",
+    "status",
+    "evaluation_policy",
+    "profiles",
+    "tasks"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "../schemas/task-contract.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "benchmark_id": {
+      "type": "string",
+      "const": "agent-profile-benchmark"
+    },
+    "benchmark_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "contract-draft",
+        "fixture-ready",
+        "benchmark-ready"
+      ]
+    },
+    "evaluation_policy": {
+      "$ref": "#/$defs/evaluation_policy"
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 18,
+      "maxItems": 18,
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    }
+  },
+  "$defs": {
+    "evaluation_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_boundary",
+        "live_web",
+        "default_allowed_tools",
+        "score_order",
+        "human_scale",
+        "provenance_values",
+        "status_values"
+      ],
+      "properties": {
+        "execution_boundary": {
+          "type": "string",
+          "const": "offline_replay"
+        },
+        "live_web": {
+          "type": "boolean",
+          "const": false
+        },
+        "default_allowed_tools": {
+          "type": "array",
+          "const": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "score_order": {
+          "type": "array",
+          "const": [
+            "hard_failures",
+            "automatic_checks",
+            "human_dimensions"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "hard_failures",
+              "automatic_checks",
+              "human_dimensions"
+            ]
+          }
+        },
+        "human_scale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum",
+            "maximum",
+            "anchors"
+          ],
+          "properties": {
+            "minimum": {
+              "type": "integer",
+              "const": 0
+            },
+            "maximum": {
+              "type": "integer",
+              "const": 4
+            },
+            "anchors": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "0",
+                "2",
+                "4"
+              ],
+              "properties": {
+                "0": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "2": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "4": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "provenance_values": {
+          "type": "array",
+          "const": [
+            "historical_candidate",
+            "synthetic"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "status_values": {
+          "type": "array",
+          "const": [
+            "contract-draft",
+            "fixture-ready",
+            "benchmark-ready"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "remit",
+        "task_ids",
+        "primary_dimensions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "enum": [
+            "kody",
+            "aegis",
+            "arch",
+            "atlas",
+            "tank",
+            "oracle",
+            "sentinel",
+            "morph",
+            "seraph"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_ids": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
+        "primary_dimensions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "source_policy",
+        "live_web",
+        "allowed_tools",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*-v[0-9]+$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "to_be_frozen",
+            "frozen"
+          ]
+        },
+        "source_policy": {
+          "type": "string",
+          "enum": [
+            "public_synthetic",
+            "sanitized_or_synthetic_reconstruction"
+          ]
+        },
+        "live_web": {
+          "type": "boolean",
+          "const": false
+        },
+        "allowed_tools": {
+          "type": "array",
+          "const": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "prompt_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "input_description",
+        "required_output_format",
+        "required_output_fields",
+        "output_constraints"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "to_be_frozen",
+            "frozen"
+          ]
+        },
+        "input_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_output_format": {
+          "type": "string",
+          "enum": [
+            "json",
+            "repository_change",
+            "structured_markdown"
+          ]
+        },
+        "required_output_fields": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "output_constraints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "automatic_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "description",
+        "pass_condition"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pass_condition": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "human_dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "weight",
+        "anchors"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "anchors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "0",
+            "2",
+            "4"
+          ],
+          "properties": {
+            "0": {
+              "type": "string",
+              "minLength": 1
+            },
+            "2": {
+              "type": "string",
+              "minLength": 1
+            },
+            "4": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "hard_failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "condition"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "condition": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_type",
+        "automatic_checks",
+        "human_dimensions",
+        "hard_failures"
+      ],
+      "properties": {
+        "primary_type": {
+          "type": "string",
+          "enum": [
+            "objective",
+            "hybrid",
+            "rubric"
+          ]
+        },
+        "automatic_checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/automatic_check"
+          }
+        },
+        "human_dimensions": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/human_dimension"
+          }
+        },
+        "hard_failures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/hard_failure"
+          }
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "profile_id",
+        "sequence",
+        "title",
+        "task_family",
+        "provenance",
+        "provenance_note",
+        "privacy_class",
+        "status",
+        "fixture",
+        "prompt_contract",
+        "measurement",
+        "known_failure_modes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9-]+-[0-9]{2}$",
+          "enum": [
+            "KODY-01",
+            "KODY-02",
+            "AEGIS-01",
+            "AEGIS-02",
+            "ARCH-01",
+            "ARCH-02",
+            "ATLAS-01",
+            "ATLAS-02",
+            "TANK-01",
+            "TANK-02",
+            "ORACLE-01",
+            "ORACLE-02",
+            "SENTINEL-01",
+            "SENTINEL-02",
+            "MORPH-01",
+            "MORPH-02",
+            "SERAPH-01",
+            "SERAPH-02"
+          ]
+        },
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "sequence": {
+          "type": "integer",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance": {
+          "type": "string",
+          "enum": [
+            "historical_candidate",
+            "synthetic"
+          ]
+        },
+        "provenance_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "privacy_class": {
+          "type": "string",
+          "enum": [
+            "public_synthetic",
+            "sanitized_candidate"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "contract-draft",
+            "fixture-ready",
+            "benchmark-ready"
+          ]
+        },
+        "fixture": {
+          "$ref": "#/$defs/fixture"
+        },
+        "prompt_contract": {
+          "$ref": "#/$defs/prompt_contract"
+        },
+        "measurement": {
+          "$ref": "#/$defs/measurement"
+        },
+        "known_failure_modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
