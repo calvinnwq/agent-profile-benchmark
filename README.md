@@ -71,12 +71,52 @@ Visual tasks use fixed artifacts and defect inventories rather than unverifiable
 The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.1.0 registry.
 No third-party packages are required.
 
+GitHub Actions runs the dependency-free tests and validation gates on pushes to `main` and `feat/**`, and on pull requests.
+
 ```bash
 python3 scripts/validate_benchmark.py
 python3 -m unittest discover -s tests -v
+python3 scripts/validate_kody01.py
 ```
 
 The validator must report nine profiles and 18 tasks.
+
+## KODY-01 control slice
+
+`fixtures/kody-01/manifest.json` binds one synthetic KODY-01 request packet, its exact prompt, the candidate output schema, the deterministic evaluator, the run-record schema, and known-good and known-bad controls.
+
+Run the evaluator directly against the known-good control:
+
+```bash
+python3 scripts/evaluate_kody01.py \
+  --fixture fixtures/kody-01/request-packet.json \
+  --candidate fixtures/kody-01/controls/known-good.json
+```
+
+Write an audit-ready control run record with the replay command:
+
+```bash
+python3 scripts/replay_kody01.py \
+  --fixture fixtures/kody-01/request-packet.json \
+  --prompt fixtures/kody-01/prompt.txt \
+  --candidate fixtures/kody-01/controls/known-good.json \
+  --condition known-good-control \
+  --run-id kody-01-control-good-local \
+  --model-requested control-known-good \
+  --model-resolved control-known-good \
+  --output .model-evidence/kody-01/control-good.run.json
+```
+
+The known-bad control must remain visible as a failed run record when replayed with `--condition known-bad-control`.
+
+The local release gate runs both controls, validates their replay records, and writes temporary evidence outside the repository:
+
+```bash
+python3 scripts/validate_kody01.py
+```
+
+This slice exercises evaluator and evidence wiring only.
+It does not change the benchmark ledger from `contract-draft` or provide model evidence.
 
 Raw model run evidence belongs under `.model-evidence/` and is ignored by Git.
 

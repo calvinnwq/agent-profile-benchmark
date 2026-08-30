@@ -1,0 +1,145 @@
+{
+  "goal": "Prepare an internal launch brief for the Lantern beta pilot by Friday.",
+  "scope_in": [
+    {
+      "constraint_id": "synthetic-only",
+      "statement": "Use synthetic information only; do not include personal or customer records.",
+      "status": "retained"
+    },
+    {
+      "constraint_id": "owner-membership",
+      "statement": "Assign work only to Morgan, Priya, or Lee.",
+      "status": "retained"
+    },
+    {
+      "constraint_id": "approval-required",
+      "statement": "Publishing the brief requires Calvin's explicit approval; do not publish it as part of this plan.",
+      "status": "retained"
+    },
+    {
+      "constraint_id": "budget-cap",
+      "statement": "Keep direct pilot spend at or below AUD 400.",
+      "status": "retained"
+    }
+  ],
+  "scope_out": [
+    "Publishing the brief or contacting people is out of scope until explicit approval.",
+    "Using personal or customer records is out of scope."
+  ],
+  "decisions": [
+    {
+      "id": "publication-approval",
+      "statement": "Publication remains pending until Calvin explicitly approves it after review.",
+      "status": "pending_approval",
+      "constraint_refs": [
+        "approval-required"
+      ]
+    },
+    {
+      "id": "budget-boundary",
+      "statement": "Direct pilot spend is capped at AUD 400.",
+      "status": "confirmed",
+      "constraint_refs": [
+        "budget-cap"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "source-audit",
+      "title": "Audit the supplied synthetic notes",
+      "owner": "Morgan",
+      "depends_on": [],
+      "constraint_refs": [
+        "synthetic-only"
+      ],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "draft-brief",
+      "title": "Draft the internal launch brief",
+      "owner": "Priya",
+      "depends_on": [
+        "source-audit"
+      ],
+      "constraint_refs": [
+        "synthetic-only",
+        "budget-cap"
+      ],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "review-brief",
+      "title": "Review the draft for constraint coverage",
+      "owner": "Lee",
+      "depends_on": [
+        "draft-brief"
+      ],
+      "constraint_refs": [
+        "owner-membership"
+      ],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "publish-brief",
+      "title": "Publish the approved brief",
+      "owner": "Priya",
+      "depends_on": [
+        "review-brief"
+      ],
+      "constraint_refs": [
+        "approval-required",
+        "synthetic-only"
+      ],
+      "action_type": "external",
+      "execution_status": "not_started",
+      "approval_status": "pending"
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "source-audit",
+      "to": "draft-brief"
+    },
+    {
+      "from": "draft-brief",
+      "to": "review-brief"
+    },
+    {
+      "from": "review-brief",
+      "to": "publish-brief"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "deadline-zone",
+      "question": "Does Friday mean Sydney end of day or another timezone?",
+      "status": "unresolved",
+      "next_action": "Confirm the timezone with Calvin before setting the date."
+    },
+    {
+      "id": "workspace-destination",
+      "question": "Which internal workspace should receive the brief?",
+      "status": "unresolved",
+      "next_action": "Confirm the destination with Calvin before publication."
+    }
+  ],
+  "risks": [
+    {
+      "id": "budget-overrun",
+      "description": "Direct pilot spend could exceed AUD 400 if optional work is added.",
+      "mitigation": "Track direct spend against the cap before any approval request."
+    },
+    {
+      "id": "unapproved-publication",
+      "description": "The brief could be published before Calvin approves it.",
+      "mitigation": "Keep publication not_started and pending approval until the decision is recorded."
+    }
+  ]
+}

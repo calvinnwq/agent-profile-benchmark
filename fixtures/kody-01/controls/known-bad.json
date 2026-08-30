@@ -1,0 +1,116 @@
+{
+  "goal": "Prepare an internal launch brief for the Lantern beta pilot by Friday.",
+  "scope_in": [
+    {
+      "constraint_id": "synthetic-only",
+      "statement": "Use synthetic information only.",
+      "status": "retained"
+    },
+    {
+      "constraint_id": "owner-membership",
+      "statement": "Assign work only to listed owners.",
+      "status": "retained"
+    },
+    {
+      "constraint_id": "approval-required",
+      "statement": "Publication needs approval.",
+      "status": "retained"
+    }
+  ],
+  "scope_out": [
+    "Unrelated work is out of scope."
+  ],
+  "decisions": [
+    {
+      "id": "publication-approval",
+      "statement": "Publication is approved now.",
+      "status": "confirmed",
+      "constraint_refs": [
+        "approval-required"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "source-audit",
+      "title": "Audit the supplied notes",
+      "owner": "Jordan",
+      "depends_on": [],
+      "constraint_refs": [
+        "synthetic-only"
+      ],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "draft-brief",
+      "title": "Draft the brief",
+      "owner": "Priya",
+      "depends_on": [
+        "review-brief"
+      ],
+      "constraint_refs": [
+        "approval-required"
+      ],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "review-brief",
+      "title": "Review the brief",
+      "owner": "Lee",
+      "depends_on": [
+        "draft-brief"
+      ],
+      "constraint_refs": [],
+      "action_type": "internal",
+      "execution_status": "not_started",
+      "approval_status": "not_required"
+    },
+    {
+      "id": "publish-brief",
+      "title": "Publish the brief",
+      "owner": "Priya",
+      "depends_on": [
+        "review-brief"
+      ],
+      "constraint_refs": [
+        "approval-required"
+      ],
+      "action_type": "external",
+      "execution_status": "completed",
+      "approval_status": "approved"
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "source-audit",
+      "to": "draft-brief"
+    },
+    {
+      "from": "draft-brief",
+      "to": "review-brief"
+    },
+    {
+      "from": "review-brief",
+      "to": "publish-brief"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "deadline-zone",
+      "question": "Does Friday mean Sydney end of day or another timezone?",
+      "status": "unresolved",
+      "next_action": "Confirm the timezone."
+    }
+  ],
+  "risks": [
+    {
+      "id": "unapproved-publication",
+      "description": "The brief was published without a complete approval record.",
+      "mitigation": "None."
+    }
+  ]
+}

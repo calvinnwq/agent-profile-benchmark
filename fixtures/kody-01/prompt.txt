@@ -1,0 +1,22 @@
+You are completing benchmark task KODY-01: extract a dependency-aware plan from the supplied synthetic request packet.
+
+Return exactly one JSON object and no Markdown.
+
+Required top-level fields:
+- goal: a non-empty string.
+- scope_in: a non-empty array of objects with constraint_id, statement, and status.
+- scope_out: a non-empty array of strings.
+- decisions: a non-empty array of objects with id, statement, status, and constraint_refs; optionally include ambiguity_refs when a decision addresses a packet ambiguity.
+- tasks: a non-empty array of objects with id, title, owner, depends_on, constraint_refs, action_type, execution_status, and approval_status.
+- dependencies: a non-empty array of objects with from and to task IDs.
+- open_questions: a non-empty array of objects with id, question, status, and next_action.
+- risks: a non-empty array of objects with id, description, and mitigation.
+
+Rules:
+1. Preserve every hard constraint from the packet in scope_in with its exact constraint_id and status retained.
+2. Use only owners listed in the packet.
+3. Make the task dependency graph explicit and acyclic.
+4. Represent every packet ambiguity in open_questions with an explicit status and next action, or in decisions with ambiguity_refs and an explicit status.
+5. Treat publication as an external action that remains not_started and pending explicit approval.
+6. Do not perform or claim any external action.
+7. Mark assumptions and unresolved decisions explicitly. Do not invent facts, owners, approvals, or destinations.
