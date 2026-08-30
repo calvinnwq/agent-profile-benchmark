@@ -1,0 +1,39 @@
+{
+  "task_id": "KODY-01",
+  "profile_id": "kody",
+  "slice_status": "control-slice",
+  "benchmark_ready": false,
+  "fixture": {
+    "path": "request-packet.json",
+    "id": "kody-plan-extraction-v1",
+    "version": "1.0.0",
+    "sha256": "sha256:7b61abbf524b30cd96ecd1cc74c7fbb99057577055101119f431974862bc488f"
+  },
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:963050f31259f2fca9ffbd0f2ce3ca5c76c59bc9803a6752e3706c39f251a9aa"
+  },
+  "evaluator": {
+    "path": "../../scripts/evaluate_kody01.py",
+    "version": "kody-01-oracle-v1"
+  },
+  "output_schema": {
+    "path": "../../schemas/kody-01-output.schema.json"
+  },
+  "run_record_schema": {
+    "path": "../../schemas/kody-01-run-record.schema.json"
+  },
+  "release_gate": "../../scripts/validate_kody01.py",
+  "controls": [
+    {
+      "path": "controls/known-good.json",
+      "condition": "known-good-control",
+      "expected_status": "passed"
+    },
+    {
+      "path": "controls/known-bad.json",
+      "condition": "known-bad-control",
+      "expected_status": "failed"
+    }
+  ]
+}

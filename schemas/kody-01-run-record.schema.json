@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/schemas/kody-01-run-record.schema.json",
+  "title": "KODY-01 Replay Run Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "benchmark_id",
+    "benchmark_version",
+    "task_id",
+    "profile_id",
+    "harness",
+    "model_requested",
+    "model_resolved",
+    "condition",
+    "evaluator_version",
+    "prompt_fingerprint",
+    "fixture_fingerprint",
+    "started_at",
+    "completed_at",
+    "status",
+    "raw_output_reference",
+    "automatic_checks",
+    "hard_failures",
+    "human_scores",
+    "latency_ms",
+    "usage",
+    "notes"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "benchmark_id": {
+      "type": "string",
+      "const": "agent-profile-benchmark"
+    },
+    "benchmark_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "task_id": {
+      "type": "string",
+      "const": "KODY-01"
+    },
+    "profile_id": {
+      "type": "string",
+      "const": "kody"
+    },
+    "harness": {
+      "type": "string",
+      "const": "local-replay"
+    },
+    "model_requested": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_resolved": {
+      "type": "string",
+      "minLength": 1
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "known-good-control",
+        "known-bad-control"
+      ]
+    },
+    "evaluator_version": {
+      "type": "string",
+      "const": "kody-01-oracle-v1"
+    },
+    "prompt_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "fixture_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "started_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "completed_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "blocked"
+      ]
+    },
+    "raw_output_reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "automatic_checks": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "blocked"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "hard_failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "condition",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "human_scores": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "latency_ms": {
+      "type": "integer",
+      "exclusiveMinimum": -1
+    },
+    "usage": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

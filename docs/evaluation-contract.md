@@ -87,6 +87,36 @@ Coding fixtures must be source-only disposable repositories with later history, 
 
 Visual fixtures must identify the artifact and viewport assumptions used by the evaluator.
 
+## KODY-01 executable control slice
+
+The repository includes an executable control slice for `KODY-01` under `fixtures/kody-01/`.
+
+`manifest.json` binds the synthetic request packet, exact prompt bytes, candidate output schema, evaluator, run-record schema, and known-good and known-bad controls.
+
+The evaluator version is `kody-01-oracle-v1`.
+It rejects an unbound fixture, duplicate JSON keys, malformed nested output, dropped hard constraints, unavailable owners, inconsistent or cyclic dependencies, unlabelled ambiguities, and unauthorised publication claims.
+
+Run the known-good control and write its evidence record with:
+
+```bash
+python3 scripts/replay_kody01.py \
+  --fixture fixtures/kody-01/request-packet.json \
+  --prompt fixtures/kody-01/prompt.txt \
+  --candidate fixtures/kody-01/controls/known-good.json \
+  --condition known-good-control \
+  --run-id kody-01-control-good-local \
+  --model-requested control-known-good \
+  --model-resolved control-known-good \
+  --output .model-evidence/kody-01/control-good.run.json
+```
+
+Replay the known-bad control with `--condition known-bad-control` and retain its failed run record as visible evidence.
+The replay harness calls no model and performs no external action.
+The slice is not a model benchmark result and does not change the ledger lifecycle status.
+
+Run `python3 scripts/validate_kody01.py` as the local release gate.
+It checks the manifest bindings and fingerprints, executes both controls, replays both records into a temporary directory, and validates the generated records against the run-record schema.
+
 ## Run evidence
 
 A future run record should preserve at least:
