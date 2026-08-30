@@ -93,8 +93,8 @@ def _bound_paths(manifest: dict[str, Any]) -> tuple[Path, Path, Path, Path, Path
         "manifest fixture version is not bound to KODY-01",
     )
     _require(
-        evaluator_metadata.get("version") == "kody-01-oracle-v1",
-        "manifest evaluator version is not kody-01-oracle-v1",
+        evaluator_metadata.get("version") == "kody-01-oracle-v2",
+        "manifest evaluator version is not kody-01-oracle-v2",
     )
 
     fixture_path = _resolve_manifest_path(fixture_metadata.get("path"), "fixture")

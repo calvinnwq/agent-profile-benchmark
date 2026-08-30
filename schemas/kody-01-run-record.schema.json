@@ -51,7 +51,10 @@
     },
     "harness": {
       "type": "string",
-      "const": "local-replay"
+      "enum": [
+        "local-replay",
+        "hermes-oneshot"
+      ]
     },
     "model_requested": {
       "type": "string",
@@ -65,12 +68,13 @@
       "type": "string",
       "enum": [
         "known-good-control",
-        "known-bad-control"
+        "known-bad-control",
+        "model-calibration"
       ]
     },
     "evaluator_version": {
       "type": "string",
-      "const": "kody-01-oracle-v1"
+      "const": "kody-01-oracle-v2"
     },
     "prompt_fingerprint": {
       "type": "string",

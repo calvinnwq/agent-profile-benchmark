@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -23,6 +24,7 @@ GOOD_PATH = FIXTURE_DIR / "controls" / "known-good.json"
 BAD_PATH = FIXTURE_DIR / "controls" / "known-bad.json"
 ORACLE_PATH = ROOT / "scripts" / "evaluate_kody01.py"
 REPLAY_PATH = ROOT / "scripts" / "replay_kody01.py"
+MODEL_RUNNER_PATH = ROOT / "scripts" / "run_kody01_model.py"
 GATE_PATH = ROOT / "scripts" / "validate_kody01.py"
 RUN_SCHEMA_PATH = ROOT / "schemas" / "kody-01-run-record.schema.json"
 
@@ -143,6 +145,40 @@ class Kody01VerticalSliceTests(unittest.TestCase):
             )
         )
         self.assertTrue(any(check["status"] == "fail" for check in evaluation["automatic_checks"]))
+
+    def test_assumption_labeling_allows_cross_references(self) -> None:
+        candidate = json.loads(json.dumps(self.good))
+        candidate["decisions"][0]["ambiguity_refs"] = ["deadline-zone"]
+        candidate["decisions"][1]["ambiguity_refs"] = ["workspace-destination"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "cross-references.json"
+            path.write_text(json.dumps(candidate), encoding="utf-8")
+            result = self.run_oracle(path)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        evaluation = json.loads(result.stdout)
+        checks = {check["id"]: check for check in evaluation["automatic_checks"]}
+        self.assertEqual(checks["assumption-labeling"]["status"], "pass")
+
+    def test_schema_errors_do_not_block_independent_checks(self) -> None:
+        broken = json.loads(json.dumps(self.good))
+        broken["tasks"][0]["action_type"] = "analysis"
+        with tempfile.TemporaryDirectory() as directory:
+            candidate = Path(directory) / "schema-invalid.json"
+            candidate.write_text(json.dumps(broken), encoding="utf-8")
+            result = self.run_oracle(candidate)
+
+        self.assertNotEqual(result.returncode, 0)
+        evaluation = json.loads(result.stdout)
+        self.assertEqual(evaluation["status"], "failed")
+        checks = {check["id"]: check for check in evaluation["automatic_checks"]}
+        self.assertEqual(checks["constraint-coverage"]["status"], "pass")
+        self.assertEqual(checks["owner-membership"]["status"], "pass")
+        self.assertEqual(checks["dependency-dag"]["status"], "pass")
+        self.assertEqual(checks["assumption-labeling"]["status"], "pass")
+        self.assertNotIn("dropped-hard-constraint", {failure["id"] for failure in evaluation["hard_failures"]})
+        self.assertNotIn("invented-authority", {failure["id"] for failure in evaluation["hard_failures"]})
+        self.assertNotIn("unsafe-external-action", {failure["id"] for failure in evaluation["hard_failures"]})
 
     def test_oracle_rejects_duplicate_json_keys(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -294,6 +330,135 @@ class Kody01VerticalSliceTests(unittest.TestCase):
         self.assertEqual(record["status"], "failed")
         self.assertTrue(record["hard_failures"])
         self.assertEqual(validate_schema_instance(record, self.run_schema), [])
+
+    def test_replay_supports_a_model_calibration_record(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            run_record_path = Path(directory) / "kody-01-model.run.json"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(REPLAY_PATH),
+                    "--fixture",
+                    str(FIXTURE_PATH),
+                    "--prompt",
+                    str(PROMPT_PATH),
+                    "--candidate",
+                    str(GOOD_PATH),
+                    "--harness",
+                    "hermes-oneshot",
+                    "--condition",
+                    "model-calibration",
+                    "--run-id",
+                    "kody-01-model-001",
+                    "--model-requested",
+                    "gpt-5.6-luna",
+                    "--model-resolved",
+                    "gpt-5.6-luna",
+                    "--output",
+                    str(run_record_path),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            record = json.loads(run_record_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(record["harness"], "hermes-oneshot")
+        self.assertEqual(record["condition"], "model-calibration")
+        self.assertEqual(record["status"], "passed")
+        self.assertEqual(validate_schema_instance(record, self.run_schema), [])
+
+    def test_model_runner_preserves_raw_output_usage_and_failed_cells(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            temp_dir = Path(directory)
+            fake_agent = temp_dir / "fake-agent.py"
+            fake_agent.write_text(
+                "#!/usr/bin/env python3\n"
+                "import json\n"
+                "import os\n"
+                "import sys\n"
+                "from pathlib import Path\n"
+                "usage = Path(sys.argv[sys.argv.index('--usage-file') + 1])\n"
+                "usage.write_text(json.dumps({'model': 'gpt-5.6-luna', 'api_calls': 1}), encoding='utf-8')\n"
+                "sys.stdout.buffer.write(Path(os.environ['KODY01_FAKE_OUTPUT']).read_bytes())\n",
+                encoding="utf-8",
+            )
+            fake_agent.chmod(0o755)
+            output_root = temp_dir / "evidence"
+            environment = {**os.environ, "KODY01_FAKE_OUTPUT": str(GOOD_PATH)}
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(MODEL_RUNNER_PATH),
+                    "--fixture",
+                    str(FIXTURE_PATH),
+                    "--prompt",
+                    str(PROMPT_PATH),
+                    "--output-root",
+                    str(output_root),
+                    "--run-id",
+                    "kody-01-fake-good",
+                    "--model-requested",
+                    "gpt-5.6-luna",
+                    "--agent-command",
+                    str(fake_agent),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            evidence_dir = output_root / "kody-01-fake-good"
+            record = json.loads((evidence_dir / "run-record.json").read_text(encoding="utf-8"))
+            self.assertEqual((evidence_dir / "raw-output.txt").read_bytes(), GOOD_PATH.read_bytes())
+            self.assertEqual(record["usage"], {"api_calls": 1, "model": "gpt-5.6-luna"})
+            self.assertEqual(record["harness"], "hermes-oneshot")
+            self.assertEqual(record["condition"], "model-calibration")
+            self.assertEqual(validate_schema_instance(record, self.run_schema), [])
+
+            fake_agent.write_text(
+                "#!/usr/bin/env python3\n"
+                "import sys\n"
+                "from pathlib import Path\n"
+                "Path(sys.argv[sys.argv.index('--usage-file') + 1]).write_text('{}', encoding='utf-8')\n"
+                "print('not JSON')\n",
+                encoding="utf-8",
+            )
+            fake_agent.chmod(0o755)
+            failed_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(MODEL_RUNNER_PATH),
+                    "--fixture",
+                    str(FIXTURE_PATH),
+                    "--prompt",
+                    str(PROMPT_PATH),
+                    "--output-root",
+                    str(output_root),
+                    "--run-id",
+                    "kody-01-fake-bad",
+                    "--model-requested",
+                    "gpt-5.6-luna",
+                    "--agent-command",
+                    str(fake_agent),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=environment,
+            )
+            self.assertNotEqual(failed_result.returncode, 0)
+            failed_record = json.loads(
+                (output_root / "kody-01-fake-bad" / "run-record.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(failed_record["status"], "failed")
+            self.assertIn("invalid-output", {failure["id"] for failure in failed_record["hard_failures"]})
+            self.assertEqual(validate_schema_instance(failed_record, self.run_schema), [])
 
     def test_fingerprints_are_sha256_of_exact_input_bytes(self) -> None:
         expected_fixture = "sha256:" + hashlib.sha256(FIXTURE_PATH.read_bytes()).hexdigest()

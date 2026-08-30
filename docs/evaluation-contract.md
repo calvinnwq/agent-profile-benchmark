@@ -93,8 +93,9 @@ The repository includes an executable control slice for `KODY-01` under `fixture
 
 `manifest.json` binds the synthetic request packet, exact prompt bytes, candidate output schema, evaluator, run-record schema, and known-good and known-bad controls.
 
-The evaluator version is `kody-01-oracle-v1`.
+The evaluator version is `kody-01-oracle-v2`.
 It rejects an unbound fixture, duplicate JSON keys, malformed nested output, dropped hard constraints, unavailable owners, inconsistent or cyclic dependencies, unlabelled ambiguities, and unauthorised publication claims.
+Checks are evaluated independently when their own inputs are structurally available, so a schema failure does not manufacture hard-failure labels for unrelated checks.
 
 Run the known-good control and write its evidence record with:
 
