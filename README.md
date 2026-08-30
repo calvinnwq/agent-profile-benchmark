@@ -71,6 +71,8 @@ Visual tasks use fixed artifacts and defect inventories rather than unverifiable
 The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.1.0 registry.
 No third-party packages are required.
 
+GitHub Actions runs the dependency-free tests and validation gates on pushes to `main` and `feat/**`, and on pull requests.
+
 ```bash
 python3 scripts/validate_benchmark.py
 python3 -m unittest discover -s tests -v

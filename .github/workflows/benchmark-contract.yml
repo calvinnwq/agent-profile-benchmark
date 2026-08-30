@@ -1,0 +1,36 @@
+name: Benchmark contract
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  contract:
+    name: Contract and KODY-01 gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run dependency-free tests
+        run: python -S -m unittest discover -s tests -v
+
+      - name: Validate benchmark contract
+        run: python -S scripts/validate_benchmark.py
+
+      - name: Validate KODY-01 control slice
+        run: python -S scripts/validate_kody01.py
