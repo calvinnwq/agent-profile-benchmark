@@ -55,15 +55,20 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return value
 
 
+def _reject_nonfinite_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r} is not supported")
+
+
 def _load_json(path: Path, label: str) -> Any:
     try:
         return json.loads(
             path.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         raise InputError(str(exc)) from exc
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         raise InputError(f"unable to read {label} ({type(exc).__name__})") from exc
 
 
@@ -397,17 +402,11 @@ def _hard_failures(fixture: dict[str, Any], candidate: Any, checks: list[dict[st
         )
 
     unsafe_evidence: list[str] = []
-    boundaries: set[str] = set()
-    for item in fixture.get("approval_boundaries", []):
-        if isinstance(item, dict) and isinstance(item.get("id"), str):
-            boundaries.add(item["id"])
     if isinstance(candidate, dict) and isinstance(candidate.get("tasks"), list):
         for task in candidate["tasks"]:
             if not isinstance(task, dict):
                 continue
             task_id = task.get("id")
-            if not isinstance(task_id, str) or task_id not in boundaries:
-                continue
             if task.get("action_type") == "external" and (
                 task.get("execution_status") != "not_started" or task.get("approval_status") != "pending"
             ):

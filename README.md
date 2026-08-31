@@ -13,6 +13,7 @@ The ledger's schema pointer and `benchmark_version` are frozen with that registr
 The validator also pins the semantic fingerprint of the full v0.2.0 ledger, so task content cannot be repurposed under an existing ID.
 All 18 tasks have frozen fixture bytes, prompt packets, evaluator oracles, output schemas, and known-good and known-bad controls.
 Every task remains offline-only with an empty `allowed_tools` list.
+`data/release-artifact-lock.json` independently pins every task package and shared runtime artifact; manifest hashes are checked against that lock rather than trusted as the sole source of truth.
 Adding or replacing a task requires an explicit benchmark-version update and corresponding fixture, prompt, evaluator, and documentation changes.
 
 Do not publish model scores until the fixtures, evaluator oracles, and prompt packets have been frozen and validated.
@@ -125,7 +126,7 @@ Raw model run evidence belongs under `.model-evidence/` and is ignored by Git.
 
 The next evidence gate is to record the exact Nous Portal model roster and resolved model identifiers.
 Then run matched profile-task cells and preserve raw evidence before reporting results.
-The release gate must pass before any model matrix run.
+The release gate and sealed artifact lock must pass before any model matrix run.
 
 The benchmark is a routing aid, not a universal intelligence ranking.
 One successful task or one aggregate score is insufficient evidence for trusted use.

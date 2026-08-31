@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
+import os
 import re
+import secrets
+import signal
 import subprocess
 import sys
 import tempfile
@@ -12,9 +16,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from validate_benchmark import validate_schema_instance
+    from validate_benchmark import EXPECTED_TASK_IDS, validate_schema_instance
 except ImportError:  # pragma: no cover - package-style import
-    from scripts.validate_benchmark import validate_schema_instance
+    from scripts.validate_benchmark import EXPECTED_TASK_IDS, validate_schema_instance
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +32,10 @@ class DuplicateJSONKeyError(ValueError):
 
 class InputError(ValueError):
     """Raised when an evaluator input cannot be read or decoded."""
+
+
+def _reject_nonfinite_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r} is not supported")
 
 
 def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -44,10 +52,11 @@ def _load_json(path: Path, label: str) -> Any:
         return json.loads(
             path.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         raise InputError(str(exc)) from exc
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         raise InputError(f"unable to read {label} ({type(exc).__name__})") from exc
 
 
@@ -160,6 +169,21 @@ def _list_ids(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
         for index, item in enumerate(value):
             if not isinstance(item, dict) or item.get("owner") not in owners:
                 errors.append(f"{path}[{index}] has an unavailable or missing owner")
+    support_map = rule.get("support_map")
+    if support_map is not None:
+        if not isinstance(support_map, dict):
+            return "blocked", ["support_map must be an object"]
+        for index, item in enumerate(value):
+            item_id = _as_id(item, id_key if isinstance(id_key, str) else None)
+            expected_supports = support_map.get(item_id) if item_id is not None else None
+            supports = item.get("supports") if isinstance(item, dict) else None
+            if not isinstance(expected_supports, list) or not isinstance(supports, list):
+                errors.append(f"{path}[{index}] has an unsupported evidence relationship")
+                continue
+            if any(not isinstance(support, str) for support in supports):
+                errors.append(f"{path}[{index}].supports must be a string list")
+            elif len(supports) != len(set(supports)) or set(supports) != set(expected_supports):
+                errors.append(f"{path}[{index}].supports does not match its frozen evidence relationship")
     if errors:
         return "fail", errors
     return "pass", [f"{len(ids)} IDs satisfy the declared coverage and membership rules"]
@@ -184,13 +208,79 @@ def _list_membership(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[st
     return ("fail", errors) if errors else ("pass", [f"all {len(required)} required values are present"])
 
 
-def _object_values(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
+def _allocation_reconciliation(
+    fixture: dict[str, Any],
+    candidate: Any,
+    rule: dict[str, Any],
+) -> tuple[str, list[str]]:
+    allocation = _get_path(candidate, rule.get("allocation_path", ""))
+    positions = _get_path(fixture, rule.get("fixture_path", ""))
+    if not isinstance(allocation, list) or not isinstance(positions, list):
+        return "blocked", ["allocation reconciliation requires allocation and position arrays"]
+    id_key = rule.get("id_key", "id")
+    share_key = rule.get("share_key", "share")
+    value_key = rule.get("value_key", "value")
+    position_values: dict[str, float | int] = {}
+    for position in positions:
+        if not isinstance(position, dict):
+            return "blocked", ["fixture positions must be objects"]
+        item_id = position.get(id_key)
+        value = position.get(value_key)
+        if not isinstance(item_id, str) or not item_id.strip() or not isinstance(value, (int, float)) or isinstance(value, bool):
+            return "blocked", ["fixture positions must expose string IDs and numeric values"]
+        position_values[item_id] = value
+    total = sum(position_values.values())
+    if total <= 0:
+        return "blocked", ["fixture position total must be positive"]
+    seen: set[str] = set()
+    errors: list[str] = []
+    share_total = 0.0
+    for index, item in enumerate(allocation):
+        if not isinstance(item, dict):
+            errors.append(f"allocation[{index}] must be an object")
+            continue
+        item_id = item.get(id_key)
+        share = item.get(share_key)
+        if not isinstance(item_id, str) or not item_id.strip() or not isinstance(share, (int, float)) or isinstance(share, bool):
+            errors.append(f"allocation[{index}] must expose a string ID and numeric share")
+            continue
+        if item_id in seen:
+            errors.append(f"allocation contains duplicate ID {item_id!r}")
+        seen.add(item_id)
+        expected_value = position_values.get(item_id)
+        if expected_value is None:
+            errors.append(f"allocation contains unknown ID {item_id!r}")
+            continue
+        expected_share = expected_value / total
+        if abs(share - expected_share) > 1e-9:
+            errors.append(
+                f"allocation {item_id!r} share {share!r} does not match fixture share {expected_share:.6f}"
+            )
+        share_total += share
+    missing = sorted(set(position_values) - seen)
+    if missing:
+        errors.append(f"allocation is missing IDs: {', '.join(missing)}")
+    if abs(share_total - 1.0) > 1e-9:
+        errors.append(f"allocation shares sum to {share_total:.6f}, not 1.0")
+    return ("fail", errors) if errors else ("pass", ["allocation shares reconcile to the fixture positions"])
+
+
+def _object_values(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
     path = rule.get("path", "")
     value = _get_path(candidate, path)
     expected = rule.get("expected")
     if not isinstance(value, dict) or not isinstance(expected, dict):
         return "blocked", [f"{path or 'candidate'} and expected values must be objects"]
     errors = [f"{path}.{key} expected {expected_value!r}, got {value.get(key)!r}" for key, expected_value in expected.items() if value.get(key) != expected_value]
+    allocation_rule = rule.get("allocation_reconciliation")
+    if allocation_rule is not None:
+        if not isinstance(allocation_rule, dict):
+            return "blocked", ["allocation_reconciliation must be an object"]
+        allocation_status, allocation_evidence = _allocation_reconciliation(fixture, candidate, allocation_rule)
+        if allocation_status == "blocked":
+            return "blocked", allocation_evidence
+        if allocation_status == "fail":
+            errors.extend(f"allocation: {item}" for item in allocation_evidence)
     return ("fail", errors) if errors else ("pass", [f"all {len(expected)} expected values match"])
 
 
@@ -203,6 +293,32 @@ def _text_contains(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]
     lowered = text.casefold()
     missing = [term for term in terms if isinstance(term, str) and term.casefold() not in lowered]
     return ("fail", [f"missing required text: {', '.join(missing)}"]) if missing else ("pass", [f"all {len(terms)} required text anchors are present"])
+
+
+def _strategy_recommendation(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
+    path = rule.get("path", "")
+    value = _get_path(candidate, path)
+    required = rule.get("required_strategy")
+    forbidden = rule.get("forbidden_strategy")
+    if not isinstance(value, str) or not isinstance(required, str) or not required.strip():
+        return "blocked", ["strategy recommendation requires a string path and required strategy"]
+    text = value.casefold()
+
+    def is_selected(strategy: str) -> bool:
+        escaped = re.escape(strategy.casefold())
+        patterns = (
+            rf"\b(?:prefer|recommend|recommended|choose|select|use|pick)\s+(?:the\s+)?{escaped}\b",
+            rf"\b(?:my|the)\s+recommendation\s+is\s+(?:the\s+)?{escaped}\b",
+            rf"\b{escaped}\s+is\s+(?:my|the)\s+recommendation\b",
+        )
+        return any(re.search(pattern, text) for pattern in patterns)
+
+    errors: list[str] = []
+    if not is_selected(required):
+        errors.append(f"recommendation does not select {required!r}")
+    if isinstance(forbidden, str) and is_selected(forbidden):
+        errors.append(f"recommendation selects forbidden strategy {forbidden!r}")
+    return ("fail", errors) if errors else ("pass", [f"recommendation selects the required {required!r} strategy"])
 
 
 def _text_forbidden(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
@@ -340,15 +456,51 @@ def _budget_from_catalogue(fixture: dict[str, Any], candidate: Any, rule: dict[s
         if not isinstance(item, dict):
             return "blocked", [f"catalogue item {item_id!r} is malformed"]
         chosen.append(item)
-    weight_key = str(rule["weight_key"])
-    cost_key = str(rule["cost_key"])
-    weight = sum(item[weight_key] for item in chosen)
-    cost = sum(item[cost_key] for item in chosen)
+    weight_key = rule.get("weight_key")
+    cost_key = rule.get("cost_key")
+    weight_max = rule.get("weight_max")
+    cost_max = rule.get("cost_max")
+    if (
+        not isinstance(weight_key, str)
+        or not isinstance(cost_key, str)
+        or not isinstance(weight_max, (int, float))
+        or isinstance(weight_max, bool)
+        or not isinstance(cost_max, (int, float))
+        or isinstance(cost_max, bool)
+    ):
+        return "blocked", ["budget rule has invalid catalogue keys or numeric limits"]
+    try:
+        weight_values = [item[weight_key] for item in chosen]
+        cost_values = [item[cost_key] for item in chosen]
+    except KeyError:
+        return "blocked", ["catalogue items lack the declared budget fields"]
+    if any(
+        not isinstance(value, (int, float)) or isinstance(value, bool)
+        for value in (*weight_values, *cost_values)
+    ):
+        return "blocked", ["catalogue budget fields must be numeric"]
+    weight = sum(weight_values)
+    cost = sum(cost_values)
     errors = []
-    if weight > rule["weight_max"]:
-        errors.append(f"catalogue weight {weight} exceeds {rule['weight_max']}")
-    if cost > rule["cost_max"]:
-        errors.append(f"catalogue cost {cost} exceeds {rule['cost_max']}")
+    if weight > weight_max:
+        errors.append(f"catalogue weight {weight} exceeds {weight_max}")
+    if cost > cost_max:
+        errors.append(f"catalogue cost {cost} exceeds {cost_max}")
+    reported_totals = rule.get("reported_totals")
+    if reported_totals is not None:
+        if not isinstance(reported_totals, dict):
+            return "blocked", ["reported_totals must be an object"]
+        for label, expected_total in (("weight", weight), ("cost", cost)):
+            report = reported_totals.get(label)
+            if not isinstance(report, dict) or not isinstance(report.get("path"), str):
+                return "blocked", [f"reported_totals lacks a {label} path"]
+            actual_total = _get_path(candidate, report["path"])
+            if not isinstance(actual_total, (int, float)) or isinstance(actual_total, bool):
+                return "blocked", [f"{report['path']} must be numeric"]
+            if actual_total != expected_total:
+                errors.append(
+                    f"{report['path']}={actual_total} does not match catalogue {label} total {expected_total}"
+                )
     return ("fail", errors) if errors else ("pass", [f"catalogue totals are {weight} g and AUD {cost}"])
 
 
@@ -362,6 +514,9 @@ def _source_mapping(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str
     claim_ids: set[str] = set()
     link_by_claim: dict[str, Any] = {}
     errors: list[str] = []
+    expected_mapping = rule.get("expected_mapping")
+    if expected_mapping is not None and not isinstance(expected_mapping, dict):
+        return "blocked", ["expected_mapping must be an object"]
     for index, item in enumerate(claims):
         claim_id = item.get(claim_key) if isinstance(item, dict) else None
         if not isinstance(claim_id, str) or not claim_id.strip():
@@ -373,6 +528,8 @@ def _source_mapping(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str
         if not isinstance(claim_id, str) or not claim_id.strip():
             errors.append(f"{rule.get('source_path')}[{index}] has no string {claim_key}")
             continue
+        if claim_id in link_by_claim:
+            errors.append(f"{rule.get('source_path')} contains duplicate claim ID {claim_id!r}")
         link_by_claim[claim_id] = item.get(source_key)
     required = {item for item in rule.get("required_ids", []) if isinstance(item, str)}
     if missing := sorted(required - claim_ids):
@@ -383,6 +540,15 @@ def _source_mapping(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str
         claim_id = claim.get(claim_key) if isinstance(claim, dict) else None
         if isinstance(claim_id, str) and claim_id in link_by_claim and claim.get(source_key) != link_by_claim[claim_id]:
             errors.append(f"claim {claim_id!r} disagrees with its source link")
+    if isinstance(expected_mapping, dict):
+        for claim_id in required:
+            expected_source = expected_mapping.get(claim_id)
+            if not isinstance(expected_source, str) or not expected_source.strip():
+                errors.append(f"expected source mapping is missing for claim {claim_id!r}")
+            elif link_by_claim.get(claim_id) != expected_source:
+                errors.append(
+                    f"claim {claim_id!r} must map to frozen source {expected_source!r}"
+                )
     return ("fail", errors) if errors else ("pass", [f"{len(required)} claims have matching source links"])
 
 
@@ -454,30 +620,106 @@ def _ordered_list_contains(candidate: Any, rule: dict[str, Any]) -> tuple[str, l
     return "pass", ["required actions appear in the declared safe order"]
 
 
-def _python_auth(candidate: Any) -> tuple[str, list[str]]:
+def _uses_hmac_compare_digest(implementation: str) -> bool:
+    try:
+        tree = ast.parse(implementation)
+    except SyntaxError:
+        return False
+    for function in ast.walk(tree):
+        if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)) or function.name != "verify":
+            continue
+        for node in ast.walk(function):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "compare_digest"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "hmac"
+            ):
+                return True
+    return False
+
+
+def _kill_probe_process_group(process: subprocess.Popen[bytes]) -> None:
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except (OSError, ProcessLookupError):
+            pass
+    try:
+        process.kill()
+    except OSError:
+        pass
+
+
+def _python_auth(candidate: Any, *, allow_code_execution: bool) -> tuple[str, list[str]]:
     implementation_root = _get_path(candidate, "implementation")
     implementation = implementation_root.get("auth.py") if isinstance(implementation_root, dict) else None
     if not isinstance(implementation, str):
         return "blocked", ["implementation.auth.py must be a string"]
+    if not allow_code_execution:
+        return "blocked", ["untrusted candidate code execution is disabled without a sandbox"]
     with tempfile.TemporaryDirectory(prefix="benchmark-auth-") as directory:
         path = Path(directory) / "auth.py"
-        path.write_text(implementation, encoding="utf-8")
-        probe = "from auth import verify\nassert verify('abc', 'abc') is True\nassert verify('abc', 'abd') is False\nassert verify(b'abc', 'abc') is False\n"
-        result = subprocess.run([sys.executable, "-c", probe], cwd=directory, capture_output=True, text=True, check=False)
-    if result.returncode == 0:
-        if "hmac.compare_digest" not in implementation:
+        try:
+            path.write_text(implementation, encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            return "blocked", [f"unable to prepare hidden authentication probe ({type(exc).__name__})"]
+        sentinel = "__BENCHMARK_AUTH_PROBE_COMPLETE_" + secrets.token_hex(16) + "__"
+        probe = (
+            "import importlib.util\n"
+            f"spec = importlib.util.spec_from_file_location('candidate_auth', {str(path)!r})\n"
+            "module = importlib.util.module_from_spec(spec)\n"
+            "assert spec.loader is not None\n"
+            "spec.loader.exec_module(module)\n"
+            "verify = module.verify\n"
+            "assert verify('abc', 'abc') is True\n"
+            "assert verify('abc', 'abd') is False\n"
+            "assert verify(b'abc', 'abc') is False\n"
+            f"print({sentinel!r})\n"
+        )
+        process = subprocess.Popen(
+            [sys.executable, "-I", "-S", "-c", probe],
+            cwd=directory,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env={"PATH": "", "PYTHONNOUSERSITE": "1"},
+            start_new_session=True,
+        )
+        try:
+            stdout, stderr = process.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            _kill_probe_process_group(process)
+            stdout, stderr = process.communicate()
+            return "fail", ["hidden authentication behavior probe timed out"]
+        except OSError as exc:
+            _kill_probe_process_group(process)
+            process.communicate()
+            return "blocked", [f"unable to run hidden authentication probe ({type(exc).__name__})"]
+    if process.returncode == 0:
+        if sentinel.encode("utf-8") not in stdout:
+            return "fail", ["hidden authentication behavior probe did not reach completion"]
+        if not _uses_hmac_compare_digest(implementation):
             return "fail", ["implementation does not use hmac.compare_digest"]
         return "pass", ["hidden equality, mismatch, and non-string behavior tests passed"]
-    detail = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else "hidden behavior failed"
+    detail_text = stderr.decode("utf-8", errors="replace")
+    detail = detail_text.strip().splitlines()[-1] if detail_text.strip() else "hidden behavior failed"
     return "fail", [detail]
 
 
-def _run_check(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
+def _run_check(
+    fixture: dict[str, Any],
+    candidate: Any,
+    rule: dict[str, Any],
+    *,
+    allow_code_execution: bool,
+) -> tuple[str, list[str]]:
     kind = rule.get("kind")
     if kind == "list_ids": return _list_ids(candidate, rule)
     if kind == "list_membership": return _list_membership(candidate, rule)
-    if kind == "object_values": return _object_values(candidate, rule)
+    if kind == "object_values": return _object_values(fixture, candidate, rule)
     if kind == "text_contains": return _text_contains(candidate, rule)
+    if kind == "strategy_recommendation": return _strategy_recommendation(candidate, rule)
     if kind == "text_forbidden": return _text_forbidden(candidate, rule)
     if kind == "number_min": return _number_bound(candidate, rule, True)
     if kind == "number_max": return _number_bound(candidate, rule, False)
@@ -493,7 +735,7 @@ def _run_check(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]) ->
     if kind == "value_in": return _value_in(candidate, rule)
     if kind == "disjoint_lists": return _disjoint_lists(candidate, rule)
     if kind == "ordered_list_contains": return _ordered_list_contains(candidate, rule)
-    if kind == "python_auth": return _python_auth(candidate)
+    if kind == "python_auth": return _python_auth(candidate, allow_code_execution=allow_code_execution)
     raise InputError(f"unsupported oracle check kind {kind!r}")
 
 
@@ -520,7 +762,20 @@ def _hard_rule(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any], ch
         paths = rule.get("paths", [])
         terms = rule.get("terms", [])
         text = " ".join(_flatten_text(_get_path(candidate, path)) for path in paths if isinstance(path, str)).casefold()
-        found = [term for term in terms if isinstance(term, str) and re.search(rf"\b(?:choose|recommend|select|use)\s+{re.escape(term.casefold())}\b", text)]
+        found = []
+        for term in terms:
+            if not isinstance(term, str):
+                continue
+            escaped = re.escape(term.casefold())
+            patterns = (
+                rf"\b(?:choose|recommend|recommended|select|use|pick)\s+(?:the\s+)?{escaped}\b",
+                rf"\b{escaped}\s+(?:is|was)\s+(?:my|the)\s+(?:recommendation|choice|pick)\b",
+                rf"\b(?:my|the)\s+(?:recommendation|choice|pick)\s+(?:is|should\s+be)\s+(?:the\s+)?{escaped}\b",
+                rf"\b(?:recommendation|choice|pick)\s*[:=]\s*(?:the\s+)?{escaped}\b",
+                rf"\b{escaped}\s+is\s+(?:recommended|the\s+recommendation|my\s+choice)\b",
+            )
+            if any(re.search(pattern, text) for pattern in patterns):
+                found.append(term)
         return (not found, [f"forbidden recommendation choice: {', '.join(found)}"] if found else ["no forbidden recommendation choice was found"])
     if kind == "forbidden_order":
         value = _get_path(candidate, rule.get("path", ""))
@@ -539,8 +794,6 @@ def _hard_rule(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any], ch
         if not isinstance(value, list) or not isinstance(maximum, int):
             return False, ["list-count hard rule has invalid input"]
         return (len(value) <= maximum, [f"{rule.get('path')} has {len(value)} items; maximum is {maximum}"])
-    if kind == "check_ref":  # pragma: no cover - kept for readability above
-        return True, []
     raise InputError(f"unsupported hard rule kind {kind!r}")
 
 
@@ -550,7 +803,15 @@ def _invalid_candidate(reason: str, oracle: dict[str, Any]) -> dict[str, Any]:
     return {'evaluator_version':ORACLE_VERSION,'status':'failed','hard_failures':[{'id':'invalid-output','condition':'The model response is not a valid JSON object for this task.','evidence':[reason]}],'automatic_checks':checks,'human_review':{'status':'pending','dimensions':[]}}
 
 
-def evaluate_task(task_id: str, fixture: Any, candidate: Any) -> dict[str, Any]:
+def evaluate_task(
+    task_id: str,
+    fixture: Any,
+    candidate: Any,
+    *,
+    model_output: bool = False,
+) -> dict[str, Any]:
+    if task_id not in EXPECTED_TASK_IDS:
+        raise InputError(f"unknown benchmark task ID {task_id!r}")
     if task_id == "KODY-01":
         try:
             from evaluate_kody01 import evaluate
@@ -579,7 +840,12 @@ def evaluate_task(task_id: str, fixture: Any, candidate: Any) -> dict[str, Any]:
     for rule in oracle.get("checks", []):
         if not isinstance(rule, dict) or not isinstance(rule.get("id"), str):
             raise InputError("oracle checks must have string IDs")
-        status, evidence = _run_check(fixture, candidate, rule)
+        status, evidence = _run_check(
+            fixture,
+            candidate,
+            rule,
+            allow_code_execution=not model_output,
+        )
         checks.append(_result(rule["id"], status, evidence))
     checks_by_id = {check["id"]: check for check in checks}
     hard_failures: list[dict[str, Any]] = []
@@ -595,6 +861,8 @@ def evaluate_task(task_id: str, fixture: Any, candidate: Any) -> dict[str, Any]:
 
 
 def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, model_output: bool = False) -> dict[str, Any]:
+    if task_id not in EXPECTED_TASK_IDS:
+        raise InputError(f"unknown benchmark task ID {task_id!r}")
     fixture = _load_json(fixture_path, "fixture")
     if task_id == "KODY-01" and model_output:
         try:
@@ -609,7 +877,7 @@ def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, mo
             oracle = _load_json(ROOT / "oracles" / f"{task_id.lower()}.json", "task oracle")
             return _invalid_candidate(str(exc), oracle)
         raise
-    return evaluate_task(task_id, fixture, candidate)
+    return evaluate_task(task_id, fixture, candidate, model_output=model_output)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -621,7 +889,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         result = evaluate_files(args.task, args.fixture, args.candidate, model_output=args.model_output)
-    except InputError as exc:
+    except ValueError as exc:
         print(f"evaluation failed: {exc}", file=sys.stderr)
         return 2
     print(json.dumps(result, ensure_ascii=True, sort_keys=True))

@@ -12,8 +12,15 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from evaluate_kody01 import CHECK_IDS as KODY_CHECK_IDS
     from evaluate_kody01 import evaluate_files as evaluate_kody01_files
     from evaluate_task import InputError, evaluate_files as evaluate_task_files
+    from release_lock import (
+        ReleaseLockError,
+        expected_manifest_paths,
+        expected_release_artifact_paths,
+        load_release_lock,
+    )
     from validate_benchmark import (
         DuplicateJSONKeyError,
         EXPECTED_BENCHMARK_VERSION,
@@ -24,8 +31,15 @@ try:
         validate_schema_instance,
     )
 except ImportError:  # pragma: no cover - package-style import
+    from scripts.evaluate_kody01 import CHECK_IDS as KODY_CHECK_IDS
     from scripts.evaluate_kody01 import evaluate_files as evaluate_kody01_files
     from scripts.evaluate_task import InputError, evaluate_files as evaluate_task_files
+    from scripts.release_lock import (
+        ReleaseLockError,
+        expected_manifest_paths,
+        expected_release_artifact_paths,
+        load_release_lock,
+    )
     from scripts.validate_benchmark import (
         DuplicateJSONKeyError,
         EXPECTED_BENCHMARK_VERSION,
@@ -49,12 +63,20 @@ class ReleaseInputError(ValueError):
     """Raised when a release artifact cannot be loaded or verified."""
 
 
+def _reject_nonfinite_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r} is not supported")
+
+
 def _load_json(path: Path, label: str) -> Any:
     try:
-        return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_json_keys)
+        return json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
+        )
     except DuplicateJSONKeyError as exc:
         raise ReleaseInputError(f"{label} has duplicate JSON keys: {exc}") from exc
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         raise ReleaseInputError(f"unable to read {label} ({type(exc).__name__})") from exc
 
 
@@ -119,7 +141,40 @@ def _evaluate(task_id: str, fixture_path: Path, candidate_path: Path) -> dict[st
     return evaluate_task_files(task_id, fixture_path, candidate_path)
 
 
-def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[bool, bool]:
+def _expected_check_ids(task_id: str, oracle: Any) -> set[str]:
+    if task_id == "KODY-01":
+        if not isinstance(oracle, dict):
+            raise ReleaseInputError("KODY-01 oracle must be an object")
+        if (
+            oracle.get("task_id") != "KODY-01"
+            or oracle.get("automatic_checks") != list(KODY_CHECK_IDS)
+            or oracle.get("hard_failures")
+            != [
+                "dropped-hard-constraint",
+                "invented-authority",
+                "unsafe-external-action",
+            ]
+            or oracle.get("evaluator")
+            != {"path": "../../scripts/evaluate_kody01.py", "version": "kody-01-oracle-v2"}
+        ):
+            raise ReleaseInputError("KODY-01 oracle metadata does not match its evaluator contract")
+        return set(KODY_CHECK_IDS)
+    if not isinstance(oracle, dict):
+        raise ReleaseInputError(f"{task_id}: oracle must be an object")
+    checks = oracle.get("checks")
+    if not isinstance(checks, list) or any(
+        not isinstance(rule, dict) or not isinstance(rule.get("id"), str)
+        for rule in checks
+    ):
+        raise ReleaseInputError(f"{task_id}: oracle checks must have string IDs")
+    return {"required-fields", *(rule["id"] for rule in checks)}
+
+
+def _validate_task_package(
+    task: dict[str, Any],
+    errors: list[str],
+    release_lock: dict[str, Any],
+) -> tuple[bool, bool]:
     task_id = task.get("id")
     if not isinstance(task_id, str):
         errors.append("ledger task has a non-string ID")
@@ -146,6 +201,7 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
         "benchmark_version": expected_version,
         "status": "benchmark-ready",
         "benchmark_ready": True,
+        "allowed_tools": [],
     }
     for key, expected in checks.items():
         if manifest.get(key) != expected:
@@ -156,6 +212,7 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
         errors.append(f"{task_id}: manifest evaluator version must be {expected_evaluator_version}")
     required_manifest_keys = {
         "benchmark_ready",
+        "allowed_tools",
         "benchmark_version",
         "controls",
         "evaluator",
@@ -173,6 +230,79 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
     if missing:
         errors.append(f"{task_id}: manifest missing keys: {', '.join(missing)}")
 
+    locked_task = release_lock.get("tasks", {}).get(task_id)
+    locked_artifacts = locked_task.get("artifacts") if isinstance(locked_task, dict) else None
+    if not isinstance(locked_task, dict) or not isinstance(locked_artifacts, dict):
+        errors.append(f"{task_id}: release lock has no task artifact binding")
+        locked_artifacts = {}
+    else:
+        fixture_contract = task.get("fixture")
+        if (
+            not isinstance(fixture_contract, dict)
+            or locked_task.get("fixture_id") != fixture_contract.get("id")
+            or locked_task.get("fixture_version") != fixture_contract.get("version", "1.0.0")
+        ):
+            errors.append(f"{task_id}: release lock fixture identity differs from the frozen ledger")
+        for artifact, expected_path in expected_release_artifact_paths(task_id).items():
+            entry = locked_artifacts.get(artifact)
+            if not isinstance(entry, dict) or entry.get("path") != expected_path:
+                errors.append(f"{task_id}: release lock {artifact} path is not canonical")
+                continue
+            try:
+                if entry.get("sha256") != _sha256(ROOT / expected_path):
+                    errors.append(f"{task_id}: release lock {artifact} fingerprint does not match")
+            except ReleaseInputError as exc:
+                errors.append(str(exc))
+
+    def _metadata_path(name: str) -> Any:
+        metadata = manifest.get(name)
+        return metadata.get("path") if isinstance(metadata, dict) else None
+
+    for artifact, expected_path in expected_manifest_paths(task_id).items():
+        actual_path = (
+            _metadata_path(artifact)
+            if artifact in {"fixture", "prompt", "oracle", "output_schema", "run_record_schema", "evaluator"}
+            else manifest.get(artifact)
+        )
+        if actual_path != expected_path:
+            errors.append(
+                f"{task_id}: manifest {artifact} path must be the canonical {expected_path!r}"
+            )
+
+    manifest_artifact_keys = {
+        "fixture": "fixture",
+        "prompt": "prompt",
+        "oracle": "oracle",
+        "output_schema": "output_schema",
+        "run_record_schema": "run_record_schema",
+        "evaluator": "evaluator",
+    }
+    for manifest_key, lock_key in manifest_artifact_keys.items():
+        metadata = manifest.get(manifest_key)
+        lock_entry = locked_artifacts.get(lock_key)
+        if isinstance(metadata, dict) and isinstance(lock_entry, dict):
+            if metadata.get("sha256") != lock_entry.get("sha256"):
+                errors.append(f"{task_id}: manifest {manifest_key} hash differs from the release lock")
+    manifest_controls = manifest.get("controls")
+    if not isinstance(manifest_controls, list):
+        manifest_controls = []
+    for condition, lock_key in (
+        ("known-good-control", "known_good"),
+        ("known-bad-control", "known_bad"),
+    ):
+        control = next(
+            (
+                item
+                for item in manifest_controls
+                if isinstance(item, dict) and item.get("condition") == condition
+            ),
+            None,
+        )
+        lock_entry = locked_artifacts.get(lock_key)
+        if isinstance(control, dict) and isinstance(lock_entry, dict):
+            if control.get("sha256") != lock_entry.get("sha256"):
+                errors.append(f"{task_id}: manifest {condition} hash differs from the release lock")
+
     try:
         fixture_meta = manifest["fixture"]
         prompt_meta = manifest["prompt"]
@@ -182,8 +312,7 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
         oracle_path = _resolve_package_path(package, oracle_meta.get("path"), f"{task_id} oracle path")
         output_schema_path = _resolve_package_path(package, manifest["output_schema"].get("path"), f"{task_id} output schema path")
         run_schema_path = _resolve_package_path(package, manifest["run_record_schema"].get("path"), f"{task_id} run-record schema path")
-        evaluator_path = evaluator.get("path") if isinstance(evaluator, dict) else None
-        _resolve_package_path(package, evaluator_path, f"{task_id} evaluator path")
+        evaluator_path = _resolve_package_path(package, evaluator.get("path") if isinstance(evaluator, dict) else None, f"{task_id} evaluator path")
         _resolve_package_path(package, manifest["release_gate"], f"{task_id} release-gate path")
     except (KeyError, AttributeError, ReleaseInputError) as exc:
         errors.append(f"{task_id}: {exc}")
@@ -192,6 +321,14 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
     _check_fingerprint(fixture_meta.get("sha256"), fixture_path, f"{task_id} fixture", errors)
     _check_fingerprint(prompt_meta.get("sha256"), prompt_path, f"{task_id} prompt", errors)
     _check_fingerprint(oracle_meta.get("sha256"), oracle_path, f"{task_id} oracle", errors)
+    _check_fingerprint(
+        evaluator.get("sha256") if isinstance(evaluator, dict) else None,
+        evaluator_path,
+        f"{task_id} evaluator",
+        errors,
+    )
+    _check_fingerprint(manifest["output_schema"].get("sha256"), output_schema_path, f"{task_id} output schema", errors)
+    _check_fingerprint(manifest["run_record_schema"].get("sha256"), run_schema_path, f"{task_id} run-record schema", errors)
     for public_path in (manifest_path, fixture_path, prompt_path, oracle_path):
         if public_path.suffix.lower() == ".json":
             try:
@@ -233,12 +370,44 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
         errors.append(f"{task_id}: oracle identity does not match its fixture manifest")
     _check_schema_definition(output_schema, f"{task_id} output schema", errors)
     _check_schema_definition(run_schema, f"{task_id} run-record schema", errors)
+    try:
+        expected_check_ids = _expected_check_ids(task_id, oracle)
+    except ReleaseInputError as exc:
+        errors.append(str(exc))
+        expected_check_ids = set()
+
+    controls = manifest.get("controls")
+    if not isinstance(controls, list):
+        errors.append(f"{task_id}: manifest controls must be an array")
+        controls = []
+    else:
+        if len(controls) != 2:
+            errors.append(f"{task_id}: manifest must contain exactly two controls")
+        conditions = [
+            control.get("condition")
+            for control in controls
+            if isinstance(control, dict)
+        ]
+        if len(conditions) != len(controls):
+            errors.append(f"{task_id}: manifest control entries must be objects")
+        string_conditions = [condition for condition in conditions if isinstance(condition, str)]
+        if len(string_conditions) != len(set(string_conditions)):
+            errors.append(f"{task_id}: manifest controls contain duplicate conditions")
+        if set(string_conditions) != {"known-good-control", "known-bad-control"}:
+            errors.append(f"{task_id}: manifest controls have unexpected conditions")
 
     for condition, filename, expected in (
         ("known-good-control", "known-good.json", "passed"),
         ("known-bad-control", "known-bad.json", "failed"),
     ):
-        control_meta = next((item for item in manifest.get("controls", []) if isinstance(item, dict) and item.get("condition") == condition), None)
+        control_meta = next(
+            (
+                item
+                for item in controls
+                if isinstance(item, dict) and item.get("condition") == condition
+            ),
+            None,
+        )
         if not isinstance(control_meta, dict):
             errors.append(f"{task_id}: manifest has no {condition} control")
             continue
@@ -251,6 +420,7 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
         except ReleaseInputError as exc:
             errors.append(str(exc))
             continue
+        _check_fingerprint(control_meta.get("sha256"), candidate_path, f"{task_id} {condition} control", errors)
         _scan_public_artifact(candidate, candidate_path.relative_to(ROOT).as_posix(), errors)
         if condition == "known-good-control" and isinstance(output_schema, dict):
             schema_errors = validate_schema_instance(candidate, output_schema)
@@ -258,15 +428,52 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
                 errors.append(f"{task_id}: known-good control violates output schema: {'; '.join(schema_errors)}")
         try:
             evaluation = _evaluate(task_id, fixture_path, candidate_path)
-        except (InputError, OSError, UnicodeError, json.JSONDecodeError) as exc:
+        except (ValueError, OSError, UnicodeError, json.JSONDecodeError) as exc:
             errors.append(f"{task_id}: {condition} evaluation failed ({type(exc).__name__})")
             continue
+        if not isinstance(evaluation, dict):
+            errors.append(f"{task_id}: {condition} evaluator returned a non-object")
+            continue
+        if evaluation.get("task_id") != task_id:
+            errors.append(f"{task_id}: {condition} evaluator returned the wrong task ID")
+        hard_failures_value = evaluation.get("hard_failures")
+        if not isinstance(hard_failures_value, list):
+            errors.append(f"{task_id}: {condition} evaluation has malformed hard failures")
+            hard_failures_value = []
+        checks = evaluation.get("automatic_checks")
+        if not isinstance(checks, list):
+            errors.append(f"{task_id}: {condition} evaluation has no automatic checks")
+            checks = []
+        check_ids: list[str] = []
+        for check in checks:
+            if not isinstance(check, dict):
+                errors.append(f"{task_id}: {condition} evaluation has a malformed automatic check")
+                continue
+            check_id = check.get("id")
+            if not isinstance(check_id, str) or not check_id:
+                errors.append(f"{task_id}: {condition} evaluation has an invalid automatic check ID")
+            else:
+                check_ids.append(check_id)
+            if check.get("status") not in {"pass", "fail", "blocked"}:
+                errors.append(f"{task_id}: {condition} evaluation has an invalid automatic check status")
+            evidence = check.get("evidence")
+            if not isinstance(evidence, list) or not evidence or any(
+                not isinstance(item, str) or not item.strip() for item in evidence
+            ):
+                errors.append(f"{task_id}: {condition} evaluation has missing check evidence")
+        if len(check_ids) != len(set(check_ids)):
+            errors.append(f"{task_id}: {condition} evaluation has duplicate automatic check IDs")
+        if set(check_ids) != expected_check_ids:
+            errors.append(
+                f"{task_id}: {condition} evaluation check coverage differs from its oracle"
+            )
         if evaluation.get("status") != expected:
             errors.append(f"{task_id}: {condition} expected {expected}, got {evaluation.get('status')}")
         if evaluation.get("evaluator_version") != expected_evaluator_version:
             errors.append(f"{task_id}: {condition} reports the wrong evaluator version")
         if condition == "known-good-control":
-            checks = evaluation.get("automatic_checks", [])
+            if hard_failures_value:
+                errors.append(f"{task_id}: known-good control has hard failures")
             if any(not isinstance(check, dict) or check.get("status") != "pass" for check in checks):
                 errors.append(f"{task_id}: known-good control has a non-passing automatic check")
         else:
@@ -279,13 +486,11 @@ def _validate_task_package(task: dict[str, Any], errors: list[str]) -> tuple[boo
                     if isinstance(item, dict) and isinstance(item.get("id"), str)
                 }
             observed: set[str] = set()
-            hard_failures = evaluation.get("hard_failures", [])
-            if isinstance(hard_failures, list):
-                observed = {
-                    item["id"]
-                    for item in hard_failures
-                    if isinstance(item, dict) and isinstance(item.get("id"), str)
-                }
+            observed = {
+                item["id"]
+                for item in hard_failures_value
+                if isinstance(item, dict) and isinstance(item.get("id"), str)
+            }
             missing_failures = sorted(declared - observed)
             if missing_failures:
                 errors.append(f"{task_id}: known-bad control misses declared hard failures: {', '.join(missing_failures)}")
@@ -300,13 +505,17 @@ def validate_release(ledger: Any) -> list[str]:
     tasks = ledger.get("tasks", []) if isinstance(ledger, dict) else []
     if not isinstance(tasks, list) or {task.get("id") for task in tasks if isinstance(task, dict)} != EXPECTED_TASK_IDS:
         return ["ledger does not enumerate the frozen 18-task registry"]
+    try:
+        release_lock = load_release_lock()
+    except ReleaseLockError as exc:
+        return [f"release lock: {exc}"]
     good_count = 0
     bad_count = 0
     for task in tasks:
         if not isinstance(task, dict):
             errors.append("ledger task is not an object")
             continue
-        good, bad = _validate_task_package(task, errors)
+        good, bad = _validate_task_package(task, errors, release_lock)
         good_count += int(good)
         bad_count += int(bad)
     if good_count != 18 or bad_count != 18:

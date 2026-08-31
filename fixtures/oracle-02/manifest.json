@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:61bbb3996de3fdd189f5c9018b69f0b3f096cd5c18fe781bbc400ba5c19807a2"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:a4cee9bbde8e235f85951985cdce98a438ac25f5f18c7aa69bb35f8c6707a7cf"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "oracle-quant-comparison-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:1daf6118fad106b9e118bdebee605362e25e90b949b7b47149ddfa7446cef4af"
   },
   "output_schema": {
-    "path": "../../schemas/oracle-02-output.schema.json"
+    "path": "../../schemas/oracle-02-output.schema.json",
+    "sha256": "sha256:37b708f174f4f0d03ef876b3df4def4d26367ec5ea22398eb8e58881df93c51a"
   },
   "profile_id": "oracle",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "ORACLE-02"
+  "task_id": "ORACLE-02",
+  "allowed_tools": []
 }

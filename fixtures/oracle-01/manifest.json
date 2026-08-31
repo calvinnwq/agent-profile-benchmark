@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:6e680c0af12a33effa44059c6c3bda4339be40f69b1a687dfa4b2a18ca4e31cb"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:15151116d1c3605c42bd510c00bb2d3d1d9a0c2687fd32ae909a7112fc97e9d6"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "oracle-official-rules-v1",
@@ -26,10 +29,11 @@
   },
   "oracle": {
     "path": "../../oracles/oracle-01.json",
-    "sha256": "sha256:d6d7f96cef1b0d1496ffc775a6f175d3568b5f7cb79ed3d65760a4f0fb7a9700"
+    "sha256": "sha256:2338b119397573e113c267c3923237253bb1b18ed47aaf2437ce0bcd7e7a3ec2"
   },
   "output_schema": {
-    "path": "../../schemas/oracle-01-output.schema.json"
+    "path": "../../schemas/oracle-01-output.schema.json",
+    "sha256": "sha256:6bad8978f4fcec1cd59b9b252e433e94c224335bf328c4fc18a3ff0dc21e7039"
   },
   "profile_id": "oracle",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "ORACLE-01"
+  "task_id": "ORACLE-01",
+  "allowed_tools": []
 }

@@ -34,16 +34,11 @@
       ]
     },
     {
+      "forbidden_strategy": "growth",
       "id": "recommendation-consistency",
-      "kind": "text_contains",
-      "paths": [
-        "recommendation",
-        "risk_comparison"
-      ],
-      "terms": [
-        "steady",
-        "downside"
-      ]
+      "kind": "strategy_recommendation",
+      "path": "recommendation",
+      "required_strategy": "steady"
     }
   ],
   "fixture_id": "aegis-strategy-comparison-v1",

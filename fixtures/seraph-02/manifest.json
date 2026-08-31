@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:ebfea0881984108781a289ae1cfb14c4893a2e7d5c14defe2394015cbfc3e701"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:274dfdc97e3bc5bd07fa50b79c8260be629de52f01d39dcc3fadbcacd76caae9"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "seraph-dashboard-interactions-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:8873fb72e95dcfd7296d3a4441520af3adddc620d0bb5b2b0825c6c4ee6a8ac4"
   },
   "output_schema": {
-    "path": "../../schemas/seraph-02-output.schema.json"
+    "path": "../../schemas/seraph-02-output.schema.json",
+    "sha256": "sha256:2b8f26bfa0d6132ad11af7e617d6f184c5aaa32638b6e0f70460c34c628758a5"
   },
   "profile_id": "seraph",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "SERAPH-02"
+  "task_id": "SERAPH-02",
+  "allowed_tools": []
 }

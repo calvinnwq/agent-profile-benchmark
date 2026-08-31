@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:c669bea95cf2346ace08ecac0f05d54284f11996fc097b0e6136bd5f4f607e81"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:bb4fb363a85b4bbf43e8adecb222e1b5f3ddf05a8b1e941572458eda90ad24eb"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "atlas-cook-kit-selection-v1",
@@ -26,10 +29,11 @@
   },
   "oracle": {
     "path": "../../oracles/atlas-01.json",
-    "sha256": "sha256:6727ef0efd5fad89686a496f223b73f568b43796cf3fd9a05e3bc1a73bed9e14"
+    "sha256": "sha256:5c3bfd5b04f25b1c4a53f017c92c349b24f278953482601a9b407790fd571694"
   },
   "output_schema": {
-    "path": "../../schemas/atlas-01-output.schema.json"
+    "path": "../../schemas/atlas-01-output.schema.json",
+    "sha256": "sha256:7ebe4d3c70e7e669e3fbf6ca3771be9bfd01a19bcd602aa4c9e2a37f9de0a9ce"
   },
   "profile_id": "atlas",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "ATLAS-01"
+  "task_id": "ATLAS-01",
+  "allowed_tools": []
 }

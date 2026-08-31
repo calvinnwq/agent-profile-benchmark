@@ -1,0 +1,894 @@
+{
+  "$schema": "../schemas/release-artifact-lock.schema.json",
+  "benchmark_id": "agent-profile-benchmark",
+  "benchmark_version": "0.2.0",
+  "lock_version": "1",
+  "shared": {
+    "contract_schema": {
+      "path": "schemas/task-contract.schema.json",
+      "sha256": "sha256:8e3ea88c371e2afcfd056927228c2c6fe529fd949b6b81d69df0b9144aa9bbcf"
+    },
+    "evaluator_kody01": {
+      "path": "scripts/evaluate_kody01.py",
+      "sha256": "sha256:6b31ec05a883e8a3b94cef56f85ce4a09e5000c77d2f3f11e1925f2e7c859f53"
+    },
+    "evaluator_task": {
+      "path": "scripts/evaluate_task.py",
+      "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+    },
+    "hermes_adapter": {
+      "path": "scripts/hermes_no_tools.py",
+      "sha256": "sha256:625f409554213235ba1cbcb143d8ff97b4269af2c2a5ad849f56602ccda1a0ab"
+    },
+    "kody_model_runner": {
+      "path": "scripts/run_kody01_model.py",
+      "sha256": "sha256:3eaabf7f1ae5fa8c103377d1e6caa639a3f07fc14a35f8a51b8f29646572a14d"
+    },
+    "kody_run_schema": {
+      "path": "schemas/kody-01-run-record.schema.json",
+      "sha256": "sha256:488a9ec056b5fd1864fabe344716fd30f0faecb8cffd47d47c44a3585f18aeac"
+    },
+    "kody_validator": {
+      "path": "scripts/validate_kody01.py",
+      "sha256": "sha256:fd5a872ce499438175e3d33a5963988b24ee9a840a52cc78fe8743601d018f22"
+    },
+    "ledger": {
+      "path": "data/task-ledger.json",
+      "sha256": "sha256:6b9177b8f2b8ce8b064b13addd545f2759ab6c5a802fa7f0447b1aa787307d12"
+    },
+    "model_runner": {
+      "path": "scripts/run_task_model.py",
+      "sha256": "sha256:64dde028d1e47b27780a73d51fb1e8092c243055eaf0cc3de701a54730a76cd6"
+    },
+    "release_lock_schema": {
+      "path": "schemas/release-artifact-lock.schema.json",
+      "sha256": "sha256:c87acf43927c67c2100f52613b387cf3161651e25d893541df8535b857fff550"
+    },
+    "release_validator": {
+      "path": "scripts/validate_benchmark_ready.py",
+      "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+    },
+    "replay_kody01": {
+      "path": "scripts/replay_kody01.py",
+      "sha256": "sha256:bc43e7425098e9f4ac3ad7f19edde6ecb2bf900b01c77d2bd5b36f9479ba91fe"
+    },
+    "replay_task": {
+      "path": "scripts/replay_task.py",
+      "sha256": "sha256:72036a5f2c681e756bfd906f0c1654e6576708e70213204a98c354430e321761"
+    },
+    "run_record_schema": {
+      "path": "schemas/task-run-record.schema.json",
+      "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    }
+  },
+  "tasks": {
+    "AEGIS-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/aegis-01/input.json",
+          "sha256": "sha256:18e2aa6335bdf683078d16568900e24636b9b7d8c7763487cbaf054b1abd7b78"
+        },
+        "known_bad": {
+          "path": "fixtures/aegis-01/controls/known-bad.json",
+          "sha256": "sha256:f332c4594a108d2621987885a3724a4456f24082af22685b5e61b2c0558501c0"
+        },
+        "known_good": {
+          "path": "fixtures/aegis-01/controls/known-good.json",
+          "sha256": "sha256:5cf299fdfa0917326206e09335e218222b4ab5c0c5ff50c64a3cc77bc0c6fe31"
+        },
+        "manifest": {
+          "path": "fixtures/aegis-01/manifest.json",
+          "sha256": "sha256:9c27f62d585f43d3ac65b8ab7f9064b326c85df6343459f65e20ca80e05c0f72"
+        },
+        "oracle": {
+          "path": "oracles/aegis-01.json",
+          "sha256": "sha256:07e4a56e13a5147bfce6073a886ecd58a3d0324c5894252a56ccf4c7bc435fbc"
+        },
+        "output_schema": {
+          "path": "schemas/aegis-01-output.schema.json",
+          "sha256": "sha256:e997d7cdfc99ca7d27a53cbd932332df864c731d98dc5b6134c3410b39569b5e"
+        },
+        "prompt": {
+          "path": "fixtures/aegis-01/prompt.txt",
+          "sha256": "sha256:d512d203f5e0d6191a06dc88fbd3f990859ab9fe62521b1f0562e36910cfca22"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "aegis-synthetic-portfolio-v1",
+      "fixture_version": "1.0.0"
+    },
+    "AEGIS-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/aegis-02/input.json",
+          "sha256": "sha256:929c2fd0e20672a21de0fb2d5af6cd5301f69ba88a5677b932bed5ca79b2e421"
+        },
+        "known_bad": {
+          "path": "fixtures/aegis-02/controls/known-bad.json",
+          "sha256": "sha256:52c0e34cd31d3ff7d412c0f10775963d269ba6e810bb1d31751833c77f346469"
+        },
+        "known_good": {
+          "path": "fixtures/aegis-02/controls/known-good.json",
+          "sha256": "sha256:2afad16fa6bb6e775198880ed6e0723c11b4cd73fb5cbb34831b6ba40fb8f1d3"
+        },
+        "manifest": {
+          "path": "fixtures/aegis-02/manifest.json",
+          "sha256": "sha256:f5fa2d33b62bb82456efcdcb3adad31060c211a846e1b58f967013c76821a044"
+        },
+        "oracle": {
+          "path": "oracles/aegis-02.json",
+          "sha256": "sha256:98113664fc06d5d93268ff4ecbb8406d0098a1d165fb9affedf7bc62686496ce"
+        },
+        "output_schema": {
+          "path": "schemas/aegis-02-output.schema.json",
+          "sha256": "sha256:c7215ea36288c10b82ed4b431fef3a5112c6d729fbef3ae8b8538a2f44b7d0cc"
+        },
+        "prompt": {
+          "path": "fixtures/aegis-02/prompt.txt",
+          "sha256": "sha256:e91c34f3c9a06ba7b1a7220fd4ffcabf580c31c989b05d6df4471020bd6aea26"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "aegis-strategy-comparison-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ARCH-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/arch-01/input.json",
+          "sha256": "sha256:de311694ad11d8e7d62e0b189f56d5de5bb3a51724916050d7cc62abf05b432e"
+        },
+        "known_bad": {
+          "path": "fixtures/arch-01/controls/known-bad.json",
+          "sha256": "sha256:0e3425d8bf6b4c093168dc611efb905c8a8999f0a3428cc800ee8544e48391f7"
+        },
+        "known_good": {
+          "path": "fixtures/arch-01/controls/known-good.json",
+          "sha256": "sha256:c255a517ed4fd6980824b7ffea515eccc115d33eb9a4a01eeb6628d5aea62b3b"
+        },
+        "manifest": {
+          "path": "fixtures/arch-01/manifest.json",
+          "sha256": "sha256:c977679b9f3127ea7660763d19f5cd3d1a2f115a2bc8842d3ad4aab2a6b39b52"
+        },
+        "oracle": {
+          "path": "oracles/arch-01.json",
+          "sha256": "sha256:37dabdfb813e773ed4b554f8d5ce2351c2c00f65b4f113b6ea6e7ad02639e154"
+        },
+        "output_schema": {
+          "path": "schemas/arch-01-output.schema.json",
+          "sha256": "sha256:9e4fbc94ce02cf96de6b689180fbd0763faf57ab44a943e5d529eb40c714bd43"
+        },
+        "prompt": {
+          "path": "fixtures/arch-01/prompt.txt",
+          "sha256": "sha256:6d094157a596615dbeb916cf369f40380bebf8906137b089a8fc0ed2b46ca502"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "arch-authentication-fix-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ARCH-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/arch-02/input.json",
+          "sha256": "sha256:a6cc8a8185a07285620bc0eee55c0e713a3d039ff91a7b360a2637ea086687e4"
+        },
+        "known_bad": {
+          "path": "fixtures/arch-02/controls/known-bad.json",
+          "sha256": "sha256:85e2f105d0bb35045c9b37482cb877d7c59574d9fb18b0f9cdb49dfddb08a747"
+        },
+        "known_good": {
+          "path": "fixtures/arch-02/controls/known-good.json",
+          "sha256": "sha256:8b0aca57711ad72bbfbde4e0221b0714e757a870ce95f3c0cca71405d98a9564"
+        },
+        "manifest": {
+          "path": "fixtures/arch-02/manifest.json",
+          "sha256": "sha256:299a9a5e982513164f905104f3919582c9fba150855397ef380c64c3bbb2f846"
+        },
+        "oracle": {
+          "path": "oracles/arch-02.json",
+          "sha256": "sha256:d228dbee25f86842ac581c7e60dc202210f01f18f2edd7e9efddf024148d1a53"
+        },
+        "output_schema": {
+          "path": "schemas/arch-02-output.schema.json",
+          "sha256": "sha256:611064a96434efba8f71835ebf58ef9a7c5b0d3fb0ab6b8c2079b98d0f13ad09"
+        },
+        "prompt": {
+          "path": "fixtures/arch-02/prompt.txt",
+          "sha256": "sha256:d894a2a1c2687da94e49ba930437382ea362c469a9c7a84109cc84ebe75ffcb6"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "arch-projection-review-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ATLAS-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/atlas-01/input.json",
+          "sha256": "sha256:72e3e1c494bf11aaafad39f9f270fb3e32e3664452f28832a87a6654da6f8460"
+        },
+        "known_bad": {
+          "path": "fixtures/atlas-01/controls/known-bad.json",
+          "sha256": "sha256:bb4fb363a85b4bbf43e8adecb222e1b5f3ddf05a8b1e941572458eda90ad24eb"
+        },
+        "known_good": {
+          "path": "fixtures/atlas-01/controls/known-good.json",
+          "sha256": "sha256:c669bea95cf2346ace08ecac0f05d54284f11996fc097b0e6136bd5f4f607e81"
+        },
+        "manifest": {
+          "path": "fixtures/atlas-01/manifest.json",
+          "sha256": "sha256:0b2a90879cd448cb04c7610f396d3d9322d15ffbef872c259c581916db079a65"
+        },
+        "oracle": {
+          "path": "oracles/atlas-01.json",
+          "sha256": "sha256:5c3bfd5b04f25b1c4a53f017c92c349b24f278953482601a9b407790fd571694"
+        },
+        "output_schema": {
+          "path": "schemas/atlas-01-output.schema.json",
+          "sha256": "sha256:7ebe4d3c70e7e669e3fbf6ca3771be9bfd01a19bcd602aa4c9e2a37f9de0a9ce"
+        },
+        "prompt": {
+          "path": "fixtures/atlas-01/prompt.txt",
+          "sha256": "sha256:076033eeb967ec68dd0bcdf2703d2926cc0b273c12b7456117cac5e429d1483c"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "atlas-cook-kit-selection-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ATLAS-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/atlas-02/input.json",
+          "sha256": "sha256:b5035a6128ce22d1a909bf9917844cb7ec859c5f2bb895fffc7c105b229477dd"
+        },
+        "known_bad": {
+          "path": "fixtures/atlas-02/controls/known-bad.json",
+          "sha256": "sha256:1655875b0ad4da949a8329f970c82fac7f1e56eb56af0ca06829da2cb5000872"
+        },
+        "known_good": {
+          "path": "fixtures/atlas-02/controls/known-good.json",
+          "sha256": "sha256:80259aa2444c7839b0de0937538353f439c6b3b8c2707764ea8fd5e96d245d1b"
+        },
+        "manifest": {
+          "path": "fixtures/atlas-02/manifest.json",
+          "sha256": "sha256:15897ea42ed5c81d1726b7f88728fd60aa688d8b5c905777b1f25c2b0f54d3a4"
+        },
+        "oracle": {
+          "path": "oracles/atlas-02.json",
+          "sha256": "sha256:80a400b4958358198fd24fff4fa02196ff280468ef81a154cf8591eb48297e23"
+        },
+        "output_schema": {
+          "path": "schemas/atlas-02-output.schema.json",
+          "sha256": "sha256:80eed5a17e29c8e22870dadfd0347f1a49886e309a6547cd4b00e125ae45a7b9"
+        },
+        "prompt": {
+          "path": "fixtures/atlas-02/prompt.txt",
+          "sha256": "sha256:64a186ec6290869fe196aea6eacfe73aa01e810f5d998131f5fca45b4458011d"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "atlas-route-logistics-v1",
+      "fixture_version": "1.0.0"
+    },
+    "KODY-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_kody01.py",
+          "sha256": "sha256:6b31ec05a883e8a3b94cef56f85ce4a09e5000c77d2f3f11e1925f2e7c859f53"
+        },
+        "fixture": {
+          "path": "fixtures/kody-01/request-packet.json",
+          "sha256": "sha256:7b61abbf524b30cd96ecd1cc74c7fbb99057577055101119f431974862bc488f"
+        },
+        "known_bad": {
+          "path": "fixtures/kody-01/controls/known-bad.json",
+          "sha256": "sha256:642f9606546188ea5b52d78f58e02e8a858d6a1ef149ef83bb6be07f1c0d3d99"
+        },
+        "known_good": {
+          "path": "fixtures/kody-01/controls/known-good.json",
+          "sha256": "sha256:901fefddb72713f7d001fdf249ef9a06c9aaa768fa1dcb21627407e602266516"
+        },
+        "manifest": {
+          "path": "fixtures/kody-01/manifest.json",
+          "sha256": "sha256:e517a8317012f4fc33fe1404093979f2cffa3972e37101f99b43a47a3431677f"
+        },
+        "oracle": {
+          "path": "oracles/kody-01.json",
+          "sha256": "sha256:e8415cd9b3534659ed3b811eb89a0db9435c240a9ecdbfe8a3d854952e2dccdf"
+        },
+        "output_schema": {
+          "path": "schemas/kody-01-output.schema.json",
+          "sha256": "sha256:d52c9962612313b125e451360c98e321a146f5f937ea5db58a271ea72bc6038a"
+        },
+        "prompt": {
+          "path": "fixtures/kody-01/prompt.txt",
+          "sha256": "sha256:963050f31259f2fca9ffbd0f2ce3ca5c76c59bc9803a6752e3706c39f251a9aa"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "kody-plan-extraction-v1",
+      "fixture_version": "1.0.0"
+    },
+    "KODY-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/kody-02/input.json",
+          "sha256": "sha256:20f68b7b5f1a2932d463cee461a39d8327d03d62c98e8c972186751063bcce27"
+        },
+        "known_bad": {
+          "path": "fixtures/kody-02/controls/known-bad.json",
+          "sha256": "sha256:0b32937e9181dcf8444706c649e92a71869641aa4c1efa1bcb27249e856ed256"
+        },
+        "known_good": {
+          "path": "fixtures/kody-02/controls/known-good.json",
+          "sha256": "sha256:629db7bf72aa58d62d7cd4d679d0d868701c43aaf688f369251734872f335793"
+        },
+        "manifest": {
+          "path": "fixtures/kody-02/manifest.json",
+          "sha256": "sha256:084b0d42739292dfe2f8b786c8691ba71703d05792aa3f403713038d8a8d582d"
+        },
+        "oracle": {
+          "path": "oracles/kody-02.json",
+          "sha256": "sha256:a650432b577c58c83836f09432d30ab9328e2a31620a63b9449780ce96ad2721"
+        },
+        "output_schema": {
+          "path": "schemas/kody-02-output.schema.json",
+          "sha256": "sha256:f3a53e1a9a2e7dd16f7133b035cacd941bc6df490227018a56d4d8ecebdfc751"
+        },
+        "prompt": {
+          "path": "fixtures/kody-02/prompt.txt",
+          "sha256": "sha256:5e3643dae2ee4893c4bd3324b858bf23ae230299552099eae1d57485fe5a79da"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "kody-conflicting-handoffs-v1",
+      "fixture_version": "1.0.0"
+    },
+    "MORPH-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/morph-01/input.json",
+          "sha256": "sha256:df39cdf983e1ddfacc70ff45a0977ae22c7bc44e7f74bf2405ffb8c7fac84069"
+        },
+        "known_bad": {
+          "path": "fixtures/morph-01/controls/known-bad.json",
+          "sha256": "sha256:ec5e921df6570b3455047e5ab998e2f0bde14b77deb9e1fb1fb2531ac28b7fcd"
+        },
+        "known_good": {
+          "path": "fixtures/morph-01/controls/known-good.json",
+          "sha256": "sha256:c31f2539d6d9da333879f9b679d2f834c1ff3f6f4fc50e0e38bc2879ea8cb0fe"
+        },
+        "manifest": {
+          "path": "fixtures/morph-01/manifest.json",
+          "sha256": "sha256:8936031a694967be01585c51bc33e5dd5b27ec2d4b4df2d6b475ccf9400157a9"
+        },
+        "oracle": {
+          "path": "oracles/morph-01.json",
+          "sha256": "sha256:9a8874040e9b4522be0c01cb74fdb7d000dd26b5b7b5000118c548d1f89a9485"
+        },
+        "output_schema": {
+          "path": "schemas/morph-01-output.schema.json",
+          "sha256": "sha256:888dba6d3a7931b13676f7618aaa61a971f792c7647f247b7ae44e154bfd187c"
+        },
+        "prompt": {
+          "path": "fixtures/morph-01/prompt.txt",
+          "sha256": "sha256:c2a237aa4a1dbc47e4c1e506db338d8dd7fb151293ce2576b980a507a32b7269"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "morph-mvp-definition-v1",
+      "fixture_version": "1.0.0"
+    },
+    "MORPH-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/morph-02/input.json",
+          "sha256": "sha256:225780ff2d430788727e02bca93d4ca88c45bea88ef9a079628a32b77a1f3fec"
+        },
+        "known_bad": {
+          "path": "fixtures/morph-02/controls/known-bad.json",
+          "sha256": "sha256:c23f24709d45d970fb70b6598b81f858f3aaf810e5926cb689955adaef7ecb94"
+        },
+        "known_good": {
+          "path": "fixtures/morph-02/controls/known-good.json",
+          "sha256": "sha256:c0d9d944bf5a6d1743a3faba9ef8aa8841b4124e34f3a6e88e60280e3422ec32"
+        },
+        "manifest": {
+          "path": "fixtures/morph-02/manifest.json",
+          "sha256": "sha256:2bc7fa6334bab6515f672eaec9db0cf46793896015d9b39a84f752ed917b4f30"
+        },
+        "oracle": {
+          "path": "oracles/morph-02.json",
+          "sha256": "sha256:bde16e2e9784f46d20651b2d51647a4075e947bcb6bdccab718f94a9659307d8"
+        },
+        "output_schema": {
+          "path": "schemas/morph-02-output.schema.json",
+          "sha256": "sha256:b64fc758cc21f991d0e7d9561a23ad4f20828b7f5218b786c84dc59aae19fc5f"
+        },
+        "prompt": {
+          "path": "fixtures/morph-02/prompt.txt",
+          "sha256": "sha256:18e2a7b36aad6acd92a78bd132d894ecd91d527f24add3bcdf4a3015109cf7ae"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "morph-launch-direction-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ORACLE-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/oracle-01/input.json",
+          "sha256": "sha256:56d6f036350f28b067f5a68f02cf62a8d50f481a4ffecc8913e603937af79ff4"
+        },
+        "known_bad": {
+          "path": "fixtures/oracle-01/controls/known-bad.json",
+          "sha256": "sha256:15151116d1c3605c42bd510c00bb2d3d1d9a0c2687fd32ae909a7112fc97e9d6"
+        },
+        "known_good": {
+          "path": "fixtures/oracle-01/controls/known-good.json",
+          "sha256": "sha256:6e680c0af12a33effa44059c6c3bda4339be40f69b1a687dfa4b2a18ca4e31cb"
+        },
+        "manifest": {
+          "path": "fixtures/oracle-01/manifest.json",
+          "sha256": "sha256:cb39d57eaf304b4369e5a4ca42b26f6b0f0b0d58c19953745aa386a39ee1b1c1"
+        },
+        "oracle": {
+          "path": "oracles/oracle-01.json",
+          "sha256": "sha256:2338b119397573e113c267c3923237253bb1b18ed47aaf2437ce0bcd7e7a3ec2"
+        },
+        "output_schema": {
+          "path": "schemas/oracle-01-output.schema.json",
+          "sha256": "sha256:6bad8978f4fcec1cd59b9b252e433e94c224335bf328c4fc18a3ff0dc21e7039"
+        },
+        "prompt": {
+          "path": "fixtures/oracle-01/prompt.txt",
+          "sha256": "sha256:8b2764a649eb86882a698bbed869908c7fa4c1b9696fd9155826cc9ee33606ae"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "oracle-official-rules-v1",
+      "fixture_version": "1.0.0"
+    },
+    "ORACLE-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/oracle-02/input.json",
+          "sha256": "sha256:49afd8960d22bf6ef71f9d55f06efafb2f47d3973283f4acdabb9c0b8f3a0021"
+        },
+        "known_bad": {
+          "path": "fixtures/oracle-02/controls/known-bad.json",
+          "sha256": "sha256:a4cee9bbde8e235f85951985cdce98a438ac25f5f18c7aa69bb35f8c6707a7cf"
+        },
+        "known_good": {
+          "path": "fixtures/oracle-02/controls/known-good.json",
+          "sha256": "sha256:61bbb3996de3fdd189f5c9018b69f0b3f096cd5c18fe781bbc400ba5c19807a2"
+        },
+        "manifest": {
+          "path": "fixtures/oracle-02/manifest.json",
+          "sha256": "sha256:145a25f6948d3f84d7b64ef83561d7e16907e345cfe4e7235e1d562b341bc7a9"
+        },
+        "oracle": {
+          "path": "oracles/oracle-02.json",
+          "sha256": "sha256:1daf6118fad106b9e118bdebee605362e25e90b949b7b47149ddfa7446cef4af"
+        },
+        "output_schema": {
+          "path": "schemas/oracle-02-output.schema.json",
+          "sha256": "sha256:37b708f174f4f0d03ef876b3df4def4d26367ec5ea22398eb8e58881df93c51a"
+        },
+        "prompt": {
+          "path": "fixtures/oracle-02/prompt.txt",
+          "sha256": "sha256:08055d186c2e8c15daa67e812bebeff095b9383d7ccff57f8d6253ad5d2c144b"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "oracle-quant-comparison-v1",
+      "fixture_version": "1.0.0"
+    },
+    "SENTINEL-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/sentinel-01/input.json",
+          "sha256": "sha256:715bdf254b6dac77a0120ab664a6974dec98cfe78aa67b8d495830817f4e70ce"
+        },
+        "known_bad": {
+          "path": "fixtures/sentinel-01/controls/known-bad.json",
+          "sha256": "sha256:f688f85a39629017325b9884e89eed8d0403bb499dd88328e45a747ab7b0fff2"
+        },
+        "known_good": {
+          "path": "fixtures/sentinel-01/controls/known-good.json",
+          "sha256": "sha256:0a513b060bfd59bf13fc66fe4339bf47c1e411d1fcbdc466f1d49269d31b45bc"
+        },
+        "manifest": {
+          "path": "fixtures/sentinel-01/manifest.json",
+          "sha256": "sha256:8238bac092ba63a92fc6dc6ac9b00f309e1fc37bbf69f389bfd256f9e8642419"
+        },
+        "oracle": {
+          "path": "oracles/sentinel-01.json",
+          "sha256": "sha256:60ed8f46940dcc2ab9d783a964a5ffcb3eb917f849708e984cef1b31128a316a"
+        },
+        "output_schema": {
+          "path": "schemas/sentinel-01-output.schema.json",
+          "sha256": "sha256:e00988ea6a4b9bedd6004aa18a5a9d34b648092a603b426da40499684f101606"
+        },
+        "prompt": {
+          "path": "fixtures/sentinel-01/prompt.txt",
+          "sha256": "sha256:f85c64e36aaa8f771c28cbc306eadd0e01bfa8c586aa0a8f95fae7c18ac69891"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "sentinel-collector-incident-v1",
+      "fixture_version": "1.0.0"
+    },
+    "SENTINEL-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/sentinel-02/input.json",
+          "sha256": "sha256:3b3265fb2bde6cc9d8762ecf4952b9fca589fd15accd0f6eb18e9a3035a75927"
+        },
+        "known_bad": {
+          "path": "fixtures/sentinel-02/controls/known-bad.json",
+          "sha256": "sha256:610255328178bd7ae1f4a838095a247de529ae45069b4a968cb1897c15f505f4"
+        },
+        "known_good": {
+          "path": "fixtures/sentinel-02/controls/known-good.json",
+          "sha256": "sha256:f2e16e0b19f901b3ebab82ca9e8df17b99056768aadb7350149ae5415b5cb6fe"
+        },
+        "manifest": {
+          "path": "fixtures/sentinel-02/manifest.json",
+          "sha256": "sha256:974da03a79fd6e227bd7e7180e30d15a8d55718a9e1b394752953581afb56fa0"
+        },
+        "oracle": {
+          "path": "oracles/sentinel-02.json",
+          "sha256": "sha256:9516450a456a7df234d02d56a3943259957a5973d2cbfa732fefa9943df4f36b"
+        },
+        "output_schema": {
+          "path": "schemas/sentinel-02-output.schema.json",
+          "sha256": "sha256:8ab8bf312f0507c35e6cb33a21700fe67a5b7aef45365c5d72d45f15cef0802a"
+        },
+        "prompt": {
+          "path": "fixtures/sentinel-02/prompt.txt",
+          "sha256": "sha256:870e4efd9914a7b79ead4ea41d3d461c3939ab624433082c55ef869867e1ea12"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "sentinel-brief-health-v1",
+      "fixture_version": "1.0.0"
+    },
+    "SERAPH-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/seraph-01/input.json",
+          "sha256": "sha256:fb37fee244bb93b4ce474b88043f6e97a6d35b36cc09448480fcb5ca74b4a0ab"
+        },
+        "known_bad": {
+          "path": "fixtures/seraph-01/controls/known-bad.json",
+          "sha256": "sha256:99e709acdc51ec2207c926ac58ae801a69511535b4a008c8694c1cadd30299a2"
+        },
+        "known_good": {
+          "path": "fixtures/seraph-01/controls/known-good.json",
+          "sha256": "sha256:d5d1506ab63b6ba3aecb7eb35bf91553aa045b4f155e541ea5362af65919b86d"
+        },
+        "manifest": {
+          "path": "fixtures/seraph-01/manifest.json",
+          "sha256": "sha256:ba4f84329a2640106ad8ea049001772dc99677447a83c81e4afe13a831fe5df8"
+        },
+        "oracle": {
+          "path": "oracles/seraph-01.json",
+          "sha256": "sha256:d76a42facdff471a7c133888d21dcc6504ed6a592ce36746a2ff021603bc0537"
+        },
+        "output_schema": {
+          "path": "schemas/seraph-01-output.schema.json",
+          "sha256": "sha256:c5b189167a3559794e6385208a26d7dc3d4368b933a49cc55f0ef70dbd3335ee"
+        },
+        "prompt": {
+          "path": "fixtures/seraph-01/prompt.txt",
+          "sha256": "sha256:13796be42e185d550484536dcd3be38143de64ce01049ce6369ea47d165689dc"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "seraph-html-critique-v1",
+      "fixture_version": "1.0.0"
+    },
+    "SERAPH-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/seraph-02/input.json",
+          "sha256": "sha256:72da8d3ebfee677cee640b78f32e2435394ddec1267b4d69d79a8403f172e419"
+        },
+        "known_bad": {
+          "path": "fixtures/seraph-02/controls/known-bad.json",
+          "sha256": "sha256:274dfdc97e3bc5bd07fa50b79c8260be629de52f01d39dcc3fadbcacd76caae9"
+        },
+        "known_good": {
+          "path": "fixtures/seraph-02/controls/known-good.json",
+          "sha256": "sha256:ebfea0881984108781a289ae1cfb14c4893a2e7d5c14defe2394015cbfc3e701"
+        },
+        "manifest": {
+          "path": "fixtures/seraph-02/manifest.json",
+          "sha256": "sha256:44e349b00eb115313f364719bc742fdc2738e2bbafc0c1dc9e89eed419f043a2"
+        },
+        "oracle": {
+          "path": "oracles/seraph-02.json",
+          "sha256": "sha256:8873fb72e95dcfd7296d3a4441520af3adddc620d0bb5b2b0825c6c4ee6a8ac4"
+        },
+        "output_schema": {
+          "path": "schemas/seraph-02-output.schema.json",
+          "sha256": "sha256:2b8f26bfa0d6132ad11af7e617d6f184c5aaa32638b6e0f70460c34c628758a5"
+        },
+        "prompt": {
+          "path": "fixtures/seraph-02/prompt.txt",
+          "sha256": "sha256:cf0452ec9531ce3b17de5bd286a107c6dc33bba55a7f500e666d62cf80c75edf"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "seraph-dashboard-interactions-v1",
+      "fixture_version": "1.0.0"
+    },
+    "TANK-01": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/tank-01/input.json",
+          "sha256": "sha256:9b9945decf65d2360102456df63392eac1bd751d2e411bb4c456b57b7a622bd3"
+        },
+        "known_bad": {
+          "path": "fixtures/tank-01/controls/known-bad.json",
+          "sha256": "sha256:4ee640f0d267938b341b620ed6268466c6e40e5e18ef667c763ce8e67eade3b6"
+        },
+        "known_good": {
+          "path": "fixtures/tank-01/controls/known-good.json",
+          "sha256": "sha256:1365e2d18524d72920c2f44d59fed2f432cec395ed347111d2ab7a494370da84"
+        },
+        "manifest": {
+          "path": "fixtures/tank-01/manifest.json",
+          "sha256": "sha256:b08d6b6b876952dbaaf7c9397395592c47b377b374fe6c66da6273d8612a6520"
+        },
+        "oracle": {
+          "path": "oracles/tank-01.json",
+          "sha256": "sha256:f63311747d9fb02d2028a86dd59421674af1b5f1e2ad38cfefd3a2207793fe29"
+        },
+        "output_schema": {
+          "path": "schemas/tank-01-output.schema.json",
+          "sha256": "sha256:a26f2fad630e195809c7cfbc471c80f72bfd686ca1e64f20587dbe29794cb8ea"
+        },
+        "prompt": {
+          "path": "fixtures/tank-01/prompt.txt",
+          "sha256": "sha256:9d28310169ba8a0d81c7d6e82bb8cba20d85d09154a31e0f6efd39d9b52aaf6c"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "tank-training-plan-v1",
+      "fixture_version": "1.0.0"
+    },
+    "TANK-02": {
+      "artifacts": {
+        "evaluator": {
+          "path": "scripts/evaluate_task.py",
+          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+        },
+        "fixture": {
+          "path": "fixtures/tank-02/input.json",
+          "sha256": "sha256:07bc46eb701259016e181c5307f3078aa9bc35992ed3dff9de67ec9c7e19c3d7"
+        },
+        "known_bad": {
+          "path": "fixtures/tank-02/controls/known-bad.json",
+          "sha256": "sha256:795ff7871c63a6b4a2f62d1f2188ccf8ed765297dbac968b3d6b1c64f8345e1b"
+        },
+        "known_good": {
+          "path": "fixtures/tank-02/controls/known-good.json",
+          "sha256": "sha256:8c7bce1a10a5f5667ac82f9a04bada2ab99dc701221212bf68fad80ceba6fbd5"
+        },
+        "manifest": {
+          "path": "fixtures/tank-02/manifest.json",
+          "sha256": "sha256:8a9daf4c3cf4356f6f1d1edf8bcc68325b9bd333cd242d5d2fb3f18a2b24ab2f"
+        },
+        "oracle": {
+          "path": "oracles/tank-02.json",
+          "sha256": "sha256:3e3cc7099a21df7e9e15dd6a2f01dd5e8bca332d7173d848155cd731074f6701"
+        },
+        "output_schema": {
+          "path": "schemas/tank-02-output.schema.json",
+          "sha256": "sha256:e47dd705fa3a9608691ebf648b652d4a729a98dd8008c8cb500a7976f4dff7f8"
+        },
+        "prompt": {
+          "path": "fixtures/tank-02/prompt.txt",
+          "sha256": "sha256:fc83ddfa4a6a330db6428ddfba77a37981b9456c3a4cbb33f1184cca0fc27da3"
+        },
+        "release_gate": {
+          "path": "scripts/validate_benchmark_ready.py",
+          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+        },
+        "run_record_schema": {
+          "path": "schemas/task-run-record.schema.json",
+          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+        }
+      },
+      "fixture_id": "tank-training-adaptation-v1",
+      "fixture_version": "1.0.0"
+    }
+  }
+}

@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:8b0aca57711ad72bbfbde4e0221b0714e757a870ce95f3c0cca71405d98a9564"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:85e2f105d0bb35045c9b37482cb877d7c59574d9fb18b0f9cdb49dfddb08a747"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "arch-projection-review-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:d228dbee25f86842ac581c7e60dc202210f01f18f2edd7e9efddf024148d1a53"
   },
   "output_schema": {
-    "path": "../../schemas/arch-02-output.schema.json"
+    "path": "../../schemas/arch-02-output.schema.json",
+    "sha256": "sha256:611064a96434efba8f71835ebf58ef9a7c5b0d3fb0ab6b8c2079b98d0f13ad09"
   },
   "profile_id": "arch",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "ARCH-02"
+  "task_id": "ARCH-02",
+  "allowed_tools": []
 }

@@ -4,7 +4,7 @@ This benchmark compares models under matched conditions.
 
 The model is the independent variable.
 
-Task wording, profile instructions, fixture bytes, allowed tools, output format, evaluator version, timeout policy, and verification opportunity must remain constant within a comparison.
+Task wording, profile instructions, fixture bytes, allowed tools, output format, evaluator version, reasoning effort, timeout policy, and verification opportunity must remain constant within a comparison.
 
 ## Evaluation phases
 
@@ -118,12 +118,19 @@ The control result is evaluator evidence, not a model benchmark score.
 Run `python3 scripts/validate_kody01.py` for the standalone KODY-01 compatibility gate.
 Run `python3 scripts/validate_benchmark_ready.py` for the release gate covering all 18 tasks.
 The release gate checks manifest bindings and fingerprints, executes both controls for every task, validates known-good outputs against their schemas, and requires known-bad controls to trigger every declared hard failure.
+The sealed release-artifact lock independently pins those package bytes and shared runtime files, so changing an artifact and repinning its mutable manifest cannot redefine a benchmark task.
 
 ## Model calibration harness
 
 `scripts/run_task_model.py` runs one approved model-calibration cell for any task with the frozen prompt and fixture.
-It exposes the `context_engine` toolset only, preserves exact stdout and stderr, records usage and process status, and writes a validated run record plus trial metadata under `.model-evidence/`.
+By default it invokes `scripts/hermes_no_tools.py`, which selects the task profile only for credentials, ignores profile configuration and rules, disables fallback routing, pins the requested reasoning effort, and passes an explicit empty tool surface.
+The adapter also disables the one-shot session database, so no transcript or memory state is persisted.
+It preserves the exact composed input, stdout, stderr, usage report, process status, model/provider resolution, trial metadata, and pre-run Git state under `.model-evidence/<run-id>/`.
+A custom `--agent-command` is supported for test doubles and diagnostics, but its tool, memory, and fallback isolation is unverified, so the runner records the cell as `blocked` rather than scoreable evidence.
 Malformed model output, non-zero exits, and timeouts remain visible as failed evidence.
+Missing or contradictory model/provider resolution remains visible as blocked evidence.
+Model-authored Python in `ARCH-01` is not executed without an OS sandbox, so that cell is blocked until a sandboxed evaluator is available.
+The runner verifies the sealed release-artifact lock before launching a model process.
 
 For example:
 
@@ -134,7 +141,7 @@ python3 scripts/run_task_model.py \
   --prompt fixtures/kody-02/prompt.txt \
   --run-id kody-02-model-001 \
   --model-requested <resolved-model-id> \
-  --agent-command kody
+  --provider <verified-provider-id>
 ```
 
 The command does not publish scores or create a model matrix.
@@ -147,18 +154,35 @@ A future run record should preserve at least:
 run_id
 benchmark_id
 benchmark_version
+release_lock_fingerprint
+ledger_fingerprint
 task_id
 profile_id
 model_requested
 model_resolved
+provider_requested
+provider_resolved
+resolution_status
 harness
 condition
+evaluator_version
+task_manifest_fingerprint
+oracle_fingerprint
+output_schema_fingerprint
+evaluator_fingerprint
+run_record_schema_fingerprint
+harness_fingerprint
 prompt_fingerprint
 fixture_fingerprint
+input_fingerprint
+input_composition_version
 started_at
 completed_at
 status
+execution_status
+failure_class
 raw_output_reference
+raw_output_fingerprint
 automatic_checks
 hard_failures
 human_scores
@@ -168,8 +192,11 @@ notes
 ```
 
 `model_requested` and `model_resolved` are separate fields.
-
+A scoreable cell must carry the full resolved model and provider IDs from the usage report.
+If the provider cannot resolve either identity, the record uses the explicit `unresolved` marker and a `blocked` status rather than substituting the request.
 A provider alias alone is not sufficient model identity.
+The manifest, evaluator, output schema, run-record schema, and exact composed input fingerprints must be recorded for every cell.
+Run IDs are unique within an evidence root; retries use a new run ID so failed attempts remain immutable.
 
 Failed, timed-out, unsupported, and blocked cells must remain visible in the run index.
 

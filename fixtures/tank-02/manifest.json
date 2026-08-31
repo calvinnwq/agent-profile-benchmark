@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:8c7bce1a10a5f5667ac82f9a04bada2ab99dc701221212bf68fad80ceba6fbd5"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:795ff7871c63a6b4a2f62d1f2188ccf8ed765297dbac968b3d6b1c64f8345e1b"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "tank-training-adaptation-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:3e3cc7099a21df7e9e15dd6a2f01dd5e8bca332d7173d848155cd731074f6701"
   },
   "output_schema": {
-    "path": "../../schemas/tank-02-output.schema.json"
+    "path": "../../schemas/tank-02-output.schema.json",
+    "sha256": "sha256:e47dd705fa3a9608691ebf648b652d4a729a98dd8008c8cb500a7976f4dff7f8"
   },
   "profile_id": "tank",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "TANK-02"
+  "task_id": "TANK-02",
+  "allowed_tools": []
 }

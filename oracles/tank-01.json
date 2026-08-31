@@ -29,7 +29,9 @@
         "recovery_rules"
       ],
       "terms": [
-        "pain",
+        "sharp pain",
+        "chest pain",
+        "fainting",
         "rest"
       ]
     }

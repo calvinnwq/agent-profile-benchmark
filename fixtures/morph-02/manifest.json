@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:c0d9d944bf5a6d1743a3faba9ef8aa8841b4124e34f3a6e88e60280e3422ec32"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:c23f24709d45d970fb70b6598b81f858f3aaf810e5926cb689955adaef7ecb94"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "morph-launch-direction-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:bde16e2e9784f46d20651b2d51647a4075e947bcb6bdccab718f94a9659307d8"
   },
   "output_schema": {
-    "path": "../../schemas/morph-02-output.schema.json"
+    "path": "../../schemas/morph-02-output.schema.json",
+    "sha256": "sha256:b64fc758cc21f991d0e7d9561a23ad4f20828b7f5218b786c84dc59aae19fc5f"
   },
   "profile_id": "morph",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "MORPH-02"
+  "task_id": "MORPH-02",
+  "allowed_tools": []
 }

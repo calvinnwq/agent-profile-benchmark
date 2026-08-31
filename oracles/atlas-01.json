@@ -67,6 +67,14 @@
       "id_key": "id",
       "kind": "budget_from_catalogue",
       "selected_path": "selected_item_ids",
+      "reported_totals": {
+        "cost": {
+          "path": "cost_total"
+        },
+        "weight": {
+          "path": "weight_total"
+        }
+      },
       "weight_key": "weight_g",
       "weight_max": 800
     }

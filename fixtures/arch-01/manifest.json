@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:c255a517ed4fd6980824b7ffea515eccc115d33eb9a4a01eeb6628d5aea62b3b"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:0e3425d8bf6b4c093168dc611efb905c8a8999f0a3428cc800ee8544e48391f7"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "arch-authentication-fix-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:37dabdfb813e773ed4b554f8d5ce2351c2c00f65b4f113b6ea6e7ad02639e154"
   },
   "output_schema": {
-    "path": "../../schemas/arch-01-output.schema.json"
+    "path": "../../schemas/arch-01-output.schema.json",
+    "sha256": "sha256:9e4fbc94ce02cf96de6b689180fbd0763faf57ab44a943e5d529eb40c714bd43"
   },
   "profile_id": "arch",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "ARCH-01"
+  "task_id": "ARCH-01",
+  "allowed_tools": []
 }

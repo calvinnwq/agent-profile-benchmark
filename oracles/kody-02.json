@@ -24,6 +24,13 @@
       ]
     },
     {
+      "allowed_ids": [
+        "note-schema",
+        "note-dry-run",
+        "note-index-gap",
+        "note-rollback",
+        "note-owner"
+      ],
       "id": "evidence-linking",
       "id_key": "evidence_id",
       "kind": "list_ids",
@@ -34,7 +41,14 @@
         "note-index-gap",
         "note-rollback",
         "note-owner"
-      ]
+      ],
+      "support_map": {
+        "note-dry-run": ["dry-run"],
+        "note-index-gap": ["index-gap"],
+        "note-owner": ["migration-owner"],
+        "note-rollback": ["rollback-window"],
+        "note-schema": ["schema-export"]
+      }
     },
     {
       "allowed_ids": [

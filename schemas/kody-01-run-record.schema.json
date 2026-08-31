@@ -1,26 +1,42 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/calvinnwq/agent-profile-benchmark/schemas/kody-01-run-record.schema.json",
-  "title": "KODY-01 Replay Run Record",
+  "title": "KODY-01 compatibility run record",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "run_id",
     "benchmark_id",
     "benchmark_version",
+    "release_lock_fingerprint",
+    "ledger_fingerprint",
     "task_id",
     "profile_id",
     "harness",
     "model_requested",
     "model_resolved",
+    "provider_requested",
+    "provider_resolved",
+    "resolution_status",
     "condition",
     "evaluator_version",
+    "task_manifest_fingerprint",
+    "oracle_fingerprint",
+    "output_schema_fingerprint",
+    "evaluator_fingerprint",
+    "run_record_schema_fingerprint",
+    "harness_fingerprint",
     "prompt_fingerprint",
     "fixture_fingerprint",
+    "input_fingerprint",
+    "input_composition_version",
     "started_at",
     "completed_at",
     "status",
+    "execution_status",
+    "failure_class",
     "raw_output_reference",
+    "raw_output_fingerprint",
     "automatic_checks",
     "hard_failures",
     "human_scores",
@@ -31,7 +47,7 @@
   "properties": {
     "run_id": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
     },
     "benchmark_id": {
       "type": "string",
@@ -40,6 +56,14 @@
     "benchmark_version": {
       "type": "string",
       "const": "0.2.0"
+    },
+    "release_lock_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "ledger_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
     },
     "task_id": {
       "type": "string",
@@ -64,6 +88,21 @@
       "type": "string",
       "minLength": 1
     },
+    "provider_requested": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provider_resolved": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "unresolved"
+      ]
+    },
     "condition": {
       "type": "string",
       "enum": [
@@ -76,6 +115,30 @@
       "type": "string",
       "const": "kody-01-oracle-v2"
     },
+    "task_manifest_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "oracle_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "output_schema_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "evaluator_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "run_record_schema_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "harness_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "prompt_fingerprint": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
@@ -83,6 +146,14 @@
     "fixture_fingerprint": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "input_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "input_composition_version": {
+      "type": "string",
+      "const": "prompt-plus-fixture-v1"
     },
     "started_at": {
       "type": "string",
@@ -100,13 +171,29 @@
         "blocked"
       ]
     },
+    "execution_status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "failed",
+        "blocked",
+        "timed_out"
+      ]
+    },
+    "failure_class": {
+      "type": "string",
+      "minLength": 1
+    },
     "raw_output_reference": {
       "type": "string",
       "minLength": 1
     },
+    "raw_output_fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "automatic_checks": {
       "type": "array",
-      "minItems": 5,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -170,16 +257,14 @@
       }
     },
     "human_scores": {
-      "type": "object",
-      "additionalProperties": true
+      "type": "object"
     },
     "latency_ms": {
       "type": "integer",
       "exclusiveMinimum": -1
     },
     "usage": {
-      "type": "object",
-      "additionalProperties": true
+      "type": "object"
     },
     "notes": {
       "type": "string",

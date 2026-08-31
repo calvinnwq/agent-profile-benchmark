@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:f2e16e0b19f901b3ebab82ca9e8df17b99056768aadb7350149ae5415b5cb6fe"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:610255328178bd7ae1f4a838095a247de529ae45069b4a968cb1897c15f505f4"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "sentinel-brief-health-v1",
@@ -29,7 +32,8 @@
     "sha256": "sha256:9516450a456a7df234d02d56a3943259957a5973d2cbfa732fefa9943df4f36b"
   },
   "output_schema": {
-    "path": "../../schemas/sentinel-02-output.schema.json"
+    "path": "../../schemas/sentinel-02-output.schema.json",
+    "sha256": "sha256:8ab8bf312f0507c35e6cb33a21700fe67a5b7aef45365c5d72d45f15cef0802a"
   },
   "profile_id": "sentinel",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "SENTINEL-02"
+  "task_id": "SENTINEL-02",
+  "allowed_tools": []
 }

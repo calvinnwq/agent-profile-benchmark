@@ -9,7 +9,14 @@
       },
       "id": "numeric-reconciliation",
       "kind": "object_values",
-      "path": "portfolio_totals"
+      "path": "portfolio_totals",
+      "allocation_reconciliation": {
+        "allocation_path": "allocation",
+        "fixture_path": "positions",
+        "id_key": "id",
+        "share_key": "share",
+        "value_key": "value"
+      }
     },
     {
       "id": "reserve-constraint",

@@ -11,7 +11,12 @@
         "north-track-closure"
       ],
       "source_key": "source_id",
-      "source_path": "source_links"
+      "source_path": "source_links",
+      "expected_mapping": {
+        "booking-window": "rulebook-2026",
+        "fire-ban": "rulebook-2026",
+        "north-track-closure": "park-alert-2026-06"
+      }
     },
     {
       "id": "quote-fidelity",

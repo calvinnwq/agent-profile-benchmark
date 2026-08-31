@@ -98,6 +98,10 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return value
 
 
+def _reject_nonfinite_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r} is not supported")
+
+
 def _json_type_matches(value: Any, expected: str) -> bool:
     if expected == "object":
         return isinstance(value, dict)
@@ -344,10 +348,11 @@ def _load_schema_errors(value: Any) -> list[str]:
         schema = json.loads(
             SCHEMA_PATH.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         return [f"unable to load contract schema: {exc}"]
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         return [f"unable to load contract schema ({type(exc).__name__})"]
     return [f"schema: {error}" for error in validate_schema_instance(value, schema)]
 
@@ -870,11 +875,12 @@ def main(argv: list[str] | None = None) -> int:
         ledger = json.loads(
             args.input.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         print(f"validation failed: unable to read input: {exc}", file=sys.stderr)
         return 1
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         print(f"validation failed: unable to read input ({type(exc).__name__})", file=sys.stderr)
         return 1
 

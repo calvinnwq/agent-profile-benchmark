@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:1365e2d18524d72920c2f44d59fed2f432cec395ed347111d2ab7a494370da84"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:4ee640f0d267938b341b620ed6268466c6e40e5e18ef667c763ce8e67eade3b6"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "tank-training-plan-v1",
@@ -26,10 +29,11 @@
   },
   "oracle": {
     "path": "../../oracles/tank-01.json",
-    "sha256": "sha256:8553d7e64e4f6eaeb2b697750ec1016ca803ce365bbfa3c111ba7d500209c078"
+    "sha256": "sha256:f63311747d9fb02d2028a86dd59421674af1b5f1e2ad38cfefd3a2207793fe29"
   },
   "output_schema": {
-    "path": "../../schemas/tank-01-output.schema.json"
+    "path": "../../schemas/tank-01-output.schema.json",
+    "sha256": "sha256:a26f2fad630e195809c7cfbc471c80f72bfd686ca1e64f20587dbe29794cb8ea"
   },
   "profile_id": "tank",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "TANK-01"
+  "task_id": "TANK-01",
+  "allowed_tools": []
 }

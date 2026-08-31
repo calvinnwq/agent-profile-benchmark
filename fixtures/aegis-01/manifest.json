@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:5cf299fdfa0917326206e09335e218222b4ab5c0c5ff50c64a3cc77bc0c6fe31"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:f332c4594a108d2621987885a3724a4456f24082af22685b5e61b2c0558501c0"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "aegis-synthetic-portfolio-v1",
@@ -26,10 +29,11 @@
   },
   "oracle": {
     "path": "../../oracles/aegis-01.json",
-    "sha256": "sha256:fb3c95ee855050b3112d648998eddf6346839b644a9b80717068eacc589cd411"
+    "sha256": "sha256:07e4a56e13a5147bfce6073a886ecd58a3d0324c5894252a56ccf4c7bc435fbc"
   },
   "output_schema": {
-    "path": "../../schemas/aegis-01-output.schema.json"
+    "path": "../../schemas/aegis-01-output.schema.json",
+    "sha256": "sha256:e997d7cdfc99ca7d27a53cbd932332df864c731d98dc5b6134c3410b39569b5e"
   },
   "profile_id": "aegis",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "AEGIS-01"
+  "task_id": "AEGIS-01",
+  "allowed_tools": []
 }

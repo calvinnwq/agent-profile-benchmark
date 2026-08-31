@@ -5,17 +5,20 @@
     {
       "condition": "known-good-control",
       "expected_status": "passed",
-      "path": "controls/known-good.json"
+      "path": "controls/known-good.json",
+      "sha256": "sha256:629db7bf72aa58d62d7cd4d679d0d868701c43aaf688f369251734872f335793"
     },
     {
       "condition": "known-bad-control",
       "expected_status": "failed",
-      "path": "controls/known-bad.json"
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:0b32937e9181dcf8444706c649e92a71869641aa4c1efa1bcb27249e856ed256"
     }
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "version": "task-oracle-v1"
+    "version": "task-oracle-v1",
+    "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
   },
   "fixture": {
     "id": "kody-conflicting-handoffs-v1",
@@ -26,10 +29,11 @@
   },
   "oracle": {
     "path": "../../oracles/kody-02.json",
-    "sha256": "sha256:a1f21308f57c4df1742c53dc83627f5e39917feee29983cc72dc21caa1003022"
+    "sha256": "sha256:a650432b577c58c83836f09432d30ab9328e2a31620a63b9449780ce96ad2721"
   },
   "output_schema": {
-    "path": "../../schemas/kody-02-output.schema.json"
+    "path": "../../schemas/kody-02-output.schema.json",
+    "sha256": "sha256:f3a53e1a9a2e7dd16f7133b035cacd941bc6df490227018a56d4d8ecebdfc751"
   },
   "profile_id": "kody",
   "prompt": {
@@ -39,8 +43,10 @@
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
-    "path": "../../schemas/task-run-record.schema.json"
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
   },
   "status": "benchmark-ready",
-  "task_id": "KODY-02"
+  "task_id": "KODY-02",
+  "allowed_tools": []
 }
