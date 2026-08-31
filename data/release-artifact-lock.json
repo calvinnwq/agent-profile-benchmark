@@ -18,7 +18,7 @@
     },
     "hermes_adapter": {
       "path": "scripts/hermes_no_tools.py",
-      "sha256": "sha256:625f409554213235ba1cbcb143d8ff97b4269af2c2a5ad849f56602ccda1a0ab"
+      "sha256": "sha256:eba7640f2720dcad4fe50331f7483a8aa1a5ce6a8397dc4baf2ddc94ee880441"
     },
     "kody_model_runner": {
       "path": "scripts/run_kody01_model.py",

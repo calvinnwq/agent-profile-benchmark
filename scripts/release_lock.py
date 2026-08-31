@@ -11,7 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "data" / "release-artifact-lock.json"
-EXPECTED_RELEASE_LOCK_FINGERPRINT = "8f301a0b28b46e89152756dfc013a730bdc684432ca1e5c506da8d5ca4315b1f"
+EXPECTED_RELEASE_LOCK_FINGERPRINT = "944782ff122eb1c57a9e3821286e2ce5c1a4286882a9434e03f4d0f3fd9db453"
 LOCK_VERSION = "1"
 TASK_ARTIFACT_KEYS = (
     "manifest",

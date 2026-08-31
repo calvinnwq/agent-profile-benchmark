@@ -70,19 +70,22 @@ def _disable_agent_state(reasoning_config: dict[str, object]) -> None:
     except ImportError as exc:
         raise RuntimeError("unable to install Hermes agent isolation hook") from exc
     original_agent = getattr(run_agent, "AIAgent", None)
-    if not callable(original_agent):
-        raise RuntimeError("Hermes run_agent.AIAgent is unavailable")
+    if not isinstance(original_agent, type):
+        raise RuntimeError("Hermes run_agent.AIAgent class is unavailable")
 
-    def isolated_agent(*args, **kwargs):
-        kwargs["skip_context_files"] = True
-        kwargs["load_soul_identity"] = False
-        kwargs["skip_memory"] = True
-        kwargs["skip_background_review"] = True
-        kwargs["session_db"] = None
-        kwargs["reasoning_config"] = reasoning_config
-        return original_agent(*args, **kwargs)
+    # Keep the original class surface intact; Hermes runtime helpers access
+    # class-level markers through run_agent.AIAgent.
+    class IsolatedAIAgent(original_agent):
+        def __init__(self, *args, **kwargs):
+            kwargs["skip_context_files"] = True
+            kwargs["load_soul_identity"] = False
+            kwargs["skip_memory"] = True
+            kwargs["skip_background_review"] = True
+            kwargs["session_db"] = None
+            kwargs["reasoning_config"] = reasoning_config
+            super().__init__(*args, **kwargs)
 
-    run_agent.AIAgent = isolated_agent
+    run_agent.AIAgent = IsolatedAIAgent
 
 
 def _disable_mcp_discovery() -> None:

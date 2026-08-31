@@ -149,6 +149,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
             )
             (temp_dir / "run_agent.py").write_text(
                 "class AIAgent:\n"
+                "    _TOOL_CALL_ARGUMENTS_CORRUPTION_MARKER = 'marker'\n"
                 "    def __init__(self, **kwargs):\n"
                 "        self.kwargs = kwargs\n",
                 encoding="utf-8",
@@ -169,6 +170,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
                 "def _create_session_db_for_oneshot():\n"
                 "    return 'unpatched'\n"
                 "def run_oneshot(prompt, model=None, provider=None, toolsets=None, usage_file=None):\n"
+                "    marker = AIAgent._TOOL_CALL_ARGUMENTS_CORRUPTION_MARKER\n"
                 "    mcp_startup.ensure_mcp_discovery_before_agent_build(single_query=True)\n"
                 "    explicit_toolsets, error = _validate_explicit_toolsets(toolsets)\n"
                 "    assert error is None\n"
@@ -178,6 +180,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
                 "        toolsets_list = []\n"
                 "    agent = AIAgent(enabled_toolsets=toolsets_list)\n"
                 "    observation = {'prompt': prompt, 'model': model, 'provider': provider,\n"
+                "                   'marker': marker,\n"
                 "                   'validated': _validate_explicit_toolsets(toolsets),\n"
                 "                   'normalized': _normalize_toolsets(toolsets),\n"
                 "                   'normalized_empty': _normalize_toolsets([]),\n"
@@ -239,6 +242,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             observation = json.loads(observation_path.read_text(encoding="utf-8"))
+            self.assertEqual(observation["marker"], "marker")
             self.assertEqual(observation["validated"], [[], None])
             self.assertEqual(observation["normalized"], [])
             self.assertEqual(observation["normalized_empty"], [])
