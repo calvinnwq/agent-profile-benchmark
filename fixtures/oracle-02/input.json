@@ -1,0 +1,29 @@
+{
+  "fixture_id": "oracle-quant-comparison-v1",
+  "fixture_version": "1.0.0",
+  "hardware": {
+    "ram_gb": 24,
+    "runtime_overhead_gb": 8
+  },
+  "options": [
+    {
+      "id": "q4",
+      "label": "Q4_K_M",
+      "quality": "lower",
+      "weights_gb": 8.2
+    },
+    {
+      "id": "q6",
+      "label": "Q6_K",
+      "quality": "balanced",
+      "weights_gb": 12.6
+    },
+    {
+      "id": "q8",
+      "label": "Q8_0",
+      "quality": "higher",
+      "weights_gb": 17.2
+    }
+  ],
+  "requirement": "Run one quant with at least 16 GB available for model weights and leave overhead headroom."
+}

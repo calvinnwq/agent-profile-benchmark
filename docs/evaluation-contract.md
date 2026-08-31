@@ -60,8 +60,8 @@ Reviewers should not reward a response for matching the historical solution when
 
 `benchmark-ready` means the prompt, fixture, evaluator oracle, and known-good and known-bad controls have passed validation.
 
-For schema and benchmark version `0.1.0`, the validator accepts only `contract-draft`.
-It rejects `fixture-ready` until fixture, prompt, evaluator, and control evidence is modeled, and rejects `benchmark-ready` until that evidence has passed validation.
+For benchmark version `0.2.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
+`python3 scripts/validate_benchmark.py` validates the frozen ledger contract, while `python3 scripts/validate_benchmark_ready.py` validates artifact bindings and both controls for all 18 tasks.
 
 No result should be used for model routing while a task remains `contract-draft`.
 
@@ -113,10 +113,31 @@ python3 scripts/replay_kody01.py \
 
 Replay the known-bad control with `--condition known-bad-control` and retain its failed run record as visible evidence.
 The replay harness calls no model and performs no external action.
-The slice is not a model benchmark result and does not change the ledger lifecycle status.
+The control result is evaluator evidence, not a model benchmark score.
 
-Run `python3 scripts/validate_kody01.py` as the local release gate.
-It checks the manifest bindings and fingerprints, executes both controls, replays both records into a temporary directory, and validates the generated records against the run-record schema.
+Run `python3 scripts/validate_kody01.py` for the standalone KODY-01 compatibility gate.
+Run `python3 scripts/validate_benchmark_ready.py` for the release gate covering all 18 tasks.
+The release gate checks manifest bindings and fingerprints, executes both controls for every task, validates known-good outputs against their schemas, and requires known-bad controls to trigger every declared hard failure.
+
+## Model calibration harness
+
+`scripts/run_task_model.py` runs one approved model-calibration cell for any task with the frozen prompt and fixture.
+It exposes the `context_engine` toolset only, preserves exact stdout and stderr, records usage and process status, and writes a validated run record plus trial metadata under `.model-evidence/`.
+Malformed model output, non-zero exits, and timeouts remain visible as failed evidence.
+
+For example:
+
+```bash
+python3 scripts/run_task_model.py \
+  --task KODY-02 \
+  --fixture fixtures/kody-02/input.json \
+  --prompt fixtures/kody-02/prompt.txt \
+  --run-id kody-02-model-001 \
+  --model-requested <resolved-model-id> \
+  --agent-command kody
+```
+
+The command does not publish scores or create a model matrix.
 
 ## Run evidence
 

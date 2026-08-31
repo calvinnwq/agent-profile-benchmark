@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "sentinel-collector-incident-v1",
+    "path": "input.json",
+    "sha256": "sha256:715bdf254b6dac77a0120ab664a6974dec98cfe78aa67b8d495830817f4e70ce",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/sentinel-01.json",
+    "sha256": "sha256:60ed8f46940dcc2ab9d783a964a5ffcb3eb917f849708e984cef1b31128a316a"
+  },
+  "output_schema": {
+    "path": "../../schemas/sentinel-01-output.schema.json"
+  },
+  "profile_id": "sentinel",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:f85c64e36aaa8f771c28cbc306eadd0e01bfa8c586aa0a8f95fae7c18ac69891",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "SENTINEL-01"
+}

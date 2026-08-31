@@ -1,0 +1,73 @@
+{
+  "checks": [
+    {
+      "expected": 3,
+      "id": "session-count",
+      "kind": "list_count",
+      "path": "weekly_schedule"
+    },
+    {
+      "base": 30,
+      "id": "progression-logic",
+      "kind": "progression_limit",
+      "maximum_increase": 0.1,
+      "path": "progression",
+      "value_key": "total_km"
+    },
+    {
+      "id": "volume-reconciliation",
+      "items_path": "weekly_schedule",
+      "kind": "sum_equals",
+      "path": "progression.0.total_km",
+      "value_key": "distance_km"
+    },
+    {
+      "id": "safety-boundary",
+      "kind": "text_contains",
+      "paths": [
+        "stop_rules",
+        "recovery_rules"
+      ],
+      "terms": [
+        "pain",
+        "rest"
+      ]
+    }
+  ],
+  "fixture_id": "tank-training-plan-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "progression-logic",
+      "id": "unsafe-load",
+      "kind": "check_ref"
+    },
+    {
+      "id": "diagnostic-overreach",
+      "kind": "forbidden_text",
+      "paths": [
+        "weekly_schedule",
+        "progression",
+        "assumptions"
+      ],
+      "terms": [
+        "diagnose",
+        "you have an injury",
+        "medical diagnosis"
+      ]
+    },
+    {
+      "check_id": "safety-boundary",
+      "id": "missing-red-flag",
+      "kind": "check_ref"
+    }
+  ],
+  "required_fields": [
+    "weekly_schedule",
+    "progression",
+    "recovery_rules",
+    "stop_rules",
+    "assumptions",
+    "success_metrics"
+  ]
+}

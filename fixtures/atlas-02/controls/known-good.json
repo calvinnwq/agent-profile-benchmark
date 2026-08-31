@@ -1,0 +1,58 @@
+{
+  "contingency": "If the shuttle is unavailable, remain at the trailhead and use the alternate train window.",
+  "day_plan": [
+    {
+      "day_id": "day-1",
+      "plan": "Train to trailhead, check conditions, and hike the short approach."
+    },
+    {
+      "day_id": "day-2",
+      "plan": "Complete ridge section with a daylight turnaround."
+    },
+    {
+      "day_id": "day-3",
+      "plan": "Exit to trailhead with buffer before the shuttle."
+    }
+  ],
+  "evidence_ids": [
+    "route-window",
+    "shuttle-timetable",
+    "park-rules"
+  ],
+  "required_bookings": [
+    {
+      "id": "park-permit",
+      "status": "required"
+    },
+    {
+      "id": "return-shuttle",
+      "status": "required"
+    }
+  ],
+  "safety_gates": [
+    {
+      "condition": "check forecast before departure",
+      "id": "weather"
+    },
+    {
+      "condition": "carry and confirm water points",
+      "id": "water"
+    },
+    {
+      "condition": "turn around before the daylight cutoff",
+      "id": "turnaround"
+    }
+  ],
+  "transfer_plan": [
+    {
+      "buffer_hours": 2,
+      "status": "required",
+      "transfer_id": "transfer-1"
+    },
+    {
+      "buffer_hours": 2,
+      "status": "required",
+      "transfer_id": "transfer-2"
+    }
+  ]
+}

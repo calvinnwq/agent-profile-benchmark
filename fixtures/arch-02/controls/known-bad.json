@@ -1,0 +1,29 @@
+{
+  "evidence": [
+    {
+      "finding_id": "absolute-projection-target",
+      "location": "wrong-file"
+    }
+  ],
+  "findings": [
+    {
+      "id": "absolute-projection-target",
+      "summary": "A path may be awkward."
+    },
+    {
+      "id": "unknown-cleanup",
+      "summary": "Add a comment."
+    }
+  ],
+  "remediation": [
+    {
+      "action": "Keep piping because it is convenient.",
+      "finding_id": "remote-pipe-execution"
+    }
+  ],
+  "review_summary": "The projection is secure as-is and safe to ship.",
+  "severity": {
+    "absolute-projection-target": "low",
+    "remote-pipe-execution": "low"
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "claim_key": "claim_id",
+      "id": "claim-source-mapping",
+      "kind": "source_mapping",
+      "path": "claim_register",
+      "required_ids": [
+        "booking-window",
+        "fire-ban",
+        "north-track-closure"
+      ],
+      "source_key": "source_id",
+      "source_path": "source_links"
+    },
+    {
+      "id": "quote-fidelity",
+      "kind": "text_contains",
+      "paths": [
+        "claim_register"
+      ],
+      "terms": [
+        "90 days",
+        "total fire ban",
+        "2026-06-15"
+      ]
+    },
+    {
+      "id": "date-and-scope",
+      "kind": "text_contains",
+      "paths": [
+        "scope_and_dates",
+        "caveats"
+      ],
+      "terms": [
+        "Coastal Ridge Park",
+        "2026"
+      ]
+    },
+    {
+      "id": "unsupported-claim-scan",
+      "kind": "text_forbidden",
+      "paths": [
+        "claim_register",
+        "recommendation"
+      ],
+      "terms": [
+        "every park",
+        "always open",
+        "guaranteed current"
+      ]
+    }
+  ],
+  "fixture_id": "oracle-official-rules-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "allowed_ids": [
+        "rulebook-2026",
+        "park-alert-2026-06"
+      ],
+      "id": "fabricated-source",
+      "kind": "source_mapping_strict",
+      "path": "source_links",
+      "source_key": "source_id"
+    },
+    {
+      "id": "material-source-contradiction",
+      "kind": "text_forbidden",
+      "paths": [
+        "claim_register",
+        "recommendation"
+      ],
+      "terms": [
+        "north track open",
+        "allowed during a total fire ban"
+      ]
+    },
+    {
+      "id": "live-freshness-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "recommendation",
+        "caveats"
+      ],
+      "terms": [
+        "today",
+        "live",
+        "current as of now"
+      ]
+    }
+  ],
+  "required_fields": [
+    "claim_register",
+    "source_links",
+    "scope_and_dates",
+    "conflicts",
+    "recommendation",
+    "caveats"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "checks": [
+    {
+      "id": "positioning-fidelity",
+      "kind": "text_contains",
+      "paths": [
+        "message_hierarchy",
+        "page_sections"
+      ],
+      "terms": [
+        "Lantern",
+        "daily brief",
+        "remote teams"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "consolidates-supplied-sources",
+        "daily-review"
+      ],
+      "id": "claim-grounding",
+      "id_key": "claim_id",
+      "kind": "list_ids",
+      "path": "claims_register",
+      "required_ids": [
+        "consolidates-supplied-sources",
+        "daily-review"
+      ]
+    },
+    {
+      "id": "cta-clarity",
+      "kind": "text_contains",
+      "paths": [
+        "call_to_action"
+      ],
+      "terms": [
+        "Request pilot access"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "hero",
+        "how-it-works",
+        "proof",
+        "cta"
+      ],
+      "id": "section-coverage",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "page_sections",
+      "required_ids": [
+        "hero",
+        "how-it-works",
+        "proof",
+        "cta"
+      ]
+    }
+  ],
+  "fixture_id": "morph-launch-direction-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "id": "unsupported-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "claims_register",
+        "message_hierarchy"
+      ],
+      "terms": [
+        "guarantees savings",
+        "all teams",
+        "zero setup"
+      ]
+    },
+    {
+      "id": "positioning-drift",
+      "kind": "text_forbidden",
+      "paths": [
+        "message_hierarchy",
+        "page_sections"
+      ],
+      "terms": [
+        "project management suite",
+        "consumer social network"
+      ]
+    },
+    {
+      "id": "cta-ambiguity",
+      "kind": "text_forbidden",
+      "paths": [
+        "call_to_action"
+      ],
+      "terms": [
+        "learn more",
+        "click here",
+        "maybe"
+      ]
+    }
+  ],
+  "required_fields": [
+    "message_hierarchy",
+    "page_sections",
+    "proof_points",
+    "claims_register",
+    "call_to_action",
+    "open_questions"
+  ]
+}

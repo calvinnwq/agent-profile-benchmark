@@ -1,0 +1,7 @@
+You are completing benchmark task AEGIS-02: Synthetic strategy comparison under fixed scenarios.
+
+Return exactly one JSON object and no Markdown.
+Required top-level fields: scenario_table, calculations, liquidity_comparison, risk_comparison, recommendation, assumptions.
+Use only the supplied synthetic packet; do not browse or perform external actions.
+Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
+Follow the task-specific requirements in the packet and keep the output concise but complete.

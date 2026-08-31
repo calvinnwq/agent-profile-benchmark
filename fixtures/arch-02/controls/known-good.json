@@ -1,0 +1,50 @@
+{
+  "evidence": [
+    {
+      "finding_id": "absolute-projection-target",
+      "location": "projection-link"
+    },
+    {
+      "finding_id": "remote-pipe-execution",
+      "location": "scripts/install.sh:4"
+    },
+    {
+      "finding_id": "world-readable-secret",
+      "location": "config/token.txt"
+    }
+  ],
+  "findings": [
+    {
+      "id": "absolute-projection-target",
+      "summary": "Projection target is absolute and not portable."
+    },
+    {
+      "id": "remote-pipe-execution",
+      "summary": "Installer pipes remote content directly to a shell."
+    },
+    {
+      "id": "world-readable-secret",
+      "summary": "Credential-shaped file is world-readable."
+    }
+  ],
+  "remediation": [
+    {
+      "action": "Use a repository-relative or explicitly allowlisted target.",
+      "finding_id": "absolute-projection-target"
+    },
+    {
+      "action": "Download, verify, and review content before execution.",
+      "finding_id": "remote-pipe-execution"
+    },
+    {
+      "action": "Remove the secret from the projection and restrict permissions.",
+      "finding_id": "world-readable-secret"
+    }
+  ],
+  "review_summary": "Three seeded defects require remediation before release.",
+  "severity": {
+    "absolute-projection-target": "high",
+    "remote-pipe-execution": "critical",
+    "world-readable-secret": "critical"
+  }
+}

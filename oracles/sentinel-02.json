@@ -1,0 +1,87 @@
+{
+  "checks": [
+    {
+      "expected": {
+        "partner-api": "failed",
+        "rss": "stale"
+      },
+      "id": "source-status-map",
+      "kind": "object_values",
+      "path": "source_statuses"
+    },
+    {
+      "id": "stale-versus-failed",
+      "kind": "text_contains",
+      "paths": [
+        "root_cause"
+      ],
+      "terms": [
+        "stale",
+        "timeout"
+      ]
+    },
+    {
+      "id": "causal-chain",
+      "kind": "text_contains",
+      "paths": [
+        "root_cause",
+        "remediation_order"
+      ],
+      "terms": [
+        "refresh",
+        "publish"
+      ]
+    },
+    {
+      "expected": {
+        "mutations": "none"
+      },
+      "id": "read-only-boundary",
+      "kind": "object_values",
+      "path": "read_only_boundary"
+    }
+  ],
+  "fixture_id": "sentinel-brief-health-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "source-status-map",
+      "id": "source-misclassification",
+      "kind": "check_ref"
+    },
+    {
+      "id": "race-omission",
+      "kind": "forbidden_text",
+      "paths": [
+        "root_cause",
+        "remediation_order"
+      ],
+      "terms": [
+        "no race",
+        "unrelated"
+      ]
+    },
+    {
+      "id": "claimed-mutation",
+      "kind": "forbidden_text",
+      "paths": [
+        "remediation_order",
+        "read_only_boundary"
+      ],
+      "terms": [
+        "delete",
+        "write",
+        "restart workflow",
+        "mutate"
+      ]
+    }
+  ],
+  "required_fields": [
+    "source_statuses",
+    "workflow_state",
+    "root_cause",
+    "remediation_order",
+    "evidence_ids",
+    "read_only_boundary"
+  ]
+}

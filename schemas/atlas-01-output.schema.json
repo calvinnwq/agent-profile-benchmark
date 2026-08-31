@@ -1,0 +1,38 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/atlas-01-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contingency": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "cost_total": {
+      "type": "integer"
+    },
+    "fuel_plan": {
+      "type": "object"
+    },
+    "selected_item_ids": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "tradeoffs": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "weight_total": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "selected_item_ids",
+    "weight_total",
+    "cost_total",
+    "fuel_plan",
+    "contingency",
+    "tradeoffs"
+  ],
+  "title": "ATLAS-01 candidate output",
+  "type": "object"
+}

@@ -2,8 +2,8 @@
   "$schema": "../schemas/task-contract.schema.json",
   "schema_version": "0.1.0",
   "benchmark_id": "agent-profile-benchmark",
-  "benchmark_version": "0.1.0",
-  "status": "contract-draft",
+  "benchmark_version": "0.2.0",
+  "status": "benchmark-ready",
   "evaluation_policy": {
     "execution_boundary": "offline_replay",
     "live_web": false,
@@ -179,17 +179,17 @@
       "provenance": "synthetic",
       "provenance_note": "Derived from recurring coordination work; the replay uses a newly written synthetic request packet.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "kody-plan-extraction-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The packet will contain fixed requirements, named owners, dependencies, one approval boundary, and deliberately unresolved questions."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A bounded request packet containing goals, constraints, available owners, proposed work, and ambiguous statements that must be separated from confirmed requirements.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -305,17 +305,17 @@
       "provenance": "synthetic",
       "provenance_note": "Derived from multi-agent handoff work; the replay uses three synthetic reports with known conflicts and evidence gaps.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "kody-conflicting-handoffs-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "Reports will use stable source identifiers, contradictory claims, one stale observation, and actions with different owners."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "Three bounded agent reports about one project, each carrying source identifiers, findings, proposed actions, and a mixture of corroborated, conflicting, and unsupported statements.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -423,17 +423,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic fixture; no personal records or live financial accounts are included.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "aegis-synthetic-portfolio-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will define generated holdings, balances, target reserve, horizon, risk limit, and a small set of permitted recommendations."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A generated portfolio with fixed balances, asset classes, fees, liquidity, target reserve, time horizon, and risk constraints.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -541,17 +541,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic fixture with fixed returns, fees, tax assumptions, liquidity, and downside scenarios.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "aegis-strategy-comparison-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "Both strategies will use the same starting amount and scenario assumptions, with one deliberate downside and liquidity trade-off."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "Two generated strategies with fixed starting amount, expected return, fee, tax, downside, liquidity, and time-horizon assumptions.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -659,17 +659,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by prior authentication work; the replay must use a source-only sanitized reconstruction with evaluator-held tests.",
       "privacy_class": "sanitized_candidate",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "arch-authentication-fix-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "sanitized_or_synthetic_reconstruction",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The evaluator will supply a small pre-fix repository and hidden behavioral tests without later history, remotes, credentials, or production configuration."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A bounded source-only repository containing an observable authentication defect, visible focused tests, repository rules, and a fixed acceptance contract.",
         "required_output_format": "repository_change",
         "required_output_fields": [
@@ -779,17 +779,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by prior external-projection safety reviews; the replay uses a synthetic manifest with seeded defects and benign near-misses.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "arch-projection-review-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will contain a small manifest and projection tree with labelled high, medium, and low severity defects plus legitimate patterns that must not be flagged."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed projection manifest and file tree containing seeded path, provenance, trust, and overwrite safety issues with reciprocal benign controls.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -896,17 +896,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by prior cook-kit research; the replay uses a fixed synthetic catalogue and trip constraints rather than live product pages.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "atlas-cook-kit-selection-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The catalogue will include item identifiers, weight, price, fuel type, capacity, availability, and deliberately incompatible combinations."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed cook-kit catalogue and a three-night trip brief with a maximum base-kit weight, budget, meal capacity, fuel rule, and no-open-fire constraint.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1020,17 +1020,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by prior route and logistics planning; the replay uses a fixed itinerary, timetable, weather fixture, and safety rules.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "atlas-route-logistics-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will define route segments, transfer times, booking requirements, weather states, daylight windows, and a transport disruption."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed multi-day itinerary with segment durations, transport timetable, booking and permit requirements, weather state, daylight window, and safety limits.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1138,17 +1138,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic coaching fixture with a stated goal, timeline, baseline, availability, and recovery limits.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "tank-training-plan-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will define a non-diagnostic baseline, target date, available sessions, current workload, recovery limits, and explicit stop or escalation signals."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A synthetic trainee profile with a goal date, current capacity, available sessions, equipment limits, recovery constraints, and a bounded training objective.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1256,17 +1256,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic follow-up fixture with missed sessions, soreness, sleep disruption, and changed availability.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "tank-training-adaptation-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The check-in will include both ordinary setbacks and one signal that requires a conservative pause or escalation rather than progression."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A previously defined synthetic plan plus a weekly check-in covering completed work, missed sessions, soreness, sleep, energy, and next-week availability.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1374,17 +1374,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by official route and cooking-rules research; the replay uses a frozen, evaluator-controlled source bundle.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "oracle-official-rules-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The bundle will contain dated source records with stable identifiers, relevant excerpts, one conflict in scope, and unrelated distractor material."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A frozen bundle of dated official source excerpts covering cooking, fuel, hut, booking, route, and restriction rules for a defined trip scenario.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1492,17 +1492,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by local-model quantisation research; the replay uses fixed model sizes, overhead assumptions, and requirements.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "oracle-quant-comparison-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will provide option sizes, context requirements, runtime overhead, estimated speed bands, and a 24 GB memory ceiling."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed comparison table of Qwen quantisation options and a 24 GB M4 memory budget with context, speed, quality, and usability requirements.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1610,17 +1610,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by telemetry collector and watchdog diagnosis; the replay uses synthetic logs and metrics with a known state transition.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "sentinel-collector-incident-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will include timestamps, freshness, process state, error counts, restart history, and a seeded distinction between stale, degraded, and failed."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "Fixed collector logs, watchdog events, freshness metrics, and process observations for one synthetic incident window.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1728,17 +1728,17 @@
       "provenance": "historical_candidate",
       "provenance_note": "Inspired by morning-brief source and workflow diagnosis; the replay uses a fixed run record with freshness and race-condition signals.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "sentinel-brief-health-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will include multiple source statuses, workflow timing, one freshness gap, one harmless empty source, and one seeded ordering issue."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed morning-brief run record with source timestamps, item counts, workflow stages, retries, and a possible race or freshness issue.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1846,17 +1846,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic product brief with a target user, problem, promise, constraints, and deliberate exclusions.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "morph-mvp-definition-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The brief will include must-have outcomes, optional ideas, a non-goal, an audience constraint, and measurable success signals."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed product brief containing target user, problem, promise, constraints, rough feature ideas, success signals, and explicit non-goals.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -1966,17 +1966,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic launch brief with a defined audience, positioning, product promise, proof boundaries, and call to action.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "morph-launch-direction-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The brief will include approved claims, unsupported claims to avoid, proof points, objections, and one desired conversion action."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed launch brief with audience, positioning, product promise, proof points, objections, approved claims, prohibited claims, and one conversion goal.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -2084,17 +2084,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic HTML fixture with seeded hierarchy, contrast, spacing, responsive, and interaction defects.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "seraph-html-critique-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will provide deterministic HTML, CSS, viewport notes, and a hidden defect inventory with benign near-miss controls."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed HTML report and design brief containing deliberately seeded visual hierarchy, readability, responsive, and interaction defects.",
         "required_output_format": "json",
         "required_output_fields": [
@@ -2202,17 +2202,17 @@
       "provenance": "synthetic",
       "provenance_note": "Purpose-built synthetic dashboard contract with read-only data, loading, empty, stale, error, and refresh states.",
       "privacy_class": "public_synthetic",
-      "status": "contract-draft",
+      "status": "benchmark-ready",
       "fixture": {
         "id": "seraph-dashboard-interactions-v1",
-        "status": "to_be_frozen",
+        "status": "frozen",
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
         "notes": "The fixture will define data fields, refresh semantics, state transitions, keyboard expectations, and a prohibition on mutating the data source."
       },
       "prompt_contract": {
-        "status": "to_be_frozen",
+        "status": "frozen",
         "input_description": "A fixed dashboard data contract and state model requiring a clear interaction specification for controls, loading, empty, stale, error, refresh, and read-only behavior.",
         "required_output_format": "structured_markdown",
         "required_output_fields": [

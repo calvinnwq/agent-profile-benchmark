@@ -82,7 +82,7 @@ class Kody01VerticalSliceTests(unittest.TestCase):
     def test_manifest_binds_the_complete_control_slice(self) -> None:
         self.assertEqual(self.manifest["task_id"], "KODY-01")
         self.assertEqual(self.manifest["profile_id"], "kody")
-        self.assertFalse(self.manifest["benchmark_ready"])
+        self.assertTrue(self.manifest["benchmark_ready"])
         referenced_paths = [
             self.manifest["fixture"]["path"],
             self.manifest["prompt"]["path"],

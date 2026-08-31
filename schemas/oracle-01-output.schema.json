@@ -1,0 +1,41 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/oracle-01-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "caveats": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "claim_register": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "conflicts": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "recommendation": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "scope_and_dates": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_links": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "claim_register",
+    "source_links",
+    "scope_and_dates",
+    "conflicts",
+    "recommendation",
+    "caveats"
+  ],
+  "title": "ORACLE-01 candidate output",
+  "type": "object"
+}

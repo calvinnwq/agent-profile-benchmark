@@ -15,7 +15,7 @@ env:
 
 jobs:
   contract:
-    name: Contract and KODY-01 gates
+    name: Contract and benchmark-ready release gates
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -31,6 +31,9 @@ jobs:
 
       - name: Validate benchmark contract
         run: python -S scripts/validate_benchmark.py
+
+      - name: Validate benchmark-ready release
+        run: python -S scripts/validate_benchmark_ready.py
 
       - name: Validate KODY-01 control slice
         run: python -S scripts/validate_kody01.py

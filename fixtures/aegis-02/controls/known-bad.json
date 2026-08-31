@@ -1,0 +1,21 @@
+{
+  "assumptions": [
+    "Synthetic example."
+  ],
+  "calculations": {
+    "growth_base_value": 55000,
+    "growth_stress_value": 45000,
+    "steady_base_value": 52000,
+    "steady_stress_value": 48500
+  },
+  "liquidity_comparison": "Both are instantly liquid.",
+  "recommendation": "Choose growth; returns are guaranteed and tax-free.",
+  "risk_comparison": "There is no risk.",
+  "scenario_table": [
+    {
+      "growth_value": 55000,
+      "scenario_id": "base",
+      "steady_value": 52000
+    }
+  ]
+}

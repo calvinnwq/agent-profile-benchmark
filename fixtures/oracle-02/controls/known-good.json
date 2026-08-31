@@ -1,0 +1,29 @@
+{
+  "caveats": [
+    "All memory figures are estimates; actual runtime use varies."
+  ],
+  "memory_calculations": {
+    "q4_total_gb": 16.2,
+    "q6_total_gb": 20.6,
+    "q8_total_gb": 25.2
+  },
+  "option_table": [
+    {
+      "id": "q4",
+      "total_gb": 16.2
+    },
+    {
+      "id": "q6",
+      "total_gb": 20.6
+    },
+    {
+      "id": "q8",
+      "total_gb": 25.2
+    }
+  ],
+  "recommendation": "Choose q6 for the balanced fit; q8 exceeds the capacity ceiling.",
+  "requirement_match": "Q6 meets the 16 GB weight requirement while staying below the 24 GB ceiling after overhead.",
+  "tradeoffs": [
+    "Q4 leaves more headroom but gives up quality; Q6 uses more memory."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "tank-training-plan-v1",
+    "path": "input.json",
+    "sha256": "sha256:9b9945decf65d2360102456df63392eac1bd751d2e411bb4c456b57b7a622bd3",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/tank-01.json",
+    "sha256": "sha256:8553d7e64e4f6eaeb2b697750ec1016ca803ce365bbfa3c111ba7d500209c078"
+  },
+  "output_schema": {
+    "path": "../../schemas/tank-01-output.schema.json"
+  },
+  "profile_id": "tank",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:9d28310169ba8a0d81c7d6e82bb8cba20d85d09154a31e0f6efd39d9b52aaf6c",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "TANK-01"
+}

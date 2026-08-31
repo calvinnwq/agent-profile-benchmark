@@ -4,17 +4,16 @@ A reproducible benchmark for evaluating AI agent profiles on measurable, task-sp
 
 ## Status
 
-The repository is currently at `contract-draft`.
+The repository is at `benchmark-ready` for benchmark version `0.2.0`.
 
 The first public slice freezes nine agent profiles, two task contracts per profile, an offline evaluation boundary, and the scoring order.
 
-The `0.1.0` task registry is intentionally exact.
+The `0.2.0` task registry is intentionally exact.
 The ledger's schema pointer and `benchmark_version` are frozen with that registry.
-The validator also pins the semantic fingerprint of the full v0.1.0 ledger, so task content cannot be repurposed under an existing ID.
-Every task remains offline-only with an empty `allowed_tools` list in this slice.
+The validator also pins the semantic fingerprint of the full v0.2.0 ledger, so task content cannot be repurposed under an existing ID.
+All 18 tasks have frozen fixture bytes, prompt packets, evaluator oracles, output schemas, and known-good and known-bad controls.
+Every task remains offline-only with an empty `allowed_tools` list.
 Adding or replacing a task requires an explicit benchmark-version update and corresponding fixture, prompt, evaluator, and documentation changes.
-
-Task prompts and replay fixtures are deliberately not marked benchmark-ready yet.
 
 Do not publish model scores until the fixtures, evaluator oracles, and prompt packets have been frozen and validated.
 
@@ -68,13 +67,14 @@ Visual tasks use fixed artifacts and defect inventories rather than unverifiable
 
 ## Validate the contracts
 
-The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.1.0 registry.
+The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.2.0 registry.
 No third-party packages are required.
 
 GitHub Actions runs the dependency-free tests and validation gates on pushes to `main` and `feat/**`, and on pull requests.
 
 ```bash
 python3 scripts/validate_benchmark.py
+python3 scripts/validate_benchmark_ready.py
 python3 -m unittest discover -s tests -v
 python3 scripts/validate_kody01.py
 ```
@@ -115,18 +115,17 @@ The local release gate runs both controls, validates their replay records, and w
 python3 scripts/validate_kody01.py
 ```
 
-This slice exercises evaluator and evidence wiring only.
-It does not change the benchmark ledger from `contract-draft` or provide model evidence.
+The KODY-01 gate exercises its evaluator and evidence wiring independently.
+The benchmark-ready release gate runs the same control checks for all 18 task packages.
+No model scores are included in the release.
 
 Raw model run evidence belongs under `.model-evidence/` and is ignored by Git.
 
-## Next gates
+## Model-evidence boundary
 
-1. Freeze one fixture and exact prompt packet per task.
-2. Build evaluator oracles with known-good and known-bad controls.
-3. Validate the evaluators before any model matrix run.
-4. Record the exact Nous Portal model roster and resolved model identifiers.
-5. Run matched profile-task cells and preserve raw evidence before reporting results.
+The next evidence gate is to record the exact Nous Portal model roster and resolved model identifiers.
+Then run matched profile-task cells and preserve raw evidence before reporting results.
+The release gate must pass before any model matrix run.
 
 The benchmark is a routing aid, not a universal intelligence ranking.
 One successful task or one aggregate score is insufficient evidence for trusted use.

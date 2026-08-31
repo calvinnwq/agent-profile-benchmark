@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "arch-projection-review-v1",
+    "path": "input.json",
+    "sha256": "sha256:a6cc8a8185a07285620bc0eee55c0e713a3d039ff91a7b360a2637ea086687e4",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/arch-02.json",
+    "sha256": "sha256:d228dbee25f86842ac581c7e60dc202210f01f18f2edd7e9efddf024148d1a53"
+  },
+  "output_schema": {
+    "path": "../../schemas/arch-02-output.schema.json"
+  },
+  "profile_id": "arch",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:d894a2a1c2687da94e49ba930437382ea362c469a9c7a84109cc84ebe75ffcb6",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "ARCH-02"
+}

@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "oracle-official-rules-v1",
+    "path": "input.json",
+    "sha256": "sha256:56d6f036350f28b067f5a68f02cf62a8d50f481a4ffecc8913e603937af79ff4",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/oracle-01.json",
+    "sha256": "sha256:d6d7f96cef1b0d1496ffc775a6f175d3568b5f7cb79ed3d65760a4f0fb7a9700"
+  },
+  "output_schema": {
+    "path": "../../schemas/oracle-01-output.schema.json"
+  },
+  "profile_id": "oracle",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:8b2764a649eb86882a698bbed869908c7fa4c1b9696fd9155826cc9ee33606ae",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "ORACLE-01"
+}

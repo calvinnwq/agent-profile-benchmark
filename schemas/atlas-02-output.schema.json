@@ -1,0 +1,41 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/atlas-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contingency": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "day_plan": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "evidence_ids": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "required_bookings": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "safety_gates": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "transfer_plan": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "day_plan",
+    "transfer_plan",
+    "required_bookings",
+    "safety_gates",
+    "contingency",
+    "evidence_ids"
+  ],
+  "title": "ATLAS-02 candidate output",
+  "type": "object"
+}

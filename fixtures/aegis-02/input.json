@@ -1,0 +1,29 @@
+{
+  "currency": "AUD",
+  "decision_priority": "Protect liquidity and limit downside before optimising upside.",
+  "fixture_id": "aegis-strategy-comparison-v1",
+  "fixture_version": "1.0.0",
+  "scenarios": [
+    "base",
+    "stress",
+    "recovery"
+  ],
+  "strategies": [
+    {
+      "base_return": 0.04,
+      "id": "steady",
+      "label": "Steady income",
+      "liquidity_days": 2,
+      "starting_value": 50000,
+      "stress_return": -0.03
+    },
+    {
+      "base_return": 0.1,
+      "id": "growth",
+      "label": "Growth tilt",
+      "liquidity_days": 10,
+      "starting_value": 50000,
+      "stress_return": -0.18
+    }
+  ]
+}

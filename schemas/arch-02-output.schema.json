@@ -1,0 +1,35 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/arch-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "evidence": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "findings": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "remediation": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "review_summary": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "severity": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "findings",
+    "severity",
+    "evidence",
+    "remediation",
+    "review_summary"
+  ],
+  "title": "ARCH-02 candidate output",
+  "type": "object"
+}

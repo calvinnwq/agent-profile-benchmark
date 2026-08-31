@@ -1,0 +1,32 @@
+{
+  "boundary": "The dashboard is read-only; controls must not mutate source records.",
+  "controls": [
+    {
+      "id": "refresh",
+      "label": "Refresh data"
+    },
+    {
+      "id": "filter",
+      "label": "Filter rows"
+    }
+  ],
+  "fixture_id": "seraph-dashboard-interactions-v1",
+  "fixture_version": "1.0.0",
+  "keyboard_rules": [
+    "Every control must be reachable and operable by keyboard"
+  ],
+  "states": [
+    "loading",
+    "ready",
+    "empty",
+    "stale",
+    "error"
+  ],
+  "transitions": [
+    "loading -> ready",
+    "ready -> stale",
+    "stale -> loading",
+    "loading -> error",
+    "error -> loading"
+  ]
+}

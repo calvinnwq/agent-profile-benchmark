@@ -1,0 +1,17 @@
+{
+  "confidence": "high but bounded to the supplied signals",
+  "evidence_ids": [
+    "collector-last-success",
+    "auth-check",
+    "disk-check",
+    "queue-depth"
+  ],
+  "health_state": "degraded",
+  "next_actions": [
+    "inspect logs",
+    "verify source freshness",
+    "restart after diagnosis"
+  ],
+  "root_cause": "The collector is stale and the queue is growing; auth and disk signals remain healthy.",
+  "severity": "high"
+}

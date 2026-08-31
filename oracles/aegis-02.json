@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "expected": {
+        "growth_base_value": 55000,
+        "growth_stress_value": 41000,
+        "steady_base_value": 52000,
+        "steady_stress_value": 48500
+      },
+      "id": "scenario-formulas",
+      "kind": "object_values",
+      "path": "calculations"
+    },
+    {
+      "id": "comparison-coverage",
+      "id_key": "scenario_id",
+      "kind": "list_ids",
+      "path": "scenario_table",
+      "required_ids": [
+        "base",
+        "stress",
+        "recovery"
+      ]
+    },
+    {
+      "id": "liquidity-treatment",
+      "kind": "text_contains",
+      "paths": [
+        "liquidity_comparison"
+      ],
+      "terms": [
+        "liquid",
+        "days"
+      ]
+    },
+    {
+      "id": "recommendation-consistency",
+      "kind": "text_contains",
+      "paths": [
+        "recommendation",
+        "risk_comparison"
+      ],
+      "terms": [
+        "steady",
+        "downside"
+      ]
+    }
+  ],
+  "fixture_id": "aegis-strategy-comparison-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "scenario-formulas",
+      "id": "scenario-arithmetic-error",
+      "kind": "check_ref"
+    },
+    {
+      "id": "unsupported-tax-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "recommendation",
+        "assumptions"
+      ],
+      "terms": [
+        "tax-free",
+        "tax guaranteed",
+        "tax advice"
+      ]
+    },
+    {
+      "id": "certainty-overreach",
+      "kind": "forbidden_text",
+      "paths": [
+        "recommendation",
+        "risk_comparison"
+      ],
+      "terms": [
+        "guaranteed",
+        "no risk",
+        "certain"
+      ]
+    }
+  ],
+  "required_fields": [
+    "scenario_table",
+    "calculations",
+    "liquidity_comparison",
+    "risk_comparison",
+    "recommendation",
+    "assumptions"
+  ]
+}

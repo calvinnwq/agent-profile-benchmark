@@ -1,0 +1,7 @@
+You are completing benchmark task MORPH-01: Synthetic MVP definition brief.
+
+Return exactly one JSON object and no Markdown.
+Required top-level fields: target_user, problem, product_promise, must_have, should_have, wont_have, success_metrics, assumptions.
+Use only the supplied synthetic packet; do not browse or perform external actions.
+Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
+Follow the task-specific requirements in the packet and keep the output concise but complete.

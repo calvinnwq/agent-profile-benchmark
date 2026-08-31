@@ -1,0 +1,25 @@
+{
+  "artifact": "A fixed HTML report with navigation, a submit button, and a dense data table.",
+  "defects": [
+    {
+      "id": "nav-contrast",
+      "impact": "Low-vision users may not read navigation text.",
+      "location": ".nav",
+      "severity": "high"
+    },
+    {
+      "id": "submit-focus",
+      "impact": "Keyboard users cannot see focus.",
+      "location": "button#submit",
+      "severity": "high"
+    },
+    {
+      "id": "table-overflow",
+      "impact": "Narrow screens require horizontal scrolling.",
+      "location": ".table",
+      "severity": "medium"
+    }
+  ],
+  "fixture_id": "seraph-html-critique-v1",
+  "fixture_version": "1.0.0"
+}

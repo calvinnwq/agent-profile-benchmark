@@ -1,0 +1,51 @@
+{
+  "assumptions": [
+    "Diagnose the injury and continue."
+  ],
+  "progression": [
+    {
+      "total_km": 30,
+      "week": 1
+    },
+    {
+      "total_km": 50,
+      "week": 2
+    }
+  ],
+  "recovery_rules": [
+    "Push through fatigue."
+  ],
+  "stop_rules": [
+    "No stop rule."
+  ],
+  "success_metrics": [
+    "Run faster."
+  ],
+  "weekly_schedule": [
+    {
+      "day": "Monday",
+      "distance_km": 15,
+      "session": "hard run"
+    },
+    {
+      "day": "Tuesday",
+      "distance_km": 15,
+      "session": "hard run"
+    },
+    {
+      "day": "Wednesday",
+      "distance_km": 10,
+      "session": "hard run"
+    },
+    {
+      "day": "Thursday",
+      "distance_km": 10,
+      "session": "hard run"
+    },
+    {
+      "day": "Sunday",
+      "distance_km": 10,
+      "session": "long run"
+    }
+  ]
+}

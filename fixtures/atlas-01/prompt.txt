@@ -1,0 +1,7 @@
+You are completing benchmark task ATLAS-01: Synthetic backpacking cook-kit selection.
+
+Return exactly one JSON object and no Markdown.
+Required top-level fields: selected_item_ids, weight_total, cost_total, fuel_plan, contingency, tradeoffs.
+Use only the supplied synthetic packet; do not browse or perform external actions.
+Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
+Follow the task-specific requirements in the packet and keep the output concise but complete.

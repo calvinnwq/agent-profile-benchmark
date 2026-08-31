@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "aegis-synthetic-portfolio-v1",
+    "path": "input.json",
+    "sha256": "sha256:18e2aa6335bdf683078d16568900e24636b9b7d8c7763487cbaf054b1abd7b78",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/aegis-01.json",
+    "sha256": "sha256:fb3c95ee855050b3112d648998eddf6346839b644a9b80717068eacc589cd411"
+  },
+  "output_schema": {
+    "path": "../../schemas/aegis-01-output.schema.json"
+  },
+  "profile_id": "aegis",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:d512d203f5e0d6191a06dc88fbd3f990859ab9fe62521b1f0562e36910cfca22",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "AEGIS-01"
+}

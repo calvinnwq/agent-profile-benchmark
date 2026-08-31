@@ -1,0 +1,29 @@
+{
+  "accessibility_requirements": [
+    "Mouse only; keyboard not supported."
+  ],
+  "control_inventory": [
+    {
+      "id": "refresh",
+      "label": "Refresh data"
+    }
+  ],
+  "open_questions": [],
+  "read_only_boundary": {
+    "mutations": "update source records"
+  },
+  "state_matrix": [
+    {
+      "id": "loading",
+      "view": "Loading."
+    },
+    {
+      "id": "ready",
+      "view": "Data."
+    }
+  ],
+  "transition_rules": [
+    "ready -> delete old rows",
+    "loading -> ready"
+  ]
+}

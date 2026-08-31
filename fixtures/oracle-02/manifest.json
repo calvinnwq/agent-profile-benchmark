@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "oracle-quant-comparison-v1",
+    "path": "input.json",
+    "sha256": "sha256:49afd8960d22bf6ef71f9d55f06efafb2f47d3973283f4acdabb9c0b8f3a0021",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/oracle-02.json",
+    "sha256": "sha256:1daf6118fad106b9e118bdebee605362e25e90b949b7b47149ddfa7446cef4af"
+  },
+  "output_schema": {
+    "path": "../../schemas/oracle-02-output.schema.json"
+  },
+  "profile_id": "oracle",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:08055d186c2e8c15daa67e812bebeff095b9383d7ccff57f8d6253ad5d2c144b",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "ORACLE-02"
+}

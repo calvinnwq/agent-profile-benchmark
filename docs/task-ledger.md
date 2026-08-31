@@ -5,7 +5,8 @@ The canonical task data lives in [`data/task-ledger.json`](../data/task-ledger.j
 This page is the human-readable index of the first 18 task contracts.
 The Primary evaluation column is an editorial summary; the canonical measurement contract remains in the JSON ledger.
 
-All tasks are `contract-draft` until their exact prompt, fixture, evaluator oracle, known-good control, and known-bad control are frozen.
+All 18 tasks are `benchmark-ready` in benchmark version `0.2.0`.
+Each task has a frozen prompt, fixture, evaluator oracle, output schema, known-good control, and known-bad control under `fixtures/`, `oracles/`, and `schemas/`.
 
 | ID | Profile | Task | Provenance | Primary evaluation (editorial summary) |
 |---|---|---|---|---|
@@ -40,7 +41,7 @@ Health-related tasks reject diagnostic overreach and progression through fixture
 
 ## Contract review checklist
 
-Before moving a task to `fixture-ready`, verify that:
+Before moving a task to `benchmark-ready`, verify that:
 
 - the input is replayable without live web access
 - the output format can be parsed consistently
@@ -49,3 +50,5 @@ Before moving a task to `fixture-ready`, verify that:
 - a known-good and known-bad output can be distinguished
 - provenance and privacy classification are accurate
 - failure and blocked states remain visible
+
+Run `python3 scripts/validate_benchmark_ready.py` to apply this checklist to every task package.

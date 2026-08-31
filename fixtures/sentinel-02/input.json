@@ -1,0 +1,25 @@
+{
+  "boundary": "Diagnosis is read-only; do not mutate sources or workflow state.",
+  "fixture_id": "sentinel-brief-health-v1",
+  "fixture_version": "1.0.0",
+  "sources": [
+    {
+      "expected_interval_hours": 24,
+      "id": "rss",
+      "last_success": "2026-06-07T09:00:00Z"
+    },
+    {
+      "id": "partner-api",
+      "last_error": "timeout at 16:00",
+      "last_success": "2026-06-10T15:55:00Z"
+    }
+  ],
+  "workflow": {
+    "events": [
+      "refresh_started",
+      "webhook_received_before_refresh_finished",
+      "publish_deferred"
+    ],
+    "state": "waiting_for_sources"
+  }
+}

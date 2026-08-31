@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
-EXPECTED_BENCHMARK_VERSION = "0.1.0"
+EXPECTED_BENCHMARK_VERSION = "0.2.0"
 EXPECTED_LEDGER_SCHEMA = "../schemas/task-contract.schema.json"
-EXPECTED_LEDGER_FINGERPRINT = "90204d420d797568c047b22a60396bccc47699b506cb3d51305d620340c82cf1"
+EXPECTED_LEDGER_FINGERPRINT = "7632bac24f0d8b815c05fdb4d71197d7364ced10e5c858e9b2457c870eb60b96"
 EXPECTED_PROFILES = {
     "kody",
     "aegis",
@@ -662,7 +662,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if fingerprint is None:
         errors.append("ledger cannot be fingerprinted as strict JSON")
     elif fingerprint != EXPECTED_LEDGER_FINGERPRINT:
-        errors.append("ledger content does not match the frozen v0.1.0 contract fingerprint")
+        errors.append("ledger content does not match the frozen v0.2.0 contract fingerprint")
     _scan_public_text(ledger, "ledger", errors)
 
     if ledger.get("$schema") != EXPECTED_LEDGER_SCHEMA:
@@ -780,7 +780,7 @@ def validate_ledger(ledger: Any) -> list[str]:
             and isinstance(task_ids_value, list)
             and task_ids_value != list(expected_task_ids)
         ):
-            errors.append(f"{profile_path}.task_ids must match the frozen v0.1.0 task registry")
+            errors.append(f"{profile_path}.task_ids must match the frozen v0.2.0 task registry")
         _validate_string_list(profile.get("primary_dimensions"), f"{profile_path}.primary_dimensions", errors)
 
     tasks = ledger.get("tasks")
@@ -805,7 +805,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if len(task_ids) != len(set(task_ids)):
         errors.append("ledger.tasks contains duplicate ids")
     if set(task_ids) != EXPECTED_TASK_IDS:
-        errors.append("ledger.tasks must match the frozen v0.1.0 task registry")
+        errors.append("ledger.tasks must match the frozen v0.2.0 task registry")
     for profile_id, profile_tasks in tasks_by_profile.items():
         if len(profile_tasks) != 2:
             errors.append(f"profile {profile_id} must have exactly two tasks")
@@ -827,14 +827,6 @@ def validate_ledger(ledger: Any) -> list[str]:
 
     ledger_status = ledger.get("status")
     if isinstance(ledger_status, str) and ledger_status in EXPECTED_STATUSES:
-        if ledger_status == "benchmark-ready":
-            errors.append(
-                "ledger readiness cannot be benchmark-ready until evaluator and control evidence is modeled"
-            )
-        if ledger_status == "fixture-ready":
-            errors.append(
-                "ledger readiness cannot be fixture-ready until fixture, prompt, evaluator, and control evidence is modeled"
-            )
         for task in tasks:
             if not isinstance(task, dict):
                 continue
@@ -856,10 +848,10 @@ def validate_ledger(ledger: Any) -> list[str]:
                 fixture_status != "to_be_frozen" or prompt_status != "to_be_frozen"
             ):
                 errors.append(f"tasks[{task_id}] contract-draft requires unfrozen fixture and prompt")
-            if ledger_status == "fixture-ready" and (
+            if ledger_status in {"fixture-ready", "benchmark-ready"} and (
                 fixture_status != "frozen" or prompt_status != "frozen"
             ):
-                errors.append(f"tasks[{task_id}] fixture-ready requires frozen fixture and prompt")
+                errors.append(f"tasks[{task_id}] {ledger_status} requires frozen fixture and prompt")
 
     return errors
 

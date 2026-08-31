@@ -1,0 +1,23 @@
+{
+  "evidence_ids": [
+    "rss",
+    "partner-api",
+    "refresh_started",
+    "webhook_received_before_refresh_finished",
+    "publish_deferred"
+  ],
+  "read_only_boundary": {
+    "mutations": "none",
+    "note": "Report only; do not change source or workflow state."
+  },
+  "remediation_order": [
+    "Inspect source status and preserve the read-only boundary.",
+    "Finish or retry refresh before publishing."
+  ],
+  "root_cause": "The RSS source is stale while the partner API failed on timeout; a webhook arrived before refresh finished, so publish was deferred.",
+  "source_statuses": {
+    "partner-api": "failed",
+    "rss": "stale"
+  },
+  "workflow_state": "waiting_for_sources"
+}

@@ -1,0 +1,17 @@
+{
+  "contingency": "Carry a second canister and a cold-weather lighting plan.",
+  "cost_total": 170,
+  "fuel_plan": {
+    "canister_count": 2,
+    "fuel_type": "isobutane"
+  },
+  "selected_item_ids": [
+    "stove-a",
+    "pot-a",
+    "windscreen-a"
+  ],
+  "tradeoffs": [
+    "The selected kit stays under both budgets but does not include a separate mug."
+  ],
+  "weight_total": 630
+}

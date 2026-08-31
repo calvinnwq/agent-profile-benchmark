@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "atlas-cook-kit-selection-v1",
+    "path": "input.json",
+    "sha256": "sha256:72e3e1c494bf11aaafad39f9f270fb3e32e3664452f28832a87a6654da6f8460",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/atlas-01.json",
+    "sha256": "sha256:6727ef0efd5fad89686a496f223b73f568b43796cf3fd9a05e3bc1a73bed9e14"
+  },
+  "output_schema": {
+    "path": "../../schemas/atlas-01-output.schema.json"
+  },
+  "profile_id": "atlas",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:076033eeb967ec68dd0bcdf2703d2926cc0b273c12b7456117cac5e429d1483c",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "ATLAS-01"
+}

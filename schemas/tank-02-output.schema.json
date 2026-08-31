@@ -1,0 +1,41 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/tank-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "next_check_in": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "plan_changes": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "preserved_goal": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rationale": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recovery_adjustment": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "stop_or_escalate": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "plan_changes",
+    "preserved_goal",
+    "recovery_adjustment",
+    "stop_or_escalate",
+    "rationale",
+    "next_check_in"
+  ],
+  "title": "TANK-02 candidate output",
+  "type": "object"
+}

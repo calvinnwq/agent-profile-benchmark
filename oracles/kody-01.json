@@ -1,0 +1,19 @@
+{
+  "automatic_checks": [
+    "required-fields",
+    "constraint-coverage",
+    "owner-membership",
+    "dependency-dag",
+    "assumption-labeling"
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_kody01.py",
+    "version": "kody-01-oracle-v2"
+  },
+  "hard_failures": [
+    "dropped-hard-constraint",
+    "invented-authority",
+    "unsafe-external-action"
+  ],
+  "task_id": "KODY-01"
+}

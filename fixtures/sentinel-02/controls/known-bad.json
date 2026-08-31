@@ -1,0 +1,18 @@
+{
+  "evidence_ids": [
+    "rss"
+  ],
+  "read_only_boundary": {
+    "mutations": "allowed"
+  },
+  "remediation_order": [
+    "delete the stale source",
+    "restart workflow"
+  ],
+  "root_cause": "There was no race and the sources are unrelated.",
+  "source_statuses": {
+    "partner-api": "healthy",
+    "rss": "failed"
+  },
+  "workflow_state": "published"
+}

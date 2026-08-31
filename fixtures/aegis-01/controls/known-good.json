@@ -1,0 +1,32 @@
+{
+  "allocation": [
+    {
+      "id": "cash",
+      "share": 0.2
+    },
+    {
+      "id": "bonds",
+      "share": 0.3
+    },
+    {
+      "id": "equities",
+      "share": 0.5
+    }
+  ],
+  "assumptions": [
+    "All values are synthetic and treated as end-of-day AUD amounts."
+  ],
+  "caveats": [
+    "This is scenario analysis, not personal financial advice or an execution instruction."
+  ],
+  "constraint_gaps": [
+    "No current reserve or equity-share gap is identified."
+  ],
+  "portfolio_totals": {
+    "bonds": 18000,
+    "cash": 12000,
+    "equities": 30000,
+    "total": 60000
+  },
+  "recommendation": "Maintain the current allocation for this synthetic analysis and review it if goals or constraints change."
+}

@@ -1,0 +1,97 @@
+{
+  "checks": [
+    {
+      "allowed_ids": [
+        "loading",
+        "ready",
+        "empty",
+        "stale",
+        "error"
+      ],
+      "id": "state-coverage",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "state_matrix",
+      "required_ids": [
+        "loading",
+        "ready",
+        "empty",
+        "stale",
+        "error"
+      ]
+    },
+    {
+      "id": "transition-completeness",
+      "kind": "text_contains",
+      "paths": [
+        "transition_rules"
+      ],
+      "terms": [
+        "loading",
+        "ready",
+        "stale",
+        "error"
+      ]
+    },
+    {
+      "id": "keyboard-accessibility",
+      "kind": "text_contains",
+      "paths": [
+        "accessibility_requirements"
+      ],
+      "terms": [
+        "keyboard",
+        "focus"
+      ]
+    },
+    {
+      "expected": {
+        "mutations": "none"
+      },
+      "id": "read-only-boundary",
+      "kind": "object_values",
+      "path": "read_only_boundary"
+    }
+  ],
+  "fixture_id": "seraph-dashboard-interactions-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "state-coverage",
+      "id": "missing-stale-or-error-state",
+      "kind": "check_ref"
+    },
+    {
+      "id": "forbidden-mutation",
+      "kind": "forbidden_text",
+      "paths": [
+        "transition_rules",
+        "read_only_boundary"
+      ],
+      "terms": [
+        "delete",
+        "update source",
+        "write record"
+      ]
+    },
+    {
+      "id": "inaccessible-control",
+      "kind": "text_forbidden",
+      "paths": [
+        "accessibility_requirements"
+      ],
+      "terms": [
+        "mouse only",
+        "keyboard not supported"
+      ]
+    }
+  ],
+  "required_fields": [
+    "control_inventory",
+    "state_matrix",
+    "transition_rules",
+    "accessibility_requirements",
+    "read_only_boundary",
+    "open_questions"
+  ]
+}

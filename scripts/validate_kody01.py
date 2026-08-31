@@ -25,7 +25,9 @@ MANIFEST_PATH = FIXTURE_DIR / "manifest.json"
 EXPECTED_EVALUATOR = ROOT / "scripts" / "evaluate_kody01.py"
 EXPECTED_OUTPUT_SCHEMA = ROOT / "schemas" / "kody-01-output.schema.json"
 EXPECTED_RUN_SCHEMA = ROOT / "schemas" / "kody-01-run-record.schema.json"
+EXPECTED_COMMON_RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
 EXPECTED_GATE = ROOT / "scripts" / "validate_kody01.py"
+EXPECTED_RELEASE_GATE = ROOT / "scripts" / "validate_benchmark_ready.py"
 EXPECTED_CONTROL_STATUSES = {
     "known-good-control": "passed",
     "known-bad-control": "failed",
@@ -77,8 +79,14 @@ def _load_manifest() -> dict[str, Any]:
 def _bound_paths(manifest: dict[str, Any]) -> tuple[Path, Path, Path, Path, Path]:
     _require(manifest.get("task_id") == "KODY-01", "manifest task binding is not KODY-01")
     _require(manifest.get("profile_id") == "kody", "manifest profile binding is not kody")
-    _require(manifest.get("slice_status") == "control-slice", "manifest slice status is not control-slice")
-    _require(manifest.get("benchmark_ready") is False, "control slice must not claim benchmark readiness")
+    _require(
+        manifest.get("slice_status") in {"control-slice", "benchmark-ready"},
+        "manifest slice status is unsupported",
+    )
+    if manifest.get("slice_status") == "control-slice":
+        _require(manifest.get("benchmark_ready") is False, "control slice must not claim benchmark readiness")
+    else:
+        _require(manifest.get("benchmark_ready") is True, "benchmark-ready slice must claim benchmark readiness")
 
     fixture_metadata = manifest.get("fixture")
     prompt_metadata = manifest.get("prompt")
@@ -110,8 +118,14 @@ def _bound_paths(manifest: dict[str, Any]) -> tuple[Path, Path, Path, Path, Path
 
     _require(evaluator_path == EXPECTED_EVALUATOR, "manifest evaluator path is not the KODY-01 evaluator")
     _require(output_schema_path == EXPECTED_OUTPUT_SCHEMA, "manifest output schema path is not bound")
-    _require(run_schema_path == EXPECTED_RUN_SCHEMA, "manifest run-record schema path is not bound")
-    _require(gate_path == EXPECTED_GATE, "manifest release-gate path is not bound")
+    _require(
+        run_schema_path in {EXPECTED_RUN_SCHEMA, EXPECTED_COMMON_RUN_SCHEMA},
+        "manifest run-record schema path is not bound",
+    )
+    _require(
+        gate_path in {EXPECTED_GATE, EXPECTED_RELEASE_GATE},
+        "manifest release-gate path is not bound",
+    )
 
     _require(
         fixture_metadata.get("sha256") == _sha256_reference(fixture_path),

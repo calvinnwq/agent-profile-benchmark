@@ -1,0 +1,19 @@
+{
+  "baseline": {
+    "longest_run_km": 14,
+    "sessions_per_week": 3,
+    "weekly_km": 30
+  },
+  "constraints": {
+    "max_weekly_increase": 0.1,
+    "minimum_rest_days": 2
+  },
+  "fixture_id": "tank-training-plan-v1",
+  "fixture_version": "1.0.0",
+  "goal": "Complete a half marathon in 12 weeks",
+  "red_flags": [
+    "sharp pain",
+    "chest pain",
+    "fainting"
+  ]
+}

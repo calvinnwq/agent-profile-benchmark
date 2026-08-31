@@ -1,0 +1,29 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/arch-01-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "changed_files": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "implementation": {
+      "type": "object"
+    },
+    "residual_risks": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "verification_summary": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "implementation",
+    "changed_files",
+    "verification_summary",
+    "residual_risks"
+  ],
+  "title": "ARCH-01 candidate output",
+  "type": "object"
+}

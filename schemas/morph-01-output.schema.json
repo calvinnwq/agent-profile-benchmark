@@ -1,0 +1,51 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/morph-01-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assumptions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "must_have": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "problem": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_promise": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "should_have": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "success_metrics": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "target_user": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "wont_have": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "target_user",
+    "problem",
+    "product_promise",
+    "must_have",
+    "should_have",
+    "wont_have",
+    "success_metrics",
+    "assumptions"
+  ],
+  "title": "MORPH-01 candidate output",
+  "type": "object"
+}

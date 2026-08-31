@@ -1,0 +1,46 @@
+{
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "morph-launch-direction-v1",
+    "path": "input.json",
+    "sha256": "sha256:225780ff2d430788727e02bca93d4ca88c45bea88ef9a079628a32b77a1f3fec",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/morph-02.json",
+    "sha256": "sha256:bde16e2e9784f46d20651b2d51647a4075e947bcb6bdccab718f94a9659307d8"
+  },
+  "output_schema": {
+    "path": "../../schemas/morph-02-output.schema.json"
+  },
+  "profile_id": "morph",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:18e2a7b36aad6acd92a78bd132d894ecd91d527f24add3bcdf4a3015109cf7ae",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json"
+  },
+  "status": "benchmark-ready",
+  "task_id": "MORPH-02"
+}

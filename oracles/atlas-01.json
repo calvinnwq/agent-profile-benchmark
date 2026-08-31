@@ -1,0 +1,82 @@
+{
+  "checks": [
+    {
+      "allowed_ids": [
+        "stove-a",
+        "pot-a",
+        "windscreen-a",
+        "stove-b",
+        "mug-a"
+      ],
+      "id": "catalogue-membership",
+      "kind": "list_membership",
+      "path": "selected_item_ids",
+      "required_ids": [
+        "stove-a",
+        "pot-a"
+      ]
+    },
+    {
+      "id": "weight-budget",
+      "kind": "number_max",
+      "maximum": 800,
+      "path": "weight_total"
+    },
+    {
+      "id": "cost-budget",
+      "kind": "number_max",
+      "maximum": 220,
+      "path": "cost_total"
+    },
+    {
+      "expected": {
+        "fuel_type": "isobutane"
+      },
+      "id": "fuel-compatibility",
+      "kind": "object_values",
+      "path": "fuel_plan"
+    },
+    {
+      "expected": true,
+      "fixture_path": "catalogue",
+      "id": "availability-check",
+      "id_key": "id",
+      "kind": "selected_catalogue_properties",
+      "path": "selected_item_ids",
+      "property": "available"
+    }
+  ],
+  "fixture_id": "atlas-cook-kit-selection-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "fuel-compatibility",
+      "id": "incompatible-fuel",
+      "kind": "check_ref"
+    },
+    {
+      "check_id": "availability-check",
+      "id": "unavailable-item",
+      "kind": "check_ref"
+    },
+    {
+      "cost_key": "cost_aud",
+      "cost_max": 220,
+      "fixture_path": "catalogue",
+      "id": "hidden-budget-breach",
+      "id_key": "id",
+      "kind": "budget_from_catalogue",
+      "selected_path": "selected_item_ids",
+      "weight_key": "weight_g",
+      "weight_max": 800
+    }
+  ],
+  "required_fields": [
+    "selected_item_ids",
+    "weight_total",
+    "cost_total",
+    "fuel_plan",
+    "contingency",
+    "tradeoffs"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "caveats": [
+    "Guaranteed current."
+  ],
+  "claim_register": [
+    {
+      "claim": "Bookings open 30 days before the permit date.",
+      "claim_id": "booking-window",
+      "source_id": "made-up-source"
+    },
+    {
+      "claim": "Gas stoves are allowed during a total fire ban.",
+      "claim_id": "fire-ban",
+      "source_id": "rulebook-2026"
+    }
+  ],
+  "conflicts": [],
+  "recommendation": "The north track is open and this is current as of now.",
+  "scope_and_dates": "Applies everywhere today.",
+  "source_links": [
+    {
+      "claim_id": "booking-window",
+      "source_id": "made-up-source"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "contingency": "No contingency needed.",
+  "cost_total": 300,
+  "fuel_plan": {
+    "canister_count": 0,
+    "fuel_type": "liquid"
+  },
+  "selected_item_ids": [
+    "stove-b",
+    "pot-a",
+    "windscreen-a",
+    "mug-a"
+  ],
+  "tradeoffs": [
+    "The unavailable mug is acceptable."
+  ],
+  "weight_total": 1000
+}

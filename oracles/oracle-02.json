@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "expected": {
+        "q4_total_gb": 16.2,
+        "q6_total_gb": 20.6,
+        "q8_total_gb": 25.2
+      },
+      "id": "memory-arithmetic",
+      "kind": "object_values",
+      "path": "memory_calculations"
+    },
+    {
+      "id": "capacity-ceiling",
+      "kind": "number_max",
+      "maximum": 24,
+      "path": "memory_calculations.q6_total_gb"
+    },
+    {
+      "id": "requirement-match",
+      "kind": "text_contains",
+      "paths": [
+        "requirement_match",
+        "recommendation"
+      ],
+      "terms": [
+        "q6",
+        "16 GB"
+      ]
+    },
+    {
+      "id": "estimate-labeling",
+      "kind": "text_contains",
+      "paths": [
+        "caveats",
+        "memory_calculations"
+      ],
+      "terms": [
+        "estimate"
+      ]
+    }
+  ],
+  "fixture_id": "oracle-quant-comparison-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "id": "over-capacity-recommendation",
+      "kind": "text_contains_forbidden_choice",
+      "paths": [
+        "recommendation",
+        "requirement_match"
+      ],
+      "terms": [
+        "q8"
+      ]
+    },
+    {
+      "check_id": "memory-arithmetic",
+      "id": "calculation-error",
+      "kind": "check_ref"
+    },
+    {
+      "id": "estimate-as-measurement",
+      "kind": "forbidden_text",
+      "paths": [
+        "recommendation",
+        "caveats"
+      ],
+      "terms": [
+        "measured exactly",
+        "guaranteed memory"
+      ]
+    }
+  ],
+  "required_fields": [
+    "memory_calculations",
+    "option_table",
+    "requirement_match",
+    "recommendation",
+    "tradeoffs",
+    "caveats"
+  ]
+}

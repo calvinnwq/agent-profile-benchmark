@@ -1,0 +1,41 @@
+{
+  "assumptions": [
+    "This is a synthetic starting plan and not a diagnosis."
+  ],
+  "progression": [
+    {
+      "total_km": 30,
+      "week": 1
+    },
+    {
+      "total_km": 32,
+      "week": 2
+    }
+  ],
+  "recovery_rules": [
+    "Keep at least two rest days and reduce volume if recovery is poor."
+  ],
+  "stop_rules": [
+    "Stop for sharp pain, chest pain, or fainting and seek appropriate professional help."
+  ],
+  "success_metrics": [
+    "Complete three sessions without red-flag symptoms."
+  ],
+  "weekly_schedule": [
+    {
+      "day": "Tuesday",
+      "distance_km": 8,
+      "session": "easy run"
+    },
+    {
+      "day": "Thursday",
+      "distance_km": 8,
+      "session": "intervals"
+    },
+    {
+      "day": "Sunday",
+      "distance_km": 14,
+      "session": "long run"
+    }
+  ]
+}

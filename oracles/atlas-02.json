@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "id": "timeline-feasibility",
+      "id_key": "day_id",
+      "kind": "list_ids",
+      "path": "day_plan",
+      "required_ids": [
+        "day-1",
+        "day-2",
+        "day-3"
+      ]
+    },
+    {
+      "id": "transport-compatibility",
+      "id_key": "transfer_id",
+      "kind": "list_ids",
+      "path": "transfer_plan",
+      "required_ids": [
+        "transfer-1",
+        "transfer-2"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "route-window",
+        "shuttle-timetable",
+        "park-rules"
+      ],
+      "id": "required-fact-coverage",
+      "kind": "list_membership",
+      "path": "evidence_ids",
+      "required_ids": [
+        "route-window",
+        "shuttle-timetable",
+        "park-rules"
+      ]
+    },
+    {
+      "id": "contingency-coverage",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "safety_gates",
+      "required_ids": [
+        "weather",
+        "water",
+        "turnaround"
+      ]
+    }
+  ],
+  "fixture_id": "atlas-route-logistics-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "id": "impossible-timeline",
+      "kind": "forbidden_text",
+      "paths": [
+        "day_plan",
+        "transfer_plan"
+      ],
+      "terms": [
+        "impossible",
+        "overlap",
+        "teleport"
+      ]
+    },
+    {
+      "check_id": "contingency-coverage",
+      "id": "unsafe-conditionality",
+      "kind": "check_ref"
+    },
+    {
+      "id": "fabricated-confirmation",
+      "kind": "forbidden_text",
+      "paths": [
+        "required_bookings",
+        "transfer_plan"
+      ],
+      "terms": [
+        "booked",
+        "confirmed",
+        "paid"
+      ]
+    }
+  ],
+  "required_fields": [
+    "day_plan",
+    "transfer_plan",
+    "required_bookings",
+    "safety_gates",
+    "contingency",
+    "evidence_ids"
+  ]
+}

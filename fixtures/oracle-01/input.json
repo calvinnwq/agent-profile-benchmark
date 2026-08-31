@@ -1,0 +1,26 @@
+{
+  "fixture_id": "oracle-official-rules-v1",
+  "fixture_version": "1.0.0",
+  "question": "Summarise the rules relevant to a June 2026 itinerary.",
+  "source_bundle": [
+    {
+      "excerpts": [
+        "Bookings open 90 days before the permit date.",
+        "Gas stoves are prohibited during a declared total fire ban."
+      ],
+      "id": "rulebook-2026",
+      "published": "2026-05-01",
+      "scope": "Coastal Ridge Park",
+      "title": "Synthetic Park Rulebook"
+    },
+    {
+      "excerpts": [
+        "The north track is closed through 2026-06-15."
+      ],
+      "id": "park-alert-2026-06",
+      "published": "2026-06-01",
+      "scope": "Coastal Ridge Park",
+      "title": "Synthetic Park Alert"
+    }
+  ]
+}

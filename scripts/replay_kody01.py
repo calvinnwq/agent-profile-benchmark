@@ -114,7 +114,7 @@ def replay(
     record = {
         "run_id": run_id,
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.1.0",
+        "benchmark_version": "0.2.0",
         "task_id": "KODY-01",
         "profile_id": "kody",
         "harness": harness,
