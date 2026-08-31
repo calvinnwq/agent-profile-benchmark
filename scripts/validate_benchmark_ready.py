@@ -138,7 +138,7 @@ def _scan_public_artifact(value: Any, path: str, errors: list[str]) -> None:
 def _evaluate(task_id: str, fixture_path: Path, candidate_path: Path) -> dict[str, Any]:
     if task_id == "KODY-01":
         return evaluate_kody01_files(fixture_path, candidate_path)
-    return evaluate_task_files(task_id, fixture_path, candidate_path)
+    return evaluate_task_files(task_id, fixture_path, candidate_path, model_output=False)
 
 
 def _expected_check_ids(task_id: str, oracle: Any) -> set[str]:
@@ -175,6 +175,7 @@ def _validate_task_package(
     errors: list[str],
     release_lock: dict[str, Any],
 ) -> tuple[bool, bool]:
+    task_error_start = len(errors)
     task_id = task.get("id")
     if not isinstance(task_id, str):
         errors.append("ledger task has a non-string ID")
@@ -375,6 +376,10 @@ def _validate_task_package(
     except ReleaseInputError as exc:
         errors.append(str(exc))
         expected_check_ids = set()
+
+    # Never execute controls after any task-integrity check has failed.
+    if len(errors) > task_error_start:
+        return False, False
 
     controls = manifest.get("controls")
     if not isinstance(controls, list):

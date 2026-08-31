@@ -808,7 +808,7 @@ def evaluate_task(
     fixture: Any,
     candidate: Any,
     *,
-    model_output: bool = False,
+    model_output: bool = True,
 ) -> dict[str, Any]:
     if task_id not in EXPECTED_TASK_IDS:
         raise InputError(f"unknown benchmark task ID {task_id!r}")
@@ -860,7 +860,7 @@ def evaluate_task(
     return {'evaluator_version':ORACLE_VERSION,'task_id':task_id,'status':status,'hard_failures':hard_failures,'automatic_checks':checks,'human_review':{'status':'pending','dimensions':[]}}
 
 
-def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, model_output: bool = False) -> dict[str, Any]:
+def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, model_output: bool = True) -> dict[str, Any]:
     if task_id not in EXPECTED_TASK_IDS:
         raise InputError(f"unknown benchmark task ID {task_id!r}")
     fixture = _load_json(fixture_path, "fixture")
@@ -885,10 +885,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--task", required=True)
     parser.add_argument("--fixture", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, required=True)
-    parser.add_argument("--model-output", action="store_true", help="preserve decode failures as failed evidence")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--model-output", action="store_true", help="treat the candidate as untrusted model output (default)")
+    mode.add_argument("--trusted-control", action="store_true", help="execute a checked-in, release-locked control")
     args = parser.parse_args(argv)
     try:
-        result = evaluate_files(args.task, args.fixture, args.candidate, model_output=args.model_output)
+        result = evaluate_files(
+            args.task,
+            args.fixture,
+            args.candidate,
+            model_output=not args.trusted_control,
+        )
     except ValueError as exc:
         print(f"evaluation failed: {exc}", file=sys.stderr)
         return 2

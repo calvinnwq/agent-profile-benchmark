@@ -130,6 +130,8 @@ A custom `--agent-command` is supported for test doubles and diagnostics, but it
 Malformed model output, non-zero exits, and timeouts remain visible as failed evidence.
 Missing or contradictory model/provider resolution remains visible as blocked evidence.
 Model-authored Python in `ARCH-01` is not executed without an OS sandbox, so that cell is blocked until a sandboxed evaluator is available.
+Direct `scripts/evaluate_task.py` calls also treat candidate output as untrusted by default and do not execute `ARCH-01` code.
+The `--trusted-control` flag is reserved for exact release-locked controls after integrity validation; never use it for model output.
 The runner verifies the sealed release-artifact lock before launching a model process.
 
 For example:

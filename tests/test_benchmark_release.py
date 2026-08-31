@@ -96,6 +96,39 @@ class BenchmarkReleaseTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("release lock", result.stderr)
 
+    def test_release_gate_does_not_execute_controls_after_lock_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            copy_root = Path(directory) / "benchmark"
+            shutil.copytree(
+                ROOT,
+                copy_root,
+                ignore=shutil.ignore_patterns(".git", ".model-evidence", "__pycache__", "*.pyc"),
+            )
+            marker_path = copy_root / "control-executed.marker"
+            control_path = copy_root / "fixtures" / "arch-01" / "controls" / "known-good.json"
+            control = json.loads(control_path.read_text(encoding="utf-8"))
+            control["implementation"]["auth.py"] = (
+                "from pathlib import Path\n"
+                f"Path({str(marker_path)!r}).write_text('executed', encoding='utf-8')\n"
+                "import hmac\n"
+                "\n"
+                "def verify(token, expected):\n"
+                "    if not isinstance(token, str) or not isinstance(expected, str):\n"
+                "        return False\n"
+                "    return hmac.compare_digest(token, expected)\n"
+            )
+            control_path.write_text(json.dumps(control), encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, str(copy_root / "scripts" / "validate_benchmark_ready.py")],
+                cwd=copy_root,
+                check=False,
+                capture_output=True,
+                text=True,
+                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+            )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(marker_path.exists(), "release validation executed a drifted control")
+
     def test_hermes_adapter_enforces_empty_tool_and_session_surfaces(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             temp_dir = Path(directory)
@@ -572,7 +605,9 @@ class BenchmarkReleaseTests(unittest.TestCase):
                 git_state["head"],
                 subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             )
-            self.assertIn("scripts/run_task_model.py", git_state["changed_files"])
+            self.assertIsInstance(git_state["changed_files"], list)
+            self.assertIsInstance(git_state["untracked_files"], list)
+            self.assertNotIn(str(ROOT), json.dumps(git_state))
             self.assertEqual(validate_schema_instance(record, json.loads(RUN_SCHEMA.read_text())), [])
 
             duplicate = subprocess.run(
@@ -981,6 +1016,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
                     str(package / "input.json"),
                     "--candidate",
                     str(candidate_path),
+                    "--trusted-control",
                 ],
                 cwd=ROOT,
                 check=False,
@@ -1019,6 +1055,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
                     str(package / "input.json"),
                     "--candidate",
                     str(candidate_path),
+                    "--trusted-control",
                 ],
                 cwd=ROOT,
                 check=False,
@@ -1052,6 +1089,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
                     str(package / "input.json"),
                     "--candidate",
                     str(candidate_path),
+                    "--trusted-control",
                 ],
                 cwd=ROOT,
                 check=False,
@@ -1063,7 +1101,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
         self.assertEqual(evaluation["status"], "failed")
         self.assertIn("hidden-test-failure", {item["id"] for item in evaluation["hard_failures"]})
 
-    def test_model_output_auth_code_is_blocked_without_a_sandbox(self) -> None:
+    def test_evaluator_blocks_auth_code_without_explicit_trusted_control(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             temp_dir = Path(directory)
             marker = temp_dir / "auth-code-ran"
@@ -1087,7 +1125,6 @@ class BenchmarkReleaseTests(unittest.TestCase):
                     str(package / "input.json"),
                     "--candidate",
                     str(candidate_path),
-                    "--model-output",
                 ],
                 cwd=ROOT,
                 check=False,

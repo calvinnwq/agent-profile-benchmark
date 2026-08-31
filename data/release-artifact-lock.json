@@ -14,7 +14,7 @@
     },
     "evaluator_task": {
       "path": "scripts/evaluate_task.py",
-      "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+      "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
     },
     "hermes_adapter": {
       "path": "scripts/hermes_no_tools.py",
@@ -46,7 +46,7 @@
     },
     "release_validator": {
       "path": "scripts/validate_benchmark_ready.py",
-      "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+      "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
     },
     "replay_kody01": {
       "path": "scripts/replay_kody01.py",
@@ -66,7 +66,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/aegis-01/input.json",
@@ -82,7 +82,7 @@
         },
         "manifest": {
           "path": "fixtures/aegis-01/manifest.json",
-          "sha256": "sha256:9c27f62d585f43d3ac65b8ab7f9064b326c85df6343459f65e20ca80e05c0f72"
+          "sha256": "sha256:160c405fe646b5102033fcbeda9748fce17639d7f49939f876298c861b7cd475"
         },
         "oracle": {
           "path": "oracles/aegis-01.json",
@@ -98,7 +98,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -112,7 +112,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/aegis-02/input.json",
@@ -128,7 +128,7 @@
         },
         "manifest": {
           "path": "fixtures/aegis-02/manifest.json",
-          "sha256": "sha256:f5fa2d33b62bb82456efcdcb3adad31060c211a846e1b58f967013c76821a044"
+          "sha256": "sha256:fac1c06f33c1d3a93925bde1c5d6cbca187520a3d35dbe23ee0c75fbd2f4d3ed"
         },
         "oracle": {
           "path": "oracles/aegis-02.json",
@@ -144,7 +144,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -158,7 +158,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/arch-01/input.json",
@@ -174,7 +174,7 @@
         },
         "manifest": {
           "path": "fixtures/arch-01/manifest.json",
-          "sha256": "sha256:c977679b9f3127ea7660763d19f5cd3d1a2f115a2bc8842d3ad4aab2a6b39b52"
+          "sha256": "sha256:bdfd050f2da19a88b1a2b15a0f8e72278aa5fa072c8ac6800be4fe8aed278340"
         },
         "oracle": {
           "path": "oracles/arch-01.json",
@@ -190,7 +190,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -204,7 +204,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/arch-02/input.json",
@@ -220,7 +220,7 @@
         },
         "manifest": {
           "path": "fixtures/arch-02/manifest.json",
-          "sha256": "sha256:299a9a5e982513164f905104f3919582c9fba150855397ef380c64c3bbb2f846"
+          "sha256": "sha256:5ccdc22f415ef1e722aae7c2b7ca10f3ee2d9b7aa3b7798b91a67f755528ec37"
         },
         "oracle": {
           "path": "oracles/arch-02.json",
@@ -236,7 +236,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -250,7 +250,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/atlas-01/input.json",
@@ -266,7 +266,7 @@
         },
         "manifest": {
           "path": "fixtures/atlas-01/manifest.json",
-          "sha256": "sha256:0b2a90879cd448cb04c7610f396d3d9322d15ffbef872c259c581916db079a65"
+          "sha256": "sha256:60661726a01374036ce43b964f7ab3da37657f690397be300eb875602f6ab04a"
         },
         "oracle": {
           "path": "oracles/atlas-01.json",
@@ -282,7 +282,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -296,7 +296,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/atlas-02/input.json",
@@ -312,7 +312,7 @@
         },
         "manifest": {
           "path": "fixtures/atlas-02/manifest.json",
-          "sha256": "sha256:15897ea42ed5c81d1726b7f88728fd60aa688d8b5c905777b1f25c2b0f54d3a4"
+          "sha256": "sha256:4e477f4e921983e7917ad322d43692cea0e7f918176dd3c9e64aa5a03b1f4468"
         },
         "oracle": {
           "path": "oracles/atlas-02.json",
@@ -328,7 +328,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -374,7 +374,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -388,7 +388,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/kody-02/input.json",
@@ -404,7 +404,7 @@
         },
         "manifest": {
           "path": "fixtures/kody-02/manifest.json",
-          "sha256": "sha256:084b0d42739292dfe2f8b786c8691ba71703d05792aa3f403713038d8a8d582d"
+          "sha256": "sha256:4ae3bd3a657f5b34e819096b413d9b0277012337f5f677125b1cf918a9c23132"
         },
         "oracle": {
           "path": "oracles/kody-02.json",
@@ -420,7 +420,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -434,7 +434,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/morph-01/input.json",
@@ -450,7 +450,7 @@
         },
         "manifest": {
           "path": "fixtures/morph-01/manifest.json",
-          "sha256": "sha256:8936031a694967be01585c51bc33e5dd5b27ec2d4b4df2d6b475ccf9400157a9"
+          "sha256": "sha256:62ddbf45ed5b6797455f14aea6993a47bafaad163e86ac726f638c4de83167b8"
         },
         "oracle": {
           "path": "oracles/morph-01.json",
@@ -466,7 +466,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -480,7 +480,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/morph-02/input.json",
@@ -496,7 +496,7 @@
         },
         "manifest": {
           "path": "fixtures/morph-02/manifest.json",
-          "sha256": "sha256:2bc7fa6334bab6515f672eaec9db0cf46793896015d9b39a84f752ed917b4f30"
+          "sha256": "sha256:4817f16719ab1586ae85455b3528583a48b768f310ea422bc2976a4546aceb6a"
         },
         "oracle": {
           "path": "oracles/morph-02.json",
@@ -512,7 +512,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -526,7 +526,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/oracle-01/input.json",
@@ -542,7 +542,7 @@
         },
         "manifest": {
           "path": "fixtures/oracle-01/manifest.json",
-          "sha256": "sha256:cb39d57eaf304b4369e5a4ca42b26f6b0f0b0d58c19953745aa386a39ee1b1c1"
+          "sha256": "sha256:ba716af4df34735fb749a299025e443c28d2746b627e4895a2a14a7c87603d2e"
         },
         "oracle": {
           "path": "oracles/oracle-01.json",
@@ -558,7 +558,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -572,7 +572,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/oracle-02/input.json",
@@ -588,7 +588,7 @@
         },
         "manifest": {
           "path": "fixtures/oracle-02/manifest.json",
-          "sha256": "sha256:145a25f6948d3f84d7b64ef83561d7e16907e345cfe4e7235e1d562b341bc7a9"
+          "sha256": "sha256:0b744cc11ae9d67f16c3b76ba5781e1b3428ee20850cd11ac27d9587e7460e84"
         },
         "oracle": {
           "path": "oracles/oracle-02.json",
@@ -604,7 +604,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -618,7 +618,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/sentinel-01/input.json",
@@ -634,7 +634,7 @@
         },
         "manifest": {
           "path": "fixtures/sentinel-01/manifest.json",
-          "sha256": "sha256:8238bac092ba63a92fc6dc6ac9b00f309e1fc37bbf69f389bfd256f9e8642419"
+          "sha256": "sha256:309e5976923df55ac80080dd172e06ab27dd93ac2759a172f7eb945687c1b9cd"
         },
         "oracle": {
           "path": "oracles/sentinel-01.json",
@@ -650,7 +650,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -664,7 +664,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/sentinel-02/input.json",
@@ -680,7 +680,7 @@
         },
         "manifest": {
           "path": "fixtures/sentinel-02/manifest.json",
-          "sha256": "sha256:974da03a79fd6e227bd7e7180e30d15a8d55718a9e1b394752953581afb56fa0"
+          "sha256": "sha256:4529fa1d02d78f81a09689b7e8e77b83059c95acc76743cb23368140c68aeee8"
         },
         "oracle": {
           "path": "oracles/sentinel-02.json",
@@ -696,7 +696,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -710,7 +710,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/seraph-01/input.json",
@@ -726,7 +726,7 @@
         },
         "manifest": {
           "path": "fixtures/seraph-01/manifest.json",
-          "sha256": "sha256:ba4f84329a2640106ad8ea049001772dc99677447a83c81e4afe13a831fe5df8"
+          "sha256": "sha256:5d1933ab7f783fe45ec37e6164a6676c739a0fcbc69c099219e0f93358ffed75"
         },
         "oracle": {
           "path": "oracles/seraph-01.json",
@@ -742,7 +742,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -756,7 +756,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/seraph-02/input.json",
@@ -772,7 +772,7 @@
         },
         "manifest": {
           "path": "fixtures/seraph-02/manifest.json",
-          "sha256": "sha256:44e349b00eb115313f364719bc742fdc2738e2bbafc0c1dc9e89eed419f043a2"
+          "sha256": "sha256:a78f862089a9a8f29a98a1f1c8b6381ad5090bda4fbb1b37d7daedb0656c818b"
         },
         "oracle": {
           "path": "oracles/seraph-02.json",
@@ -788,7 +788,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -802,7 +802,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/tank-01/input.json",
@@ -818,7 +818,7 @@
         },
         "manifest": {
           "path": "fixtures/tank-01/manifest.json",
-          "sha256": "sha256:b08d6b6b876952dbaaf7c9397395592c47b377b374fe6c66da6273d8612a6520"
+          "sha256": "sha256:477aa53055a1f4c383d9470c212952ff17eaa1ba020b2b6fa2df0029f59ac64b"
         },
         "oracle": {
           "path": "oracles/tank-01.json",
@@ -834,7 +834,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
@@ -848,7 +848,7 @@
       "artifacts": {
         "evaluator": {
           "path": "scripts/evaluate_task.py",
-          "sha256": "sha256:2721e1eb6158592bd5edd37969daf9c07dbc480e0756572daa0e67ad461e7d0b"
+          "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308"
         },
         "fixture": {
           "path": "fixtures/tank-02/input.json",
@@ -864,7 +864,7 @@
         },
         "manifest": {
           "path": "fixtures/tank-02/manifest.json",
-          "sha256": "sha256:8a9daf4c3cf4356f6f1d1edf8bcc68325b9bd333cd242d5d2fb3f18a2b24ab2f"
+          "sha256": "sha256:782804ffa45996a29324e9ce64e77d9f4db9c5deb23d23b6e5570e2b439b3adc"
         },
         "oracle": {
           "path": "oracles/tank-02.json",
@@ -880,7 +880,7 @@
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
-          "sha256": "sha256:7377ca307645defacf58a73157d0eefe23167ffcba9b37d631d15c1677824959"
+          "sha256": "sha256:1ac4d0ca9bc642d5bf43dcd15007f9822a343ef7e750fcf2a12b776e5e3e0eff"
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
