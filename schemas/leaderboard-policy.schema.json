@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/leaderboard-policy.schema.json",
+  "title": "Agent Profile Benchmark leaderboard policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_id",
+    "policy_version",
+    "benchmark_id",
+    "benchmark_version",
+    "scope",
+    "status",
+    "coverage",
+    "ranking",
+    "publication"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "$id": {"type": "string"},
+    "schema_version": {"type": "string", "const": "leaderboard-policy-v1"},
+    "policy_id": {"type": "string", "const": "leaderboard-v1"},
+    "policy_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
+    "benchmark_version": {"type": "string", "const": "0.2.0"},
+    "scope": {"type": "string", "const": "benchmark-specific model leaderboard and routing aid"},
+    "status": {"type": "string", "enum": ["active"]},
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provisional_min_task_coverage", "confirmed_min_replicates_per_task"],
+      "properties": {
+        "provisional_min_task_coverage": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "confirmed_min_replicates_per_task": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "ranking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "tie_breakers"],
+      "properties": {
+        "primary": {"type": "string", "const": "full_contract_pass_rate"},
+        "tie_breakers": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "automatic_check_pass_rate",
+              "human_quality_score",
+              "hard_failure_rate",
+              "invalid_output_rate",
+              "median_latency_ms"
+            ]
+          }
+        }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score_publishable_requires_complete_overall_coverage",
+        "routing_requires_confirmed_model_per_profile"
+      ],
+      "properties": {
+        "score_publishable_requires_complete_overall_coverage": {"type": "boolean"},
+        "routing_requires_confirmed_model_per_profile": {"type": "boolean"}
+      }
+    }
+  }
+}

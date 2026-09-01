@@ -65,29 +65,44 @@ def _validate_run_id(run_id: str) -> None:
 
 
 def _hermes_python() -> str:
-    hermes = shutil.which("hermes")
-    if not hermes:
+    """Find a Python interpreter behind the first usable Hermes launcher."""
+    shell_interpreters = {"bash", "csh", "fish", "ksh", "sh", "tcsh", "zsh"}
+    launcher_paths: list[Path] = []
+    for directory in os.get_exec_path(os.environ):
+        launcher = Path(directory) / "hermes"
+        if launcher.is_file() and os.access(launcher, os.X_OK):
+            launcher_paths.append(launcher)
+    if not launcher_paths:
         raise InputError("Hermes executable was not found on PATH")
-    executable = Path(hermes).resolve()
-    try:
-        first_line = executable.read_text(encoding="utf-8").splitlines()[0]
-    except (OSError, UnicodeError, IndexError) as exc:
-        raise InputError(f"unable to inspect Hermes executable ({type(exc).__name__})") from exc
-    for candidate in (executable.parent / "python3", executable.parent / "python"):
-        if candidate.is_file():
-            return str(candidate)
-    if first_line.startswith("#!"):
+
+    seen_launchers: set[Path] = set()
+    for launcher in launcher_paths:
+        executable = launcher.resolve()
+        if executable in seen_launchers:
+            continue
+        seen_launchers.add(executable)
+        try:
+            first_line = executable.read_text(encoding="utf-8").splitlines()[0]
+        except (OSError, UnicodeError, IndexError) as exc:
+            raise InputError(f"unable to inspect Hermes executable ({type(exc).__name__})") from exc
+        for candidate in (executable.parent / "python3", executable.parent / "python"):
+            if candidate.is_file() and os.access(candidate, os.X_OK):
+                return str(candidate)
+        if not first_line.startswith("#!"):
+            continue
         shebang = shlex.split(first_line[2:].strip())
-        if shebang:
-            interpreter = shebang[0]
-            if Path(interpreter).name == "env":
-                interpreter = next((item for item in shebang[1:] if not item.startswith("-")), "")
-            resolved_interpreter = (
-                interpreter if Path(interpreter).is_file() else shutil.which(interpreter)
-            )
-            if resolved_interpreter:
-                return resolved_interpreter
-    return sys.executable
+        if not shebang:
+            continue
+        interpreter = shebang[0]
+        if Path(interpreter).name == "env":
+            interpreter = next((item for item in shebang[1:] if not item.startswith("-")), "")
+        if not interpreter or Path(interpreter).name in shell_interpreters:
+            continue
+        resolved_interpreter = interpreter if Path(interpreter).is_file() else shutil.which(interpreter)
+        if resolved_interpreter and Path(resolved_interpreter).name.startswith("python"):
+            return resolved_interpreter
+
+    raise InputError("Hermes executable has no Python interpreter on PATH")
 
 
 def _default_agent_command(profile_id: str) -> list[str]:

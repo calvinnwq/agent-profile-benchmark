@@ -128,5 +128,63 @@ The next evidence gate is to record the exact Nous Portal model roster and resol
 Then run matched profile-task cells and preserve raw evidence before reporting results.
 The release gate and sealed artifact lock must pass before any model matrix run.
 
-The benchmark is a routing aid, not a universal intelligence ranking.
-One successful task or one aggregate score is insufficient evidence for trusted use.
+## Versioned model leaderboard
+
+`data/leaderboard-policy.json` defines `leaderboard-v1` for benchmark version `0.2.0`.
+The policy ranks models only on this frozen suite and must not be described as a universal intelligence ranking.
+
+A roster snapshot uses [`schemas/model-roster.schema.json`](schemas/model-roster.schema.json) and preserves the requested model ID, resolved model ID, provider identity, availability, and any exclusion reason.
+A leaderboard input manifest uses [`schemas/leaderboard-input.schema.json`](schemas/leaderboard-input.schema.json) and selects immutable run records by run ID and relative evidence path.
+Generated output uses [`schemas/leaderboard-output.schema.json`](schemas/leaderboard-output.schema.json) and keeps per-task run traces so every metric remains auditable.
+
+Build a leaderboard from an evidence manifest with:
+
+```bash
+python3 scripts/build_leaderboard.py \
+  --input .model-evidence/<snapshot>/leaderboard-input.json \
+  --output .model-evidence/<snapshot>/leaderboard.json
+```
+
+Render a self-contained HTML report from generated output with:
+
+```bash
+python3 scripts/render_leaderboard_html.py \
+  --input .model-evidence/<snapshot>/leaderboard.json \
+  --output .model-evidence/<snapshot>/leaderboard.html
+```
+
+The renderer preserves the benchmark scope, status gates, metrics, exclusions, and evidence lineage without adding external assets or JavaScript.
+The builder seals the default ledger, policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
+
+Overall ranking requires complete task coverage.
+Per-profile views are available independently, but incomplete profiles remain explicitly unranked.
+A model is `provisional` after complete coverage and `confirmed` only after the policy's minimum three comparable replicates per task.
+Excluded or unresolved provider identities remain visible without contributing to comparable quality metrics.
+The generator is deterministic for a fixed policy, ledger, roster, and selected run set.
+
+Run a new eligible roster sweep through the existing isolated single-cell harness with:
+
+```bash
+python3 scripts/run_leaderboard_matrix.py \
+  --roster .model-evidence/<roster-snapshot>/leaderboard-roster.json \
+  --output-root .model-evidence/<matrix-snapshot> \
+  --snapshot-id <matrix-snapshot-id> \
+  --reasoning medium \
+  --timeout-seconds 600
+```
+
+The matrix runner validates the roster, checks the benchmark-ready release gate before the first model call, plans every eligible model against every frozen task, runs cells sequentially, preserves raw evidence under the new output root, and writes a `leaderboard-input.json` manifest.
+It never overwrites a non-empty evidence root.
+A failed or blocked cell remains visible when its single-cell runner writes a run record; a launch failure is reported separately and leaves the input manifest incomplete rather than fabricating a result.
+
+Future free-model onboarding is append-only:
+
+1. Capture a new provider roster snapshot.
+2. Resolve and freeze the exact requested and resolved model identities.
+3. Add each new entity to the new roster snapshot without changing old snapshots.
+4. Run the unchanged `0.2.0` suite and harness conditions.
+5. Build a new leaderboard snapshot from the preserved run records.
+6. Keep incomplete models unranked and promote only after the policy's coverage and repeat-confirmation gates pass.
+
+Changing the frozen task suite requires a new benchmark version.
+Results from different benchmark versions must not be silently combined.

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/leaderboard-output.schema.json",
+  "title": "Generated Agent Profile Benchmark leaderboard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "benchmark_id",
+    "benchmark_version",
+    "policy_id",
+    "policy_version",
+    "input_snapshot_id",
+    "roster_snapshot_id",
+    "generated_at",
+    "scope",
+    "models",
+    "aggregate",
+    "overall",
+    "profiles",
+    "publication",
+    "input"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "$id": {"type": "string"},
+    "schema_version": {"type": "string", "const": "leaderboard-v1"},
+    "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
+    "benchmark_version": {"type": "string", "const": "0.2.0"},
+    "policy_id": {"type": "string", "const": "leaderboard-v1"},
+    "policy_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "input_snapshot_id": {"type": "string", "minLength": 1},
+    "roster_snapshot_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "minLength": 1},
+    "release_lock_fingerprint": {"type": "string"},
+    "scope": {"type": "string", "const": "benchmark-specific model leaderboard and routing aid"},
+    "models": {
+      "type": "array",
+      "items": {"type": "object", "additionalProperties": true}
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempted_runs",
+        "comparable_resolved_runs",
+        "excluded_provider_or_identity_runs",
+        "full_contract_pass_runs",
+        "all_automatic_checks_pass_runs",
+        "hard_failure_runs",
+        "invalid_output_runs",
+        "process_or_timeout_failures",
+        "human_scores_assigned"
+      ],
+      "properties": {
+        "attempted_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "comparable_resolved_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "excluded_provider_or_identity_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "full_contract_pass_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "all_automatic_checks_pass_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "hard_failure_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "invalid_output_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "process_or_timeout_failures": {"type": "integer", "exclusiveMinimum": -1},
+        "human_scores_assigned": {"type": "boolean"}
+      }
+    },
+    "overall": {"type": "object", "additionalProperties": true},
+    "profiles": {"type": "object", "additionalProperties": {"type": "object", "additionalProperties": true}},
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ranking_available",
+        "score_publishable",
+        "human_scores_assigned",
+        "routing_recommendation_allowed",
+        "reason"
+      ],
+      "properties": {
+        "ranking_available": {"type": "boolean"},
+        "score_publishable": {"type": "boolean"},
+        "human_scores_assigned": {"type": "boolean"},
+        "routing_recommendation_allowed": {"type": "boolean"},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "input": {"type": "object", "additionalProperties": true}
+  }
+}

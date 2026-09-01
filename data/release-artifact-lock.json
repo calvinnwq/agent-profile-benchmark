@@ -38,7 +38,7 @@
     },
     "model_runner": {
       "path": "scripts/run_task_model.py",
-      "sha256": "sha256:64dde028d1e47b27780a73d51fb1e8092c243055eaf0cc3de701a54730a76cd6"
+      "sha256": "sha256:4074d3c0a8dd26099606caade1e0fda7b2534d86523d05b9477046cbe8d39be1"
     },
     "release_lock_schema": {
       "path": "schemas/release-artifact-lock.schema.json",

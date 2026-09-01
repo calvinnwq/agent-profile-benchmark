@@ -148,6 +148,59 @@ python3 scripts/run_task_model.py \
 
 The command does not publish scores or create a model matrix.
 
+## Re-runnable leaderboard workflow
+
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.2.0`.
+It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
+
+Roster snapshots must conform to `schemas/model-roster.schema.json`.
+Each model entity preserves its requested ID, resolved ID, requested and resolved provider, availability, and exclusion reason where applicable.
+An eligible entity must have a canonical resolved model identity.
+An excluded entity remains visible but cannot enter a ranking.
+
+A matrix run should use `scripts/run_leaderboard_matrix.py` rather than invoking models through profile aliases or assembling run records by hand.
+The runner validates the roster and frozen task manifests, checks `scripts/validate_benchmark_ready.py` before the first model call, plans every eligible model against all 18 frozen tasks, and invokes `scripts/run_task_model.py` sequentially with the same reasoning and timeout settings.
+The runner writes a new evidence root and refuses to overwrite a non-empty one.
+A cell's raw output and run record remain immutable under its run ID.
+
+```bash
+python3 scripts/run_leaderboard_matrix.py \
+  --roster .model-evidence/<roster-snapshot>/leaderboard-roster.json \
+  --output-root .model-evidence/<matrix-snapshot> \
+  --snapshot-id <matrix-snapshot-id> \
+  --reasoning medium \
+  --timeout-seconds 600
+```
+
+The resulting `leaderboard-input.json` conforms to `schemas/leaderboard-input.schema.json` and selects only run records that were actually written and identity-checked by the matrix runner.
+A launch failure is recorded in `matrix-run.json` and does not become a fabricated run record.
+
+Build the deterministic output from that manifest:
+
+```bash
+python3 scripts/build_leaderboard.py \
+  --input .model-evidence/<matrix-snapshot>/leaderboard-input.json \
+  --output .model-evidence/<matrix-snapshot>/leaderboard.json
+```
+
+The generated artifact conforms to `schemas/leaderboard-output.schema.json`.
+It contains overall and per-profile views, explicit attempted/comparable/excluded aggregate counts, coverage, objective metrics, status, and raw run references.
+Overall ranking requires every task to have at least one comparable run.
+A complete but not repeated model is `provisional`.
+A model with at least three comparable replicates for every task is `confirmed`.
+Incomplete evidence is emitted under `unranked` rather than being intermingled with ranked entries.
+The primary metric is full contract pass rate, followed by automatic-check pass rate, normalized human quality, hard-failure rate, invalid-output rate, and median latency.
+Human quality cannot rescue a hard contract failure.
+
+For a fixed policy, benchmark ledger, roster, and selected run set, output generation must be byte-deterministic.
+The input manifest and generated output preserve the release-lock fingerprint and exact run references so each value can be audited back to raw evidence.
+Provider or identity exclusions are counted separately and do not contaminate comparable quality aggregates.
+
+To onboard a later free model, capture a new roster snapshot and create a new model entity rather than mutating an earlier snapshot.
+Run the unchanged frozen suite and conditions, preserve its raw evidence, build a new input manifest, and generate a new leaderboard snapshot.
+A new model remains `unranked` until it has complete evidence and becomes `provisional` or `confirmed` only under the coverage policy.
+A task-suite change requires a new benchmark version and non-comparable output lineage.
+
 ## Run evidence
 
 A future run record should preserve at least:
