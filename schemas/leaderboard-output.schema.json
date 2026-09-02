@@ -28,7 +28,7 @@
     "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
     "benchmark_version": {"type": "string", "const": "0.2.0"},
     "policy_id": {"type": "string", "const": "leaderboard-v1"},
-    "policy_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "policy_version": {"type": "string", "const": "1.0.0"},
     "input_snapshot_id": {"type": "string", "minLength": 1},
     "roster_snapshot_id": {"type": "string", "minLength": 1},
     "generated_at": {"type": "string", "minLength": 1},
@@ -36,7 +36,40 @@
     "scope": {"type": "string", "const": "benchmark-specific model leaderboard and routing aid"},
     "models": {
       "type": "array",
-      "items": {"type": "object", "additionalProperties": true}
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["model_id", "status", "availability", "task_cells"],
+        "properties": {
+          "model_id": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "enum": ["provisional", "confirmed", "unranked", "excluded"]},
+          "availability": {"type": "string", "enum": ["eligible", "excluded"]},
+          "task_cells": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "task_id",
+                "attempted_runs",
+                "comparable_runs",
+                "excluded_runs",
+                "excluded_provider_or_identity_runs",
+                "blocked_or_unverified_runs"
+              ],
+              "properties": {
+                "task_id": {"type": "string", "minLength": 1},
+                "attempted_runs": {"type": "integer", "exclusiveMinimum": -1},
+                "comparable_runs": {"type": "integer", "exclusiveMinimum": -1},
+                "excluded_runs": {"type": "integer", "exclusiveMinimum": -1},
+                "excluded_provider_or_identity_runs": {"type": "integer", "exclusiveMinimum": -1},
+                "blocked_or_unverified_runs": {"type": "integer", "exclusiveMinimum": -1}
+              }
+            }
+          }
+        }
+      }
     },
     "aggregate": {
       "type": "object",
@@ -45,6 +78,7 @@
         "attempted_runs",
         "comparable_resolved_runs",
         "excluded_provider_or_identity_runs",
+        "blocked_or_unverified_runs",
         "full_contract_pass_runs",
         "all_automatic_checks_pass_runs",
         "hard_failure_runs",
@@ -56,6 +90,7 @@
         "attempted_runs": {"type": "integer", "exclusiveMinimum": -1},
         "comparable_resolved_runs": {"type": "integer", "exclusiveMinimum": -1},
         "excluded_provider_or_identity_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "blocked_or_unverified_runs": {"type": "integer", "exclusiveMinimum": -1},
         "full_contract_pass_runs": {"type": "integer", "exclusiveMinimum": -1},
         "all_automatic_checks_pass_runs": {"type": "integer", "exclusiveMinimum": -1},
         "hard_failure_runs": {"type": "integer", "exclusiveMinimum": -1},

@@ -24,6 +24,8 @@ RUNNER = ROOT / "scripts" / "run_task_model.py"
 RELEASE_GATE = ROOT / "scripts" / "validate_benchmark_ready.py"
 ROSTER_SCHEMA = ROOT / "schemas" / "model-roster.schema.json"
 INPUT_SCHEMA = ROOT / "schemas" / "leaderboard-input.schema.json"
+RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
+UNRESOLVED_IDENTITY_VALUES = {"", "none", "unresolved"}
 
 
 class MatrixInputError(ValueError):
@@ -142,6 +144,7 @@ def _eligible_models(roster: dict[str, Any]) -> list[dict[str, str]]:
         raise MatrixInputError("roster.models must be a non-empty array")
     eligible: list[dict[str, str]] = []
     seen: set[str] = set()
+    seen_requested: set[str] = set()
     for index, model in enumerate(models):
         if not isinstance(model, dict):
             raise MatrixInputError(f"roster.models[{index}] must be an object")
@@ -149,12 +152,18 @@ def _eligible_models(roster: dict[str, Any]) -> list[dict[str, str]]:
         if model_id in seen:
             raise MatrixInputError(f"roster contains duplicate model ID {model_id!r}")
         seen.add(model_id)
+        requested = _required_string(model.get("requested_model_id"), f"roster.models[{index}].requested_model_id")
+        if requested in seen_requested:
+            raise MatrixInputError(f"roster contains duplicate requested model ID {requested!r}")
+        seen_requested.add(requested)
         availability = _required_string(model.get("availability"), f"roster.models[{index}].availability")
         if availability != "eligible":
             continue
-        requested = _required_string(model.get("requested_model_id"), f"roster.models[{index}].requested_model_id")
         resolved = _required_string(model.get("resolved_model_id"), f"roster.models[{index}].resolved_model_id")
         provider = _required_string(model.get("provider_requested"), f"roster.models[{index}].provider_requested")
+        provider_resolved = _required_string(
+            model.get("provider_resolved"), f"roster.models[{index}].provider_resolved"
+        )
         if model_id != resolved:
             raise MatrixInputError(f"eligible roster model {model_id!r} lacks a canonical resolved identity")
         eligible.append(
@@ -163,6 +172,7 @@ def _eligible_models(roster: dict[str, Any]) -> list[dict[str, str]]:
                 "requested_model_id": requested,
                 "resolved_model_id": resolved,
                 "provider": provider,
+                "provider_resolved": provider_resolved,
             }
         )
     return sorted(eligible, key=lambda item: item["model_id"])
@@ -178,7 +188,7 @@ def build_matrix_plan(
 ) -> list[dict[str, str]]:
     """Return eligible model/task cells in stable roster-then-ledger order."""
     snapshot_id = _required_string(snapshot_id, "snapshot_id")
-    provider = _required_string(roster.get("provider"), "roster.provider")
+    _required_string(roster.get("provider"), "roster.provider")
     tasks = _ordered_tasks(ledger)
     task_inputs = task_inputs or {}
     plan: list[dict[str, str]] = []
@@ -201,7 +211,8 @@ def build_matrix_plan(
                 "model_id": model["model_id"],
                 "requested_model_id": model["requested_model_id"],
                 "resolved_model_id": model["resolved_model_id"],
-                "provider": provider,
+                "provider": model["provider"],
+                "provider_resolved": model["provider_resolved"],
                 "task_id": task["id"],
                 "profile_id": task["profile_id"],
                 "fixture_path": fixture_path,
@@ -306,6 +317,38 @@ def _record_reference(root: Path, output_root: Path, run_id: str) -> str:
     return record_path.resolve().relative_to(root.resolve()).as_posix()
 
 
+def _validate_cell_record(record: Any, cell: dict[str, str]) -> None:
+    """Ensure a written run record still belongs to its planned matrix cell."""
+    if not isinstance(record, dict):
+        raise MatrixInputError(f"cell {cell['run_id']!r} run record must be an object")
+    _validate_schema(record, RUN_SCHEMA, f"cell {cell['run_id']} run record")
+    expected = {
+        "run_id": cell["run_id"],
+        "benchmark_id": "agent-profile-benchmark",
+        "benchmark_version": "0.2.0",
+        "task_id": cell["task_id"],
+        "profile_id": cell["profile_id"],
+        "harness": "hermes-oneshot",
+        "condition": "model-calibration",
+        "model_requested": cell["requested_model_id"],
+        "provider_requested": cell["provider"],
+    }
+    for field, expected_value in expected.items():
+        if record.get(field) != expected_value:
+            raise MatrixInputError(
+                f"cell {cell['run_id']!r} run record {field} does not match the planned cell"
+            )
+    for field, expected_value in (
+        ("model_resolved", cell["resolved_model_id"]),
+        ("provider_resolved", cell["provider_resolved"]),
+    ):
+        actual = record.get(field)
+        if actual not in UNRESOLVED_IDENTITY_VALUES and actual != expected_value:
+            raise MatrixInputError(
+                f"cell {cell['run_id']!r} run record {field} does not match the planned cell"
+            )
+
+
 def run_matrix(
     *,
     root: Path,
@@ -390,8 +433,7 @@ def run_matrix(
         if (run_dir / "run-record.json").is_file():
             record_path = _record_reference(root, output_root, cell["run_id"])
             record = _load_json(run_dir / "run-record.json", f"cell {cell['run_id']} run record")
-            if not isinstance(record, dict) or record.get("run_id") != cell["run_id"]:
-                raise MatrixInputError(f"cell {cell['run_id']!r} has an invalid run record identity")
+            _validate_cell_record(record, cell)
             status = record.get("status") if isinstance(record.get("status"), str) else None
             completed_cells.append({"run_id": cell["run_id"], "record_path": record_path})
         cell_results.append(

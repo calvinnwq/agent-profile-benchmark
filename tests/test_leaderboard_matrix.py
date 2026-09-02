@@ -21,16 +21,16 @@ class LeaderboardMatrixTests(unittest.TestCase):
                     "model_id": "zeta/model:free",
                     "requested_model_id": "zeta/model:free",
                     "resolved_model_id": "zeta/model:free",
-                    "provider_requested": "nous",
-                    "provider_resolved": "nous",
+                    "provider_requested": "provider-zeta",
+                    "provider_resolved": "provider-zeta",
                     "availability": "eligible",
                 },
                 {
                     "model_id": "alpha/model:free",
                     "requested_model_id": "alpha/model:free",
                     "resolved_model_id": "alpha/model:free",
-                    "provider_requested": "nous",
-                    "provider_resolved": "nous",
+                    "provider_requested": "provider-alpha",
+                    "provider_resolved": "provider-alpha",
                     "availability": "eligible",
                 },
                 {
@@ -80,7 +80,10 @@ class LeaderboardMatrixTests(unittest.TestCase):
         )
         self.assertEqual(len({cell["run_id"] for cell in plan}), len(plan))
         self.assertTrue(all(":" not in cell["run_id"] and "/" not in cell["run_id"] for cell in plan))
-        self.assertTrue(all(cell["provider"] == "nous" for cell in plan))
+        self.assertEqual(
+            [cell["provider"] for cell in plan],
+            ["provider-alpha"] * 3 + ["provider-zeta"] * 3,
+        )
         self.assertEqual(plan[0]["fixture_path"], "fixtures/zeta/custom-fixture.json")
         self.assertEqual(plan[0]["prompt_path"], "fixtures/zeta/custom-prompt.txt")
 
@@ -111,6 +114,52 @@ class LeaderboardMatrixTests(unittest.TestCase):
         self.assertEqual(manifest["schema_version"], "leaderboard-input-v1")
         self.assertEqual([item["run_id"] for item in manifest["runs"]], ["a-run", "z-run"])
         self.assertEqual(manifest["roster_path"], "roster.json")
+
+    def test_plan_rejects_duplicate_requested_model_aliases(self) -> None:
+        from scripts.run_leaderboard_matrix import MatrixInputError, build_matrix_plan
+
+        roster = {
+            "provider": "nous",
+            "models": [
+                {
+                    "model_id": "alpha/model:free",
+                    "requested_model_id": "shared-alias",
+                    "resolved_model_id": "alpha/model:free",
+                    "provider_requested": "nous",
+                    "provider_resolved": "nous",
+                    "availability": "eligible",
+                },
+                {
+                    "model_id": "beta/model:free",
+                    "requested_model_id": "shared-alias",
+                    "resolved_model_id": "beta/model:free",
+                    "provider_requested": "nous",
+                    "provider_resolved": "nous",
+                    "availability": "eligible",
+                },
+            ],
+        }
+        ledger = {
+            "profiles": [{"id": "alpha", "task_ids": ["ALPHA-01"]}],
+            "tasks": [{"id": "ALPHA-01", "profile_id": "alpha"}],
+        }
+        with self.assertRaisesRegex(MatrixInputError, "requested model ID"):
+            build_matrix_plan(roster, ledger, "snapshot", Path("out"))
+
+    def test_written_record_must_match_the_planned_cell_schema(self) -> None:
+        from scripts.run_leaderboard_matrix import MatrixInputError, _validate_cell_record
+
+        cell = {
+            "run_id": "snapshot-model-alpha-0123456789-ALPHA-01",
+            "task_id": "ALPHA-01",
+            "profile_id": "alpha",
+            "requested_model_id": "model-a:free",
+            "resolved_model_id": "model-a:free",
+            "provider": "nous",
+            "provider_resolved": "nous",
+        }
+        with self.assertRaisesRegex(MatrixInputError, "violates its schema"):
+            _validate_cell_record({"run_id": cell["run_id"]}, cell)
 
 
 if __name__ == "__main__":

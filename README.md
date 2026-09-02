@@ -154,12 +154,13 @@ python3 scripts/render_leaderboard_html.py \
 ```
 
 The renderer preserves the benchmark scope, status gates, metrics, exclusions, and evidence lineage without adding external assets or JavaScript.
-The builder seals the default ledger, policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
+The builder seals the default ledger, `leaderboard-v1` policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
 
 Overall ranking requires complete task coverage.
 Per-profile views are available independently, but incomplete profiles remain explicitly unranked.
-A model is `provisional` after complete coverage and `confirmed` only after the policy's minimum three comparable replicates per task.
+A model is `provisional` after the policy's minimum task coverage and `confirmed` only after the policy's minimum three comparable replicates per task.
 Excluded or unresolved provider identities remain visible without contributing to comparable quality metrics.
+Blocked or unverified-isolation evidence remains visible without contributing to comparable quality metrics, and is counted separately from provider or identity exclusions.
 The generator is deterministic for a fixed policy, ledger, roster, and selected run set.
 
 Run a new eligible roster sweep through the existing isolated single-cell harness with:

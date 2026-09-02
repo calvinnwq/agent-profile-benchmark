@@ -188,7 +188,7 @@ It contains overall and per-profile views, explicit attempted/comparable/exclude
 Overall ranking requires every task to have at least one comparable run.
 A complete but not repeated model is `provisional`.
 A model with at least three comparable replicates for every task is `confirmed`.
-Incomplete evidence is emitted under `unranked` rather than being intermingled with ranked entries.
+Incomplete, blocked, and unverified-isolation evidence is emitted under `unranked` rather than being intermingled with ranked entries.
 The primary metric is full contract pass rate, followed by automatic-check pass rate, normalized human quality, hard-failure rate, invalid-output rate, and median latency.
 Human quality cannot rescue a hard contract failure.
 

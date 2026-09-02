@@ -28,15 +28,22 @@ except ImportError:  # pragma: no cover - package-style import
 try:
     from release_lock import (
         ReleaseLockError,
+        expected_release_artifact_paths,
         load_release_lock,
         verify_task_release_artifacts,
     )
 except ImportError:  # pragma: no cover - package-style import
     from scripts.release_lock import (
         ReleaseLockError,
+        expected_release_artifact_paths,
         load_release_lock,
         verify_task_release_artifacts,
     )
+
+try:
+    from replay_task import INPUT_COMPOSITION_VERSION, INPUT_SEPARATOR
+except ImportError:  # pragma: no cover - package-style import
+    from scripts.replay_task import INPUT_COMPOSITION_VERSION, INPUT_SEPARATOR
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +54,8 @@ ROSTER_SCHEMA = ROOT / "schemas" / "model-roster.schema.json"
 INPUT_SCHEMA = ROOT / "schemas" / "leaderboard-input.schema.json"
 OUTPUT_SCHEMA = ROOT / "schemas" / "leaderboard-output.schema.json"
 DEFAULT_RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
+SUPPORTED_POLICY_VERSION = "1.0.0"
+EXPECTED_POLICY_FINGERPRINT = "9e52b7f7e6a2ec485393a0be53797b48ed3a07645c53699bc39f7982a129faea"
 UNRESOLVED_IDENTITY_VALUES = {"", "none", "unresolved"}
 VALID_AVAILABILITY = {"eligible", "excluded"}
 VALID_RUN_STATUSES = {"passed", "failed", "blocked"}
@@ -70,13 +79,27 @@ def _reject_nonfinite_json_constant(value: str) -> None:
     raise LeaderboardInputError(f"non-finite JSON number {value!r} is not supported")
 
 
+def _reject_nonfinite_values(value: Any, label: str) -> None:
+    pending: list[tuple[Any, str]] = [(value, label)]
+    while pending:
+        current, path = pending.pop()
+        if isinstance(current, float) and not math.isfinite(current):
+            raise LeaderboardInputError(f"{path} contains a non-finite number")
+        if isinstance(current, dict):
+            pending.extend((child, f"{path}.{key}") for key, child in current.items())
+        elif isinstance(current, list):
+            pending.extend((child, f"{path}[{index}]") for index, child in enumerate(current))
+
+
 def _load_json(path: Path, label: str) -> Any:
     try:
-        return json.loads(
+        value = json.loads(
             path.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
             parse_constant=_reject_nonfinite_json_constant,
         )
+        _reject_nonfinite_values(value, label)
+        return value
     except LeaderboardInputError:
         raise
     except (OSError, UnicodeError, json.JSONDecodeError, RecursionError, ValueError) as exc:
@@ -126,6 +149,10 @@ def _file_fingerprint(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _bytes_fingerprint(value: bytes) -> str:
+    return f"sha256:{hashlib.sha256(value).hexdigest()}"
+
+
 def _finite_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
@@ -165,6 +192,10 @@ def _validate_policy(policy: Any, benchmark_id: str, benchmark_version: str) -> 
         _required_string(policy.get(key), f"policy.{key}")
     if policy["schema_version"] != "leaderboard-policy-v1":
         raise LeaderboardInputError("policy.schema_version must be leaderboard-policy-v1")
+    if policy["policy_version"] != SUPPORTED_POLICY_VERSION:
+        raise LeaderboardInputError(
+            f"policy.policy_version must be {SUPPORTED_POLICY_VERSION} for leaderboard-v1"
+        )
     if policy["benchmark_id"] != benchmark_id or policy["benchmark_version"] != benchmark_version:
         raise LeaderboardInputError("policy benchmark identity does not match the input")
     if policy["policy_id"] != "leaderboard-v1" or policy["scope"] != "benchmark-specific model leaderboard and routing aid" or policy["status"] != "active":
@@ -193,6 +224,15 @@ def _validate_policy(policy: Any, benchmark_id: str, benchmark_version: str) -> 
     ]
     if tie_breakers != expected_tie_breakers:
         raise LeaderboardInputError("policy.ranking.tie_breakers do not match leaderboard-v1")
+    publication = policy.get("publication")
+    if not isinstance(publication, dict):
+        raise LeaderboardInputError("policy.publication must be an object")
+    for key in (
+        "score_publishable_requires_complete_overall_coverage",
+        "routing_requires_confirmed_model_per_profile",
+    ):
+        if not isinstance(publication.get(key), bool):
+            raise LeaderboardInputError(f"policy.publication.{key} must be a boolean")
     return policy
 
 
@@ -264,6 +304,7 @@ def _load_roster(path: Path, benchmark_id: str, benchmark_version: str) -> dict[
     if not isinstance(models, list) or not models:
         raise LeaderboardInputError("roster.models must be a non-empty array")
     seen: set[str] = set()
+    seen_requested: set[str] = set()
     for index, model in enumerate(models):
         if not isinstance(model, dict):
             raise LeaderboardInputError(f"roster.models[{index}] must be an object")
@@ -272,6 +313,9 @@ def _load_roster(path: Path, benchmark_id: str, benchmark_version: str) -> dict[
             raise LeaderboardInputError(f"roster contains duplicate model ID {model_id!r}")
         seen.add(model_id)
         requested = _required_string(model.get("requested_model_id"), f"roster.models[{index}].requested_model_id")
+        if requested in seen_requested:
+            raise LeaderboardInputError(f"roster contains duplicate requested model ID {requested!r}")
+        seen_requested.add(requested)
         resolved = _required_string(model.get("resolved_model_id"), f"roster.models[{index}].resolved_model_id")
         availability = _required_string(model.get("availability"), f"roster.models[{index}].availability")
         if availability not in VALID_AVAILABILITY:
@@ -369,6 +413,22 @@ def _record_model_id(record: dict[str, Any]) -> tuple[str, bool]:
     raise LeaderboardInputError(f"run {record.get('run_id')!r} has unsupported resolution_status")
 
 
+def _record_is_scoreable(record: dict[str, Any]) -> bool:
+    """Return whether a resolved record is eligible for comparison metrics."""
+    if record.get("status") == "blocked" or record.get("execution_status") == "blocked":
+        return False
+    if record.get("failure_class") in {"git-provenance", "unverified-isolation", "usage-resolution"}:
+        return False
+    if _as_unresolved(record.get("provider_resolved")):
+        return False
+    checks = record.get("automatic_checks")
+    if isinstance(checks, list) and any(
+        isinstance(item, dict) and item.get("status") == "blocked" for item in checks
+    ):
+        return False
+    return True
+
+
 def _trusted_task_bindings(task_ids: Iterable[str]) -> dict[str, dict[str, str]]:
     """Verify the sealed release and return expected run-record fingerprints."""
     try:
@@ -378,6 +438,17 @@ def _trusted_task_bindings(task_ids: Iterable[str]) -> dict[str, dict[str, str]]
             binding = verify_task_release_artifacts(task_id, "hermes-oneshot")
             task = release_lock["tasks"][task_id]
             artifacts = task["artifacts"]
+            artifact_paths = expected_release_artifact_paths(task_id)
+            prompt_path = ROOT / artifact_paths["prompt"]
+            fixture_path = ROOT / artifact_paths["fixture"]
+            prompt_bytes = prompt_path.read_bytes()
+            fixture_bytes = fixture_path.read_bytes()
+            prompt_bytes.decode("utf-8")
+            fixture_bytes.decode("utf-8")
+            if _bytes_fingerprint(prompt_bytes) != artifacts["prompt"]["sha256"]:
+                raise LeaderboardInputError(f"sealed {task_id} prompt fingerprint changed during verification")
+            if _bytes_fingerprint(fixture_bytes) != artifacts["fixture"]["sha256"]:
+                raise LeaderboardInputError(f"sealed {task_id} fixture fingerprint changed during verification")
             bindings[task_id] = {
                 "release_lock_fingerprint": binding["release_lock_fingerprint"],
                 "ledger_fingerprint": binding["ledger_fingerprint"],
@@ -389,9 +460,11 @@ def _trusted_task_bindings(task_ids: Iterable[str]) -> dict[str, dict[str, str]]
                 "harness_fingerprint": binding["harness_fingerprint"],
                 "prompt_fingerprint": artifacts["prompt"]["sha256"],
                 "fixture_fingerprint": artifacts["fixture"]["sha256"],
+                "input_fingerprint": _bytes_fingerprint(prompt_bytes + INPUT_SEPARATOR + fixture_bytes),
+                "input_composition_version": INPUT_COMPOSITION_VERSION,
             }
         return bindings
-    except (KeyError, ReleaseLockError, TypeError) as exc:
+    except (KeyError, OSError, ReleaseLockError, TypeError, UnicodeError) as exc:
         raise LeaderboardInputError(f"sealed benchmark release could not be verified ({exc})") from exc
 
 
@@ -408,7 +481,7 @@ def _load_records(
     roster_by_requested = {model["requested_model_id"]: model for model in roster["models"]}
     records: list[dict[str, Any]] = []
     release_lock: str | None = None
-    provider_requested = roster["provider"]
+    seen_raw_references: set[str] = set()
     for ref in manifest["runs"]:
         path = _relative_path(root, ref["record_path"], f"run record {ref['run_id']}")
         record = _load_json(path, f"run record {ref['run_id']}")
@@ -436,8 +509,6 @@ def _load_records(
                     raise LeaderboardInputError(
                         f"run {ref['run_id']} {field} does not match the sealed benchmark release"
                     )
-        if record.get("provider_requested") != provider_requested:
-            raise LeaderboardInputError(f"run {ref['run_id']} uses a different requested provider")
         if record.get("harness") != "hermes-oneshot":
             raise LeaderboardInputError(f"run {ref['run_id']} does not use the scoreable Hermes harness")
         if release_lock is None:
@@ -452,6 +523,8 @@ def _load_records(
             )
         if roster_model["requested_model_id"] != record.get("model_requested"):
             raise LeaderboardInputError(f"run {ref['run_id']} requested identity differs from its roster record")
+        if record.get("provider_requested") != roster_model["provider_requested"]:
+            raise LeaderboardInputError(f"run {ref['run_id']} uses a different requested provider")
         if record.get("provider_resolved") != roster_model.get("provider_resolved"):
             if roster_model["availability"] != "excluded" and resolved:
                 raise LeaderboardInputError(f"run {ref['run_id']} resolved provider differs from its roster record")
@@ -460,11 +533,15 @@ def _load_records(
         if raw_fingerprint != _file_fingerprint(raw_path):
             raise LeaderboardInputError(f"run {ref['run_id']} raw output fingerprint does not match the recorded bytes")
         raw_reference = raw_path.relative_to(root.resolve()).as_posix()
+        if raw_reference in seen_raw_references:
+            raise LeaderboardInputError(f"duplicate raw output reference {raw_reference!r}")
+        seen_raw_references.add(raw_reference)
         record = dict(record)
         record["_model_id"] = roster_model["model_id"]
         # An excluded roster entity stays visible, but never contributes to
         # comparable quality metrics even if an old run resolved its identity.
         record["_identity_resolved"] = resolved and roster_model["availability"] == "eligible"
+        record["_comparable"] = record["_identity_resolved"] and _record_is_scoreable(record)
         record["_raw_output_reference"] = raw_reference
         record["_record_path"] = ref["record_path"]
         records.append(record)
@@ -477,7 +554,8 @@ def _run_metrics(record: dict[str, Any]) -> dict[str, Any]:
     hard_failure_ids = [item.get("id") for item in record.get("hard_failures", []) if isinstance(item, dict)]
     human_score, human_available = _human_score(record.get("human_scores"))
     full_pass = bool(
-        record.get("resolution_status") == "resolved"
+        _record_is_scoreable(record)
+        and record.get("resolution_status") == "resolved"
         and record.get("provider_resolved") not in UNRESOLVED_IDENTITY_VALUES
         and record.get("execution_status") == "completed"
         and record.get("status") == "passed"
@@ -500,7 +578,7 @@ def _run_metrics(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _scope_metrics(records: list[dict[str, Any]]) -> dict[str, Any]:
-    comparable = [record for record in records if record["_identity_resolved"]]
+    comparable = [record for record in records if record["_comparable"]]
     metrics = [_run_metrics(record) for record in comparable]
     human_scores = [item["human_quality_score"] for item in metrics if item["human_score_available"]]
     latencies = [item["latency_ms"] for item in metrics if item["latency_ms"] is not None]
@@ -548,7 +626,9 @@ def _model_entry(
     ordered_tasks: list[str],
     profile_tasks: dict[str, list[str]],
     task_profile: dict[str, str],
+    minimum_provisional_coverage: float,
     minimum_confirmed_replicates: int,
+    require_complete_overall_coverage: bool,
 ) -> dict[str, Any]:
     task_cells: list[dict[str, Any]] = []
     for task_id in ordered_tasks:
@@ -556,13 +636,17 @@ def _model_entry(
             [record for record in records if record["task_id"] == task_id],
             key=lambda item: (item.get("completed_at", ""), item["run_id"]),
         )
-        comparable = [record for record in task_records if record["_identity_resolved"]]
+        comparable = [record for record in task_records if record["_comparable"]]
         cell = {
             "task_id": task_id,
             "profile_id": task_profile[task_id],
             "attempted_runs": len(task_records),
             "comparable_runs": len(comparable),
             "excluded_runs": len(task_records) - len(comparable),
+            "excluded_provider_or_identity_runs": sum(not record["_identity_resolved"] for record in task_records),
+            "blocked_or_unverified_runs": sum(
+                record["_identity_resolved"] and not record["_comparable"] for record in task_records
+            ),
             "replicate_count": len(comparable),
             "coverage_status": "covered" if comparable else "missing",
             "metrics": _scope_metrics(task_records),
@@ -595,11 +679,13 @@ def _model_entry(
         ]
         # The trace carries every value needed for the median without exposing
         # filesystem paths or depending on the order of the input manifest.
+        covered_task_ids = {cell["task_id"] for cell in covered_cells}
         latencies = [
-            run["latency_ms"]
-            for cell in covered_cells
-            for run in cell["runs"]
-            if run["resolution_status"] == "resolved" and run["latency_ms"] is not None
+            record["latency_ms"]
+            for record in records
+            if record["task_id"] in covered_task_ids
+            and record["_comparable"]
+            and _finite_number(record.get("latency_ms"))
         ]
         return {
             "full_contract_pass_rate": _mean(
@@ -638,21 +724,25 @@ def _model_entry(
             "median_latency_ms": _median(latencies),
         }
 
-    def _scope_view(task_ids: list[str]) -> dict[str, Any]:
+    def _scope_view(task_ids: list[str], *, require_complete: bool = False) -> dict[str, Any]:
         selected = [cell for cell in task_cells if cell["task_id"] in task_ids]
         covered = [cell for cell in selected if cell["comparable_runs"] > 0]
         comparable_records = [
             record
             for task_id in task_ids
             for record in records
-            if record["task_id"] == task_id and record["_identity_resolved"]
+            if record["task_id"] == task_id and record["_comparable"]
         ]
         scope_status = "unranked"
         reason_codes: list[str] = []
         if model["availability"] == "excluded":
             scope_status = "excluded"
             reason_codes.append("roster-excluded")
-        elif len(covered) == len(task_ids):
+        elif (
+            task_ids
+            and len(covered) / len(task_ids) >= minimum_provisional_coverage
+            and (not require_complete or len(covered) == len(task_ids))
+        ):
             min_replicates = min(cell["replicate_count"] for cell in selected) if selected else 0
             if min_replicates >= minimum_confirmed_replicates:
                 scope_status = "confirmed"
@@ -681,7 +771,7 @@ def _model_entry(
         profile_id: _scope_view(task_ids)
         for profile_id, task_ids in profile_tasks.items()
     }
-    overall_view = _scope_view(ordered_tasks)
+    overall_view = _scope_view(ordered_tasks, require_complete=require_complete_overall_coverage)
     return {
         "model_id": model["model_id"],
         "requested_model_id": model["requested_model_id"],
@@ -793,6 +883,8 @@ def build_leaderboard(
         raise LeaderboardInputError(
             "custom ledger, policy, or run schema requires --allow-untrusted-inputs"
         )
+    if trusted_paths and _canonical_fingerprint(policy_document) != EXPECTED_POLICY_FINGERPRINT:
+        raise LeaderboardInputError("leaderboard policy does not match the sealed leaderboard-v1 policy")
     ordered_tasks, profile_tasks, task_profile = _load_ledger(
         ledger_path,
         benchmark_id,
@@ -821,7 +913,9 @@ def build_leaderboard(
             ordered_tasks,
             profile_tasks,
             task_profile,
+            policy["coverage"]["provisional_min_task_coverage"],
             policy["coverage"]["confirmed_min_replicates_per_task"],
+            policy["publication"]["score_publishable_requires_complete_overall_coverage"],
         )
         for model_id, roster_model in roster_by_id.items()
     ]
@@ -829,16 +923,19 @@ def build_leaderboard(
     overall = _ranking_view(entries, "overall")
     profile_views = {profile_id: _ranking_view(entries, profile_id) for profile_id in profile_tasks}
     all_run_metrics = [_run_metrics(record) for record in records]
-    comparable_records = [record for record in records if record["_identity_resolved"]]
+    comparable_records = [record for record in records if record["_comparable"]]
     comparable_metrics = [
         metrics
         for record, metrics in zip(records, all_run_metrics)
-        if record["_identity_resolved"]
+        if record["_comparable"]
     ]
     aggregate = {
         "attempted_runs": len(records),
         "comparable_resolved_runs": len(comparable_records),
-        "excluded_provider_or_identity_runs": len(records) - len(comparable_records),
+        "excluded_provider_or_identity_runs": sum(not record["_identity_resolved"] for record in records),
+        "blocked_or_unverified_runs": sum(
+            record["_identity_resolved"] and not record["_comparable"] for record in records
+        ),
         "full_contract_pass_runs": sum(item["full_contract_pass"] for item in comparable_metrics),
         "all_automatic_checks_pass_runs": sum(
             bool(metrics["automatic_check_statuses"])
@@ -862,8 +959,14 @@ def build_leaderboard(
         entry["metrics"]["human_quality_score"] is not None
         for entry in entries
     )
-    all_profiles_have_confirmed = all(
-        any(row["status"] == "confirmed" for row in view["ranked"])
+    routing_requires_confirmed = policy["publication"]["routing_requires_confirmed_model_per_profile"]
+    all_profiles_meet_routing_gate = all(
+        any(
+            row["status"] == "confirmed"
+            if routing_requires_confirmed
+            else row["status"] in {"provisional", "confirmed"}
+            for row in view["ranked"]
+        )
         for view in profile_views.values()
     )
     output = {
@@ -885,10 +988,12 @@ def build_leaderboard(
             "ranking_available": bool(overall["ranked"]),
             "score_publishable": bool(overall["ranked"]),
             "human_scores_assigned": any_human_scores,
-            "routing_recommendation_allowed": all_profiles_have_confirmed,
+            "routing_recommendation_allowed": all_profiles_meet_routing_gate,
             "reason": (
                 "Every profile has a confirmed candidate."
-                if all_profiles_have_confirmed
+                if all_profiles_meet_routing_gate and routing_requires_confirmed
+                else "Every profile has a ranked candidate."
+                if all_profiles_meet_routing_gate
                 else "Coverage or repeat confirmation is incomplete for at least one profile."
             ),
         },

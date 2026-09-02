@@ -11,6 +11,13 @@ import unittest
 from pathlib import Path
 from typing import Any
 
+from scripts.build_leaderboard import (
+    DEFAULT_RUN_SCHEMA,
+    LeaderboardInputError,
+    _load_records,
+    _trusted_task_bindings,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILDER = ROOT / "scripts" / "build_leaderboard.py"
@@ -235,12 +242,60 @@ class LeaderboardTests(unittest.TestCase):
         self.assertTrue(POLICY.is_file(), "the checked-in leaderboard policy is required")
         self.assertTrue(POLICY_SCHEMA.is_file(), "the leaderboard policy schema is required")
         from scripts.validate_benchmark import validate_schema_instance
+        from scripts.validate_benchmark import _canonical_fingerprint
+        from scripts.build_leaderboard import EXPECTED_POLICY_FINGERPRINT
 
         policy = json.loads(POLICY.read_text(encoding="utf-8"))
         schema = json.loads(POLICY_SCHEMA.read_text(encoding="utf-8"))
         self.assertEqual(validate_schema_instance(policy, schema), [])
         self.assertEqual(policy["policy_id"], "leaderboard-v1")
         self.assertEqual(policy["policy_version"], "1.0.0")
+        self.assertEqual(_canonical_fingerprint(policy), EXPECTED_POLICY_FINGERPRINT)
+
+    def test_policy_gates_are_applied_to_coverage_and_publication(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            task_ids = ("ALPHA-01", "ALPHA-02", "BETA-01", "BETA-02")
+            records = [
+                _run_record("model-a:free", task_id, True, sequence)
+                for sequence, task_id in enumerate(task_ids, start=1)
+            ]
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set()},
+                records_override=records,
+            )
+            policy_path = root / "policy.json"
+            policy = json.loads(policy_path.read_text(encoding="utf-8"))
+            policy["coverage"]["provisional_min_task_coverage"] = 0.5
+            policy["publication"]["score_publishable_requires_complete_overall_coverage"] = False
+            policy["publication"]["routing_requires_confirmed_model_per_profile"] = False
+            _write_json(policy_path, policy)
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(output["overall"]["ranked"][0]["status"], "provisional")
+            self.assertAlmostEqual(
+                output["overall"]["ranked"][0]["coverage"]["task_coverage_rate"],
+                4 / 6,
+                places=5,
+            )
+            self.assertTrue(output["publication"]["score_publishable"])
+            self.assertTrue(output["publication"]["routing_recommendation_allowed"])
+
+    def test_policy_version_is_pinned_for_leaderboard_v1(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _build_synthetic_input(root, passed_tasks_by_model={"model-a:free": set()})
+            policy_path = root / "policy.json"
+            policy = json.loads(policy_path.read_text(encoding="utf-8"))
+            policy["policy_version"] = "1.0.1"
+            _write_json(policy_path, policy)
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("policy_version", result.stderr)
 
     def test_incomplete_global_coverage_stays_unranked_but_profile_view_can_rank(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -288,6 +343,123 @@ class LeaderboardTests(unittest.TestCase):
             self.assertEqual(model["coverage"]["minimum_replicates"], 3)
             self.assertEqual(model["coverage"]["maximum_replicates"], 3)
             self.assertTrue(output["publication"]["routing_recommendation_allowed"])
+
+    def test_blocked_evidence_is_visible_but_not_comparable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = []
+            for sequence, task in enumerate(_base_ledger()["tasks"], start=1):
+                record = _run_record("model-a:free", task["id"], True, sequence)
+                record["status"] = "blocked"
+                record["execution_status"] = "blocked"
+                record["failure_class"] = "unverified-isolation"
+                record["automatic_checks"][0]["status"] = "blocked"
+                records.append(record)
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set()},
+                records_override=records,
+            )
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(output["overall"]["ranked"], [])
+            self.assertEqual(output["overall"]["unranked"][0]["status"], "unranked")
+            self.assertEqual(output["aggregate"]["comparable_resolved_runs"], 0)
+            self.assertEqual(output["aggregate"]["excluded_provider_or_identity_runs"], 0)
+            self.assertEqual(output["aggregate"]["blocked_or_unverified_runs"], len(records))
+            self.assertEqual(output["models"][0]["coverage"]["comparable_runs"], 0)
+            cell = output["models"][0]["task_cells"][0]
+            self.assertEqual(cell["excluded_provider_or_identity_runs"], 0)
+            self.assertEqual(cell["blocked_or_unverified_runs"], 1)
+
+    def test_duplicate_raw_output_reference_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = _run_record("model-a:free", "ALPHA-01", True, 1)
+            second = _run_record("model-a:free", "ALPHA-02", True, 2)
+            second["raw_output_reference"] = first["raw_output_reference"]
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set()},
+                records_override=[first, second],
+            )
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("duplicate raw output reference", result.stderr)
+
+    def test_trusted_release_binds_composed_input_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record = _run_record("model-a:free", "KODY-01", True, 1)
+            trusted_bindings = _trusted_task_bindings({"KODY-01": "kody"})
+            record.update(trusted_bindings["KODY-01"])
+            record["input_fingerprint"] = FINGERPRINT
+            record_path = root / "record.json"
+            raw_path = root / record["raw_output_reference"]
+            raw_path.parent.mkdir(parents=True, exist_ok=True)
+            raw_path.write_text("{}\n", encoding="utf-8")
+            _write_json(record_path, record)
+            manifest = {
+                "benchmark_id": "agent-profile-benchmark",
+                "benchmark_version": "0.2.0",
+                "runs": [{"run_id": record["run_id"], "record_path": "record.json"}],
+            }
+
+            with self.assertRaisesRegex(LeaderboardInputError, "input_fingerprint"):
+                _load_records(
+                    manifest,
+                    _base_roster(("model-a:free",)),
+                    root,
+                    {"KODY-01": "kody"},
+                    DEFAULT_RUN_SCHEMA,
+                    _base_policy(),
+                    trusted_bindings,
+                )
+
+    def test_blocked_latency_does_not_affect_comparable_median(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = [
+                _run_record("model-a:free", task["id"], True, sequence)
+                for sequence, task in enumerate(_base_ledger()["tasks"], start=1)
+            ]
+            blocked = _run_record("model-a:free", "ALPHA-01", True, 99)
+            blocked["status"] = "blocked"
+            blocked["execution_status"] = "blocked"
+            blocked["failure_class"] = "unverified-isolation"
+            blocked["automatic_checks"][0]["status"] = "blocked"
+            blocked["latency_ms"] = 999999
+            records.append(blocked)
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set()},
+                records_override=records,
+            )
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            median = output["overall"]["ranked"][0]["metrics"]["median_latency_ms"]
+            self.assertEqual(median, 103.5)
+            self.assertNotEqual(median, 999999)
+
+    def test_duplicate_requested_roster_identity_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            roster = _base_roster(("model-a:free", "model-b:free"))
+            roster["models"][1]["requested_model_id"] = "model-a:free"
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set(), "model-b:free": set()},
+                roster=roster,
+            )
+
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("requested model ID", result.stderr)
 
     def test_hard_failure_prevents_full_pass_even_if_status_is_passed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -555,6 +727,7 @@ class LeaderboardTests(unittest.TestCase):
                     "attempted_runs": 12,
                     "comparable_resolved_runs": 12,
                     "excluded_provider_or_identity_runs": 0,
+                    "blocked_or_unverified_runs": 0,
                     "full_contract_pass_runs": 6,
                     "all_automatic_checks_pass_runs": 6,
                     "hard_failure_runs": 6,
