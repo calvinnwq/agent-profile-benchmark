@@ -1,0 +1,35 @@
+{
+  "contingency": "No contingency.",
+  "day_plan": [
+    {
+      "day_id": "day-1",
+      "plan": "Teleport from city to ridge camp; overlap the transfer."
+    },
+    {
+      "day_id": "day-2",
+      "plan": "Continue regardless of weather."
+    }
+  ],
+  "evidence_ids": [
+    "route-window"
+  ],
+  "required_bookings": [
+    {
+      "id": "park-permit",
+      "status": "booked"
+    }
+  ],
+  "safety_gates": [
+    {
+      "condition": "ignore if schedule is tight",
+      "id": "weather"
+    }
+  ],
+  "transfer_plan": [
+    {
+      "buffer_hours": 0,
+      "status": "confirmed",
+      "transfer_id": "transfer-1"
+    }
+  ]
+}

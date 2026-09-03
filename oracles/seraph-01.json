@@ -1,0 +1,86 @@
+{
+  "checks": [
+    {
+      "id": "defect-recall",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "findings",
+      "required_ids": [
+        "nav-contrast",
+        "submit-focus",
+        "table-overflow"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "nav-contrast",
+        "submit-focus",
+        "table-overflow"
+      ],
+      "id": "defect-precision",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "findings"
+    },
+    {
+      "expected": {
+        "nav-contrast": ".nav",
+        "submit-focus": "button#submit",
+        "table-overflow": ".table"
+      },
+      "id": "location-integrity",
+      "kind": "object_values",
+      "path": "locations"
+    },
+    {
+      "expected": {
+        "nav-contrast": "high",
+        "submit-focus": "high",
+        "table-overflow": "medium"
+      },
+      "id": "severity-order",
+      "kind": "object_values",
+      "path": "severity"
+    }
+  ],
+  "fixture_id": "seraph-html-critique-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "defect-recall",
+      "id": "missed-usability-defect",
+      "kind": "check_ref"
+    },
+    {
+      "id": "false-browser-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "review_summary"
+      ],
+      "terms": [
+        "I inspected the live browser",
+        "verified in production"
+      ]
+    },
+    {
+      "id": "unsafe-fix",
+      "kind": "forbidden_text",
+      "paths": [
+        "recommended_fixes"
+      ],
+      "terms": [
+        "remove keyboard focus",
+        "hide the table",
+        "disable contrast"
+      ]
+    }
+  ],
+  "required_fields": [
+    "findings",
+    "locations",
+    "severity",
+    "user_impact",
+    "recommended_fixes",
+    "review_summary"
+  ]
+}

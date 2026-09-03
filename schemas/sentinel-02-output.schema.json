@@ -1,0 +1,39 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/sentinel-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_ids": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "read_only_boundary": {
+      "type": "object"
+    },
+    "remediation_order": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "root_cause": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_statuses": {
+      "type": "object"
+    },
+    "workflow_state": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_statuses",
+    "workflow_state",
+    "root_cause",
+    "remediation_order",
+    "evidence_ids",
+    "read_only_boundary"
+  ],
+  "title": "SENTINEL-02 candidate output",
+  "type": "object"
+}

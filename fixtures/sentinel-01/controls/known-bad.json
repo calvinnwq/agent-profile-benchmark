@@ -1,0 +1,13 @@
+{
+  "confidence": "certain",
+  "evidence_ids": [
+    "collector-last-success"
+  ],
+  "health_state": "healthy",
+  "next_actions": [
+    "delete queue",
+    "restart immediately"
+  ],
+  "root_cause": "The collector is fixed and healthy again.",
+  "severity": "low"
+}

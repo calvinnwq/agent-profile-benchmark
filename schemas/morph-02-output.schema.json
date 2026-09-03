@@ -1,0 +1,41 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/morph-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "call_to_action": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "claims_register": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "message_hierarchy": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "open_questions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "page_sections": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "proof_points": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "message_hierarchy",
+    "page_sections",
+    "proof_points",
+    "claims_register",
+    "call_to_action",
+    "open_questions"
+  ],
+  "title": "MORPH-02 candidate output",
+  "type": "object"
+}

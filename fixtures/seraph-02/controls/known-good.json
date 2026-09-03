@@ -1,0 +1,52 @@
+{
+  "accessibility_requirements": [
+    "Every control is keyboard reachable with visible focus.",
+    "Announce loading, stale, and error state changes."
+  ],
+  "control_inventory": [
+    {
+      "id": "refresh",
+      "label": "Refresh data"
+    },
+    {
+      "id": "filter",
+      "label": "Filter rows"
+    }
+  ],
+  "open_questions": [
+    "What freshness threshold should mark data stale?"
+  ],
+  "read_only_boundary": {
+    "mutations": "none",
+    "note": "Refresh and filter only read data."
+  },
+  "state_matrix": [
+    {
+      "id": "loading",
+      "view": "Show progress and disable duplicate refresh."
+    },
+    {
+      "id": "ready",
+      "view": "Show data and active filters."
+    },
+    {
+      "id": "empty",
+      "view": "Explain that no rows match."
+    },
+    {
+      "id": "stale",
+      "view": "Show stale warning and offer refresh."
+    },
+    {
+      "id": "error",
+      "view": "Show error details and retry."
+    }
+  ],
+  "transition_rules": [
+    "loading -> ready after a successful fetch",
+    "ready -> stale when freshness expires",
+    "stale -> loading on refresh",
+    "loading -> error on failure",
+    "error -> loading on retry"
+  ]
+}

@@ -4,7 +4,7 @@ This benchmark compares models under matched conditions.
 
 The model is the independent variable.
 
-Task wording, profile instructions, fixture bytes, allowed tools, output format, evaluator version, timeout policy, and verification opportunity must remain constant within a comparison.
+Task wording, profile instructions, fixture bytes, allowed tools, output format, evaluator version, reasoning effort, timeout policy, and verification opportunity must remain constant within a comparison.
 
 ## Evaluation phases
 
@@ -60,8 +60,8 @@ Reviewers should not reward a response for matching the historical solution when
 
 `benchmark-ready` means the prompt, fixture, evaluator oracle, and known-good and known-bad controls have passed validation.
 
-For schema and benchmark version `0.1.0`, the validator accepts only `contract-draft`.
-It rejects `fixture-ready` until fixture, prompt, evaluator, and control evidence is modeled, and rejects `benchmark-ready` until that evidence has passed validation.
+For benchmark version `0.2.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
+`python3 scripts/validate_benchmark.py` validates the frozen ledger contract, while `python3 scripts/validate_benchmark_ready.py` validates artifact bindings and both controls for all 18 tasks.
 
 No result should be used for model routing while a task remains `contract-draft`.
 
@@ -113,10 +113,93 @@ python3 scripts/replay_kody01.py \
 
 Replay the known-bad control with `--condition known-bad-control` and retain its failed run record as visible evidence.
 The replay harness calls no model and performs no external action.
-The slice is not a model benchmark result and does not change the ledger lifecycle status.
+The control result is evaluator evidence, not a model benchmark score.
 
-Run `python3 scripts/validate_kody01.py` as the local release gate.
-It checks the manifest bindings and fingerprints, executes both controls, replays both records into a temporary directory, and validates the generated records against the run-record schema.
+Run `python3 scripts/validate_kody01.py` for the standalone KODY-01 compatibility gate.
+Run `python3 scripts/validate_benchmark_ready.py` for the release gate covering all 18 tasks.
+The release gate checks manifest bindings and fingerprints, executes both controls for every task, validates known-good outputs against their schemas, and requires known-bad controls to trigger every declared hard failure.
+The sealed release-artifact lock independently pins those package bytes and shared runtime files, so changing an artifact and repinning its mutable manifest cannot redefine a benchmark task.
+
+## Model calibration harness
+
+`scripts/run_task_model.py` runs one approved model-calibration cell for any task with the frozen prompt and fixture.
+By default it invokes `scripts/hermes_no_tools.py`, which selects the task profile only for credentials, ignores profile configuration and rules, disables fallback routing, pins the requested reasoning effort, and passes an explicit empty tool surface.
+The adapter also disables the one-shot session database, so no transcript or memory state is persisted.
+It preserves the exact composed input, stdout, stderr, usage report, process status, model/provider resolution, trial metadata, and pre-run Git state under `.model-evidence/<run-id>/`.
+A custom `--agent-command` is supported for test doubles and diagnostics, but its tool, memory, and fallback isolation is unverified, so the runner records the cell as `blocked` rather than scoreable evidence.
+Malformed model output, non-zero exits, and timeouts remain visible as failed evidence.
+Missing or contradictory model/provider resolution remains visible as blocked evidence.
+Model-authored Python in `ARCH-01` is not executed without an OS sandbox, so that cell is blocked until a sandboxed evaluator is available.
+Direct `scripts/evaluate_task.py` calls also treat candidate output as untrusted by default and do not execute `ARCH-01` code.
+The `--trusted-control` flag is reserved for exact release-locked controls after integrity validation; never use it for model output.
+The runner verifies the sealed release-artifact lock before launching a model process.
+
+For example:
+
+```bash
+python3 scripts/run_task_model.py \
+  --task KODY-02 \
+  --fixture fixtures/kody-02/input.json \
+  --prompt fixtures/kody-02/prompt.txt \
+  --run-id kody-02-model-001 \
+  --model-requested <resolved-model-id> \
+  --provider <verified-provider-id>
+```
+
+The command does not publish scores or create a model matrix.
+
+## Re-runnable leaderboard workflow
+
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.2.0`.
+It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
+
+Roster snapshots must conform to `schemas/model-roster.schema.json`.
+Each model entity preserves its requested ID, resolved ID, requested and resolved provider, availability, and exclusion reason where applicable.
+An eligible entity must have a canonical resolved model identity.
+An excluded entity remains visible but cannot enter a ranking.
+
+A matrix run should use `scripts/run_leaderboard_matrix.py` rather than invoking models through profile aliases or assembling run records by hand.
+The runner validates the roster and frozen task manifests, checks `scripts/validate_benchmark_ready.py` before the first model call, plans every eligible model against all 18 frozen tasks, and invokes `scripts/run_task_model.py` sequentially with the same reasoning and timeout settings.
+The runner writes a new evidence root and refuses to overwrite a non-empty one.
+A cell's raw output and run record remain immutable under its run ID.
+
+```bash
+python3 scripts/run_leaderboard_matrix.py \
+  --roster .model-evidence/<roster-snapshot>/leaderboard-roster.json \
+  --output-root .model-evidence/<matrix-snapshot> \
+  --snapshot-id <matrix-snapshot-id> \
+  --reasoning medium \
+  --timeout-seconds 600
+```
+
+The resulting `leaderboard-input.json` conforms to `schemas/leaderboard-input.schema.json` and selects only run records that were actually written and identity-checked by the matrix runner.
+A launch failure is recorded in `matrix-run.json` and does not become a fabricated run record.
+
+Build the deterministic output from that manifest:
+
+```bash
+python3 scripts/build_leaderboard.py \
+  --input .model-evidence/<matrix-snapshot>/leaderboard-input.json \
+  --output .model-evidence/<matrix-snapshot>/leaderboard.json
+```
+
+The generated artifact conforms to `schemas/leaderboard-output.schema.json`.
+It contains overall and per-profile views, explicit attempted/comparable/excluded aggregate counts, coverage, objective metrics, status, and raw run references.
+Overall ranking requires every task to have at least one comparable run.
+A complete but not repeated model is `provisional`.
+A model with at least three comparable replicates for every task is `confirmed`.
+Incomplete, blocked, and unverified-isolation evidence is emitted under `unranked` rather than being intermingled with ranked entries.
+The primary metric is full contract pass rate, followed by automatic-check pass rate, normalized human quality, hard-failure rate, invalid-output rate, and median latency.
+Human quality cannot rescue a hard contract failure.
+
+For a fixed policy, benchmark ledger, roster, and selected run set, output generation must be byte-deterministic.
+The input manifest and generated output preserve the release-lock fingerprint and exact run references so each value can be audited back to raw evidence.
+Provider or identity exclusions are counted separately and do not contaminate comparable quality aggregates.
+
+To onboard a later free model, capture a new roster snapshot and create a new model entity rather than mutating an earlier snapshot.
+Run the unchanged frozen suite and conditions, preserve its raw evidence, build a new input manifest, and generate a new leaderboard snapshot.
+A new model remains `unranked` until it has complete evidence and becomes `provisional` or `confirmed` only under the coverage policy.
+A task-suite change requires a new benchmark version and non-comparable output lineage.
 
 ## Run evidence
 
@@ -126,18 +209,35 @@ A future run record should preserve at least:
 run_id
 benchmark_id
 benchmark_version
+release_lock_fingerprint
+ledger_fingerprint
 task_id
 profile_id
 model_requested
 model_resolved
+provider_requested
+provider_resolved
+resolution_status
 harness
 condition
+evaluator_version
+task_manifest_fingerprint
+oracle_fingerprint
+output_schema_fingerprint
+evaluator_fingerprint
+run_record_schema_fingerprint
+harness_fingerprint
 prompt_fingerprint
 fixture_fingerprint
+input_fingerprint
+input_composition_version
 started_at
 completed_at
 status
+execution_status
+failure_class
 raw_output_reference
+raw_output_fingerprint
 automatic_checks
 hard_failures
 human_scores
@@ -147,8 +247,11 @@ notes
 ```
 
 `model_requested` and `model_resolved` are separate fields.
-
+A scoreable cell must carry the full resolved model and provider IDs from the usage report.
+If the provider cannot resolve either identity, the record uses the explicit `unresolved` marker and a `blocked` status rather than substituting the request.
 A provider alias alone is not sufficient model identity.
+The manifest, evaluator, output schema, run-record schema, and exact composed input fingerprints must be recorded for every cell.
+Run IDs are unique within an evidence root; retries use a new run ID so failed attempts remain immutable.
 
 Failed, timed-out, unsupported, and blocked cells must remain visible in the run index.
 

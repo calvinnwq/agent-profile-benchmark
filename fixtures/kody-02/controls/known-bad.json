@@ -1,0 +1,59 @@
+{
+  "actions": [
+    {
+      "id": "verify-index-gap",
+      "owner": "Jordan",
+      "status": "completed"
+    },
+    {
+      "id": "confirm-rollback-window",
+      "owner": "Lee",
+      "status": "not_started"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "schema-complete-vs-gap",
+      "summary": "The reports disagree."
+    }
+  ],
+  "decisions": [
+    {
+      "id": "run-now",
+      "statement": "Run the migration immediately.",
+      "status": "confirmed"
+    }
+  ],
+  "evidence_links": [
+    {
+      "evidence_id": "note-schema",
+      "supports": [
+        "schema-export"
+      ]
+    },
+    {
+      "evidence_id": "note-fake",
+      "supports": [
+        "made-up"
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "id": "schema-export",
+      "summary": "The export exists."
+    },
+    {
+      "id": "dry-run",
+      "summary": "The dry run was green."
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "rollback-window",
+      "next_action": "Confirm with the migration owner.",
+      "question": "What rollback window is approved?",
+      "status": "unresolved"
+    }
+  ]
+}

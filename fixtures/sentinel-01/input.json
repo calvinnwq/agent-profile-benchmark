@@ -1,0 +1,31 @@
+{
+  "allowed_actions": [
+    "inspect logs",
+    "verify source freshness",
+    "restart after diagnosis"
+  ],
+  "fixture_id": "sentinel-collector-incident-v1",
+  "fixture_version": "1.0.0",
+  "observed_at": "2026-06-10T16:30:00Z",
+  "signals": [
+    {
+      "id": "collector-last-success",
+      "value": "2026-06-10T14:00:00Z"
+    },
+    {
+      "id": "auth-check",
+      "value": "healthy"
+    },
+    {
+      "id": "disk-check",
+      "value": "healthy"
+    },
+    {
+      "id": "queue-depth",
+      "value": "growing"
+    }
+  ],
+  "thresholds": {
+    "stale_after_minutes": 60
+  }
+}

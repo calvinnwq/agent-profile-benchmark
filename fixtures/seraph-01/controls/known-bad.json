@@ -1,0 +1,22 @@
+{
+  "findings": [
+    {
+      "id": "nav-contrast",
+      "summary": "Navigation could be clearer."
+    }
+  ],
+  "locations": {
+    "nav-contrast": "wrong"
+  },
+  "recommended_fixes": [
+    {
+      "fix": "Remove keyboard focus.",
+      "id": "submit-focus"
+    }
+  ],
+  "review_summary": "I inspected the live browser and verified in production that there are no issues.",
+  "severity": {
+    "nav-contrast": "low"
+  },
+  "user_impact": {}
+}

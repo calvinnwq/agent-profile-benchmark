@@ -1,0 +1,18 @@
+{
+  "assumptions": [],
+  "must_have": [
+    "source connectors",
+    "daily digest",
+    "team review",
+    "native mobile app",
+    "custom enterprise workflows"
+  ],
+  "problem": "Build a complete collaboration platform.",
+  "product_promise": "Do everything for everyone.",
+  "should_have": [],
+  "success_metrics": [
+    "Make users happy."
+  ],
+  "target_user": "Enterprise procurement departments and individual hobbyists.",
+  "wont_have": []
+}

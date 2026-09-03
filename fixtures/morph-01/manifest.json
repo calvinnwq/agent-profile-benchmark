@@ -1,0 +1,52 @@
+{
+  "allowed_tools": [],
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json",
+      "sha256": "sha256:c31f2539d6d9da333879f9b679d2f834c1ff3f6f4fc50e0e38bc2879ea8cb0fe"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:ec5e921df6570b3455047e5ab998e2f0bde14b77deb9e1fb1fb2531ac28b7fcd"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "morph-mvp-definition-v1",
+    "path": "input.json",
+    "sha256": "sha256:df39cdf983e1ddfacc70ff45a0977ae22c7bc44e7f74bf2405ffb8c7fac84069",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/morph-01.json",
+    "sha256": "sha256:9a8874040e9b4522be0c01cb74fdb7d000dd26b5b7b5000118c548d1f89a9485"
+  },
+  "output_schema": {
+    "path": "../../schemas/morph-01-output.schema.json",
+    "sha256": "sha256:888dba6d3a7931b13676f7618aaa61a971f792c7647f247b7ae44e154bfd187c"
+  },
+  "profile_id": "morph",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:c2a237aa4a1dbc47e4c1e506db338d8dd7fb151293ce2576b980a507a32b7269",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+  },
+  "status": "benchmark-ready",
+  "task_id": "MORPH-01"
+}

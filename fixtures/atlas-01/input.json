@@ -1,0 +1,56 @@
+{
+  "catalogue": [
+    {
+      "available": true,
+      "cost_aud": 90,
+      "fuel_type": "isobutane",
+      "id": "stove-a",
+      "label": "Canister stove",
+      "weight_g": 300
+    },
+    {
+      "available": true,
+      "cost_aud": 60,
+      "fuel_type": "isobutane",
+      "id": "pot-a",
+      "label": "750 ml pot",
+      "weight_g": 250
+    },
+    {
+      "available": true,
+      "cost_aud": 20,
+      "fuel_type": "isobutane",
+      "id": "windscreen-a",
+      "label": "Foil windscreen",
+      "weight_g": 80
+    },
+    {
+      "available": true,
+      "cost_aud": 110,
+      "fuel_type": "liquid",
+      "id": "stove-b",
+      "label": "Liquid-fuel stove",
+      "weight_g": 420
+    },
+    {
+      "available": false,
+      "cost_aud": 18,
+      "fuel_type": "none",
+      "id": "mug-a",
+      "label": "Aluminium mug",
+      "weight_g": 120
+    }
+  ],
+  "constraints": {
+    "fuel_type": "isobutane",
+    "max_cost_aud": 220,
+    "max_weight_g": 800
+  },
+  "fixture_id": "atlas-cook-kit-selection-v1",
+  "fixture_version": "1.0.0",
+  "requirements": [
+    "Boil water for four days.",
+    "Include a compatible contingency."
+  ],
+  "trip_days": 4
+}

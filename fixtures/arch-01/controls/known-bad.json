@@ -1,0 +1,16 @@
+{
+  "changed_files": [
+    "auth.py",
+    "README.md"
+  ],
+  "implementation": {
+    "auth.py": "def verify(token, expected):\n    print(token)\n    return token == expected\n"
+  },
+  "residual_risks": [],
+  "verification_summary": {
+    "focused_tests": [
+      "not actually run"
+    ],
+    "status": "not_run"
+  }
+}

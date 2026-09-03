@@ -1,0 +1,27 @@
+{
+  "call_to_action": "Click here to learn more, maybe",
+  "claims_register": [
+    {
+      "claim": "Lantern guarantees savings.",
+      "claim_id": "consolidates-supplied-sources",
+      "evidence_id": "unknown"
+    }
+  ],
+  "message_hierarchy": [
+    "Lantern is a complete project management suite for everyone."
+  ],
+  "open_questions": [],
+  "page_sections": [
+    {
+      "id": "hero",
+      "purpose": "Be exciting."
+    },
+    {
+      "id": "cta",
+      "purpose": "Learn more."
+    }
+  ],
+  "proof_points": [
+    "proof-connectors"
+  ]
+}

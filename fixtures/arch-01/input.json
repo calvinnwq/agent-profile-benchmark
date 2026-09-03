@@ -1,0 +1,18 @@
+{
+  "fixture_id": "arch-authentication-fix-v1",
+  "fixture_version": "1.0.0",
+  "hidden_test_behaviour": [
+    "equal strings return true",
+    "different strings return false",
+    "non-string values return false"
+  ],
+  "requirements": [
+    "Use constant-time comparison for string tokens.",
+    "Reject non-string inputs.",
+    "Do not log or persist credential material.",
+    "Change only auth.py."
+  ],
+  "source_files": {
+    "auth.py": "def verify(token, expected):\n    return token == expected\n"
+  }
+}

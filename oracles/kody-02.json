@@ -1,0 +1,103 @@
+{
+  "checks": [
+    {
+      "id": "fact-retention",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "facts",
+      "required_ids": [
+        "schema-export",
+        "dry-run",
+        "index-gap",
+        "rollback-window",
+        "migration-owner"
+      ]
+    },
+    {
+      "id": "conflict-surfacing",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "conflicts",
+      "required_ids": [
+        "schema-complete-vs-gap",
+        "rollback-unconfirmed"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "note-schema",
+        "note-dry-run",
+        "note-index-gap",
+        "note-rollback",
+        "note-owner"
+      ],
+      "id": "evidence-linking",
+      "id_key": "evidence_id",
+      "kind": "list_ids",
+      "path": "evidence_links",
+      "required_ids": [
+        "note-schema",
+        "note-dry-run",
+        "note-index-gap",
+        "note-rollback",
+        "note-owner"
+      ],
+      "support_map": {
+        "note-dry-run": ["dry-run"],
+        "note-index-gap": ["index-gap"],
+        "note-owner": ["migration-owner"],
+        "note-rollback": ["rollback-window"],
+        "note-schema": ["schema-export"]
+      }
+    },
+    {
+      "allowed_ids": [
+        "verify-index-gap",
+        "confirm-rollback-window",
+        "record-owner-decision"
+      ],
+      "allowed_owners": [
+        "Morgan",
+        "Priya",
+        "Lee"
+      ],
+      "id": "action-completeness",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "actions",
+      "require_owner": true,
+      "required_ids": [
+        "verify-index-gap",
+        "confirm-rollback-window",
+        "record-owner-decision"
+      ]
+    }
+  ],
+  "fixture_id": "kody-conflicting-handoffs-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "conflict-surfacing",
+      "id": "silent-conflict",
+      "kind": "check_ref"
+    },
+    {
+      "check_id": "evidence-linking",
+      "id": "fabricated-evidence",
+      "kind": "check_ref"
+    },
+    {
+      "check_id": "action-completeness",
+      "id": "lost-action-owner",
+      "kind": "check_ref"
+    }
+  ],
+  "required_fields": [
+    "facts",
+    "conflicts",
+    "evidence_links",
+    "decisions",
+    "actions",
+    "open_questions"
+  ]
+}

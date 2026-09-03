@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/release-artifact-lock.schema.json",
+  "title": "Agent Profile Benchmark release artifact lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "benchmark_id", "benchmark_version", "lock_version", "shared", "tasks"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "benchmark_id": {"const": "agent-profile-benchmark"},
+    "benchmark_version": {"const": "0.2.0"},
+    "lock_version": {"const": "1"},
+    "shared": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/artifact"
+      },
+      "minProperties": 1
+    },
+    "tasks": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/task"
+      },
+      "minProperties": 1
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixture_id", "fixture_version", "artifacts"],
+      "properties": {
+        "fixture_id": {"type": "string", "minLength": 1},
+        "fixture_version": {"type": "string", "minLength": 1},
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "manifest",
+            "fixture",
+            "prompt",
+            "oracle",
+            "output_schema",
+            "evaluator",
+            "run_record_schema",
+            "known_good",
+            "known_bad",
+            "release_gate"
+          ],
+          "properties": {
+            "manifest": {"$ref": "#/$defs/artifact"},
+            "fixture": {"$ref": "#/$defs/artifact"},
+            "prompt": {"$ref": "#/$defs/artifact"},
+            "oracle": {"$ref": "#/$defs/artifact"},
+            "output_schema": {"$ref": "#/$defs/artifact"},
+            "evaluator": {"$ref": "#/$defs/artifact"},
+            "run_record_schema": {"$ref": "#/$defs/artifact"},
+            "known_good": {"$ref": "#/$defs/artifact"},
+            "known_bad": {"$ref": "#/$defs/artifact"},
+            "release_gate": {"$ref": "#/$defs/artifact"}
+          }
+        }
+      }
+    }
+  }
+}

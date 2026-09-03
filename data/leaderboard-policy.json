@@ -1,0 +1,28 @@
+{
+  "$schema": "../schemas/leaderboard-policy.schema.json",
+  "schema_version": "leaderboard-policy-v1",
+  "policy_id": "leaderboard-v1",
+  "policy_version": "1.0.0",
+  "benchmark_id": "agent-profile-benchmark",
+  "benchmark_version": "0.2.0",
+  "scope": "benchmark-specific model leaderboard and routing aid",
+  "status": "active",
+  "coverage": {
+    "provisional_min_task_coverage": 1.0,
+    "confirmed_min_replicates_per_task": 3
+  },
+  "ranking": {
+    "primary": "full_contract_pass_rate",
+    "tie_breakers": [
+      "automatic_check_pass_rate",
+      "human_quality_score",
+      "hard_failure_rate",
+      "invalid_output_rate",
+      "median_latency_ms"
+    ]
+  },
+  "publication": {
+    "score_publishable_requires_complete_overall_coverage": true,
+    "routing_requires_confirmed_model_per_profile": true
+  }
+}

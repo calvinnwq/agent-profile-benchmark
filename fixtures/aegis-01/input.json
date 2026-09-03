@@ -1,0 +1,28 @@
+{
+  "constraints": {
+    "maximum_equity_share": 0.5,
+    "minimum_cash": 10000
+  },
+  "currency": "AUD",
+  "fixture_id": "aegis-synthetic-portfolio-v1",
+  "fixture_version": "1.0.0",
+  "goal": "Preserve a cash reserve while keeping growth exposure within the stated ceiling.",
+  "positions": [
+    {
+      "id": "cash",
+      "label": "Cash reserve",
+      "value": 12000
+    },
+    {
+      "id": "bonds",
+      "label": "Bonds",
+      "value": 18000
+    },
+    {
+      "id": "equities",
+      "label": "Global equities",
+      "value": 30000
+    }
+  ],
+  "synthetic_only": true
+}

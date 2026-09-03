@@ -1,0 +1,30 @@
+{
+  "fixture_id": "morph-launch-direction-v1",
+  "fixture_version": "1.0.0",
+  "positioning": {
+    "allowed_claims": [
+      "consolidates supplied sources",
+      "supports a daily review"
+    ],
+    "audience": "time-poor remote teams",
+    "cta": "Request pilot access",
+    "product": "Lantern",
+    "promise": "one clear daily brief",
+    "proof_points": [
+      {
+        "id": "proof-connectors",
+        "text": "Connects the three supplied team sources."
+      },
+      {
+        "id": "proof-setup",
+        "text": "Synthetic pilot setup target is under 10 minutes."
+      }
+    ],
+    "required_sections": [
+      "hero",
+      "how-it-works",
+      "proof",
+      "cta"
+    ]
+  }
+}

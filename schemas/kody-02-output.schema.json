@@ -1,0 +1,41 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/kody-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "conflicts": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "decisions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "evidence_links": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "facts": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "open_questions": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "facts",
+    "conflicts",
+    "evidence_links",
+    "decisions",
+    "actions",
+    "open_questions"
+  ],
+  "title": "KODY-02 candidate output",
+  "type": "object"
+}

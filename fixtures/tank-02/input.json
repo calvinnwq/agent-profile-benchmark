@@ -1,0 +1,19 @@
+{
+  "check_in": {
+    "note": "Calf tightness after the second run",
+    "pain_scale": 4,
+    "sessions_completed": 2,
+    "sleep_quality": "poor"
+  },
+  "constraints": {
+    "avoid_catch_up": true,
+    "preserve_goal": true
+  },
+  "fixture_id": "tank-training-adaptation-v1",
+  "fixture_version": "1.0.0",
+  "goal": "Complete a half marathon in 10 weeks",
+  "planned_week": {
+    "sessions": 4,
+    "volume_km": 36
+  }
+}

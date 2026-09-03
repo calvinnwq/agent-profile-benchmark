@@ -1,0 +1,27 @@
+{
+  "brief": {
+    "must_have": [
+      "source connectors",
+      "daily digest",
+      "team review"
+    ],
+    "problem": "async updates are fragmented across tools",
+    "product_promise": "one clear daily brief",
+    "should_have": [
+      "email delivery",
+      "basic history"
+    ],
+    "success_metrics": [
+      "60% weekly active team rate",
+      "under 10 minutes setup time"
+    ],
+    "target_user": "time-poor remote teams",
+    "wont_have": [
+      "native mobile app",
+      "custom enterprise workflows"
+    ]
+  },
+  "fixture_id": "morph-mvp-definition-v1",
+  "fixture_version": "1.0.0",
+  "scope_rule": "Prioritise a narrow promise over platform expansion."
+}

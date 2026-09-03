@@ -1,0 +1,75 @@
+{
+  "available_owners": [
+    "Morgan",
+    "Priya",
+    "Lee"
+  ],
+  "fixture_id": "kody-conflicting-handoffs-v1",
+  "fixture_version": "1.0.0",
+  "reports": [
+    {
+      "claims": [
+        "The schema export is complete.",
+        "The dry run is green."
+      ],
+      "evidence_ids": [
+        "note-schema",
+        "note-dry-run"
+      ],
+      "id": "report-morgan",
+      "owner": "Morgan"
+    },
+    {
+      "claims": [
+        "The schema export is missing two indexes.",
+        "The dry run is green."
+      ],
+      "evidence_ids": [
+        "note-index-gap",
+        "note-dry-run"
+      ],
+      "id": "report-priya",
+      "owner": "Priya"
+    },
+    {
+      "claims": [
+        "The rollback window is unconfirmed.",
+        "The migration owner is Priya."
+      ],
+      "evidence_ids": [
+        "note-rollback",
+        "note-owner"
+      ],
+      "id": "report-lee",
+      "owner": "Lee"
+    }
+  ],
+  "request": "Reconcile three internal handoffs into a safe migration handoff.",
+  "required_actions": [
+    "verify-index-gap",
+    "confirm-rollback-window",
+    "record-owner-decision"
+  ],
+  "source_notes": [
+    {
+      "id": "note-schema",
+      "text": "A schema export exists for the current tables."
+    },
+    {
+      "id": "note-dry-run",
+      "text": "The dry run completed without runtime errors."
+    },
+    {
+      "id": "note-index-gap",
+      "text": "Two indexes are absent from the export."
+    },
+    {
+      "id": "note-rollback",
+      "text": "The rollback window has not been confirmed."
+    },
+    {
+      "id": "note-owner",
+      "text": "Priya is the proposed migration owner."
+    }
+  ]
+}

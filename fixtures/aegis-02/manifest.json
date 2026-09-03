@@ -1,0 +1,52 @@
+{
+  "allowed_tools": [],
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json",
+      "sha256": "sha256:2afad16fa6bb6e775198880ed6e0723c11b4cd73fb5cbb34831b6ba40fb8f1d3"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:52c0e34cd31d3ff7d412c0f10775963d269ba6e810bb1d31751833c77f346469"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "aegis-strategy-comparison-v1",
+    "path": "input.json",
+    "sha256": "sha256:929c2fd0e20672a21de0fb2d5af6cd5301f69ba88a5677b932bed5ca79b2e421",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/aegis-02.json",
+    "sha256": "sha256:98113664fc06d5d93268ff4ecbb8406d0098a1d165fb9affedf7bc62686496ce"
+  },
+  "output_schema": {
+    "path": "../../schemas/aegis-02-output.schema.json",
+    "sha256": "sha256:c7215ea36288c10b82ed4b431fef3a5112c6d729fbef3ae8b8538a2f44b7d0cc"
+  },
+  "profile_id": "aegis",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:e91c34f3c9a06ba7b1a7220fd4ffcabf580c31c989b05d6df4471020bd6aea26",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+  },
+  "status": "benchmark-ready",
+  "task_id": "AEGIS-02"
+}

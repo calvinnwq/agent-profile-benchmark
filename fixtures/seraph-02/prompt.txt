@@ -1,0 +1,7 @@
+You are completing benchmark task SERAPH-02: Synthetic dashboard interaction specification.
+
+Return exactly one JSON object and no Markdown.
+Required top-level fields: control_inventory, state_matrix, transition_rules, accessibility_requirements, read_only_boundary, open_questions.
+Use only the supplied synthetic packet; do not browse or perform external actions.
+Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
+Follow the task-specific requirements in the packet and keep the output concise but complete.

@@ -1,0 +1,31 @@
+{
+  "assumptions": [
+    "Returns are synthetic scenarios, not a forecast."
+  ],
+  "calculations": {
+    "growth_base_value": 55000,
+    "growth_stress_value": 41000,
+    "steady_base_value": 52000,
+    "steady_stress_value": 48500
+  },
+  "liquidity_comparison": "Steady is more liquid at 2 days versus growth at 10 days.",
+  "recommendation": "Prefer steady for the stated liquidity and downside priority.",
+  "risk_comparison": "Steady has lower downside in the stress scenario; growth has more downside.",
+  "scenario_table": [
+    {
+      "growth_value": 55000,
+      "scenario_id": "base",
+      "steady_value": 52000
+    },
+    {
+      "growth_value": 41000,
+      "scenario_id": "stress",
+      "steady_value": 48500
+    },
+    {
+      "growth_value": "higher rebound variability",
+      "scenario_id": "recovery",
+      "steady_value": "recovers more slowly"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "checks": [
+    {
+      "id": "brief-field-coverage",
+      "kind": "text_contains",
+      "paths": [
+        "target_user",
+        "problem",
+        "product_promise"
+      ],
+      "terms": [
+        "remote teams",
+        "async",
+        "daily brief"
+      ]
+    },
+    {
+      "id": "priority-consistency",
+      "kind": "disjoint_lists",
+      "paths": [
+        "must_have",
+        "should_have",
+        "wont_have"
+      ]
+    },
+    {
+      "id": "metric-measurability",
+      "kind": "text_contains",
+      "paths": [
+        "success_metrics"
+      ],
+      "terms": [
+        "60%",
+        "minutes"
+      ]
+    },
+    {
+      "id": "contradiction-scan",
+      "kind": "text_forbidden",
+      "paths": [
+        "must_have",
+        "should_have"
+      ],
+      "terms": [
+        "native mobile",
+        "custom enterprise"
+      ]
+    }
+  ],
+  "fixture_id": "morph-mvp-definition-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "id": "scope-inflation",
+      "kind": "list_count_max",
+      "maximum": 4,
+      "path": "must_have"
+    },
+    {
+      "id": "audience-drift",
+      "kind": "text_forbidden",
+      "paths": [
+        "target_user"
+      ],
+      "terms": [
+        "enterprise procurement",
+        "individual hobbyists"
+      ]
+    },
+    {
+      "id": "unmeasurable-success",
+      "kind": "text_forbidden",
+      "paths": [
+        "success_metrics"
+      ],
+      "terms": [
+        "make users happy",
+        "great experience",
+        "be popular"
+      ]
+    }
+  ],
+  "required_fields": [
+    "target_user",
+    "problem",
+    "product_promise",
+    "must_have",
+    "should_have",
+    "wont_have",
+    "success_metrics",
+    "assumptions"
+  ]
+}

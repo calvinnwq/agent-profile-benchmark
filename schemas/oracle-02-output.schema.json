@@ -1,0 +1,40 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/oracle-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "caveats": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "memory_calculations": {
+      "type": "object"
+    },
+    "option_table": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "recommendation": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requirement_match": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tradeoffs": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "memory_calculations",
+    "option_table",
+    "requirement_match",
+    "recommendation",
+    "tradeoffs",
+    "caveats"
+  ],
+  "title": "ORACLE-02 candidate output",
+  "type": "object"
+}

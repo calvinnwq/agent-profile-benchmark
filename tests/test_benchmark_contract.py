@@ -131,9 +131,9 @@ class BenchmarkContractTests(unittest.TestCase):
     def test_cli_rejects_duplicate_json_object_keys(self) -> None:
         canonical = json.dumps(self.ledger, separators=(",", ":"))
         cases = {}
-        for first, second in (("contract-draft", "benchmark-ready"), ("benchmark-ready", "contract-draft")):
+        for first, second in (("benchmark-ready", "fixture-ready"), ("fixture-ready", "benchmark-ready")):
             cases[f"root_{first}_first"] = canonical.replace(
-                '"status":"contract-draft"',
+                '"status":"benchmark-ready"',
                 f'"status":"{first}","status":"{second}"',
                 1,
             )
@@ -207,28 +207,22 @@ class BenchmarkContractTests(unittest.TestCase):
         broken = json.loads(json.dumps(self.ledger))
         broken["status"] = "benchmark-ready"
         for task in broken["tasks"]:
-            task["status"] = "benchmark-ready"
+            task["status"] = "fixture-ready"
 
         errors = validate_ledger(broken)
 
-        self.assertIn(
-            "ledger readiness cannot be benchmark-ready until evaluator and control evidence is modeled",
-            errors,
-        )
-        self.assertFalse(any("status must match ledger readiness" in error for error in errors))
+        self.assertTrue(any("status must match ledger readiness" in error for error in errors))
 
     def test_fixture_ready_requires_frozen_inputs(self) -> None:
         broken = json.loads(json.dumps(self.ledger))
         broken["status"] = "fixture-ready"
         for task in broken["tasks"]:
             task["status"] = "fixture-ready"
+            task["fixture"]["status"] = "to_be_frozen"
+            task["prompt_contract"]["status"] = "to_be_frozen"
 
         errors = validate_ledger(broken)
 
-        self.assertIn(
-            "ledger readiness cannot be fixture-ready until fixture, prompt, evaluator, and control evidence is modeled",
-            errors,
-        )
         self.assertTrue(any("fixture-ready requires frozen" in error for error in errors))
 
     def test_fixture_ready_is_rejected_without_evidence(self) -> None:
@@ -241,16 +235,15 @@ class BenchmarkContractTests(unittest.TestCase):
 
         errors = validate_ledger(broken)
 
-        self.assertIn(
-            "ledger readiness cannot be fixture-ready until fixture, prompt, evaluator, and control evidence is modeled",
-            errors,
-        )
+        self.assertTrue(any("fingerprint" in error for error in errors))
         self.assertFalse(any("fixture-ready requires frozen" in error for error in errors))
         self.assertFalse(any("status must match ledger readiness" in error for error in errors))
 
     def test_contract_draft_requires_unfrozen_inputs(self) -> None:
         broken = json.loads(json.dumps(self.ledger))
+        broken["status"] = "contract-draft"
         for task in broken["tasks"]:
+            task["status"] = "contract-draft"
             task["fixture"]["status"] = "frozen"
             task["prompt_contract"]["status"] = "frozen"
 
@@ -272,7 +265,7 @@ class BenchmarkContractTests(unittest.TestCase):
 
         errors = validate_ledger(broken)
 
-        self.assertIn("ledger content does not match the frozen v0.1.0 contract fingerprint", errors)
+        self.assertIn("ledger content does not match the frozen v0.2.0 contract fingerprint", errors)
 
     def test_validator_rejects_replacement_of_the_frozen_task_registry(self) -> None:
         broken = json.loads(json.dumps(self.ledger))
@@ -426,7 +419,7 @@ class BenchmarkContractTests(unittest.TestCase):
             self.schema["properties"]["$schema"]["const"],
             "../schemas/task-contract.schema.json",
         )
-        self.assertEqual(self.schema["properties"]["benchmark_version"]["const"], "0.1.0")
+        self.assertEqual(self.schema["properties"]["benchmark_version"]["const"], "0.2.0")
         self.assertIn("profiles", self.schema["required"])
         self.assertIn("tasks", self.schema["required"])
         self.assertEqual(self.schema["properties"]["profiles"]["minItems"], 9)
@@ -597,9 +590,9 @@ class BenchmarkContractTests(unittest.TestCase):
             self.assertEqual([task_one, task_two], [task["title"] for task in profile_tasks])
 
         evaluation_contract = (ROOT / "docs" / "evaluation-contract.md").read_text(encoding="utf-8")
-        self.assertIn("the validator accepts only `contract-draft`", evaluation_contract)
-        self.assertIn("It rejects `fixture-ready`", evaluation_contract)
-        self.assertIn("rejects `benchmark-ready`", evaluation_contract)
+        self.assertIn("benchmark version `0.2.0`", evaluation_contract)
+        self.assertIn("validate_benchmark_ready.py", evaluation_contract)
+        self.assertIn("all 18 tasks", evaluation_contract)
 
         serialized = json.dumps(self.ledger)
         forbidden_fragments = (

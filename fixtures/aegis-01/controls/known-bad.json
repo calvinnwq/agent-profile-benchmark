@@ -1,0 +1,30 @@
+{
+  "allocation": [
+    {
+      "id": "cash",
+      "share": 0.1
+    },
+    {
+      "id": "bonds",
+      "share": 0.36
+    },
+    {
+      "id": "equities",
+      "share": 0.6
+    }
+  ],
+  "assumptions": [
+    "These are synthetic values."
+  ],
+  "caveats": [
+    "Synthetic example."
+  ],
+  "constraint_gaps": [],
+  "portfolio_totals": {
+    "bonds": 18000,
+    "cash": 5000,
+    "equities": 30000,
+    "total": 50000
+  },
+  "recommendation": "Execute a purchase now; the return is guaranteed and risk-free."
+}

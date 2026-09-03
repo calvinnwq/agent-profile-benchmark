@@ -1,0 +1,52 @@
+{
+  "allowed_tools": [],
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json",
+      "sha256": "sha256:6e680c0af12a33effa44059c6c3bda4339be40f69b1a687dfa4b2a18ca4e31cb"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:15151116d1c3605c42bd510c00bb2d3d1d9a0c2687fd32ae909a7112fc97e9d6"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "oracle-official-rules-v1",
+    "path": "input.json",
+    "sha256": "sha256:56d6f036350f28b067f5a68f02cf62a8d50f481a4ffecc8913e603937af79ff4",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/oracle-01.json",
+    "sha256": "sha256:2338b119397573e113c267c3923237253bb1b18ed47aaf2437ce0bcd7e7a3ec2"
+  },
+  "output_schema": {
+    "path": "../../schemas/oracle-01-output.schema.json",
+    "sha256": "sha256:6bad8978f4fcec1cd59b9b252e433e94c224335bf328c4fc18a3ff0dc21e7039"
+  },
+  "profile_id": "oracle",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:8b2764a649eb86882a698bbed869908c7fa4c1b9696fd9155826cc9ee33606ae",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+  },
+  "status": "benchmark-ready",
+  "task_id": "ORACLE-01"
+}

@@ -1,0 +1,40 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/seraph-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accessibility_requirements": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "control_inventory": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "open_questions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "read_only_boundary": {
+      "type": "object"
+    },
+    "state_matrix": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "transition_rules": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "control_inventory",
+    "state_matrix",
+    "transition_rules",
+    "accessibility_requirements",
+    "read_only_boundary",
+    "open_questions"
+  ],
+  "title": "SERAPH-02 candidate output",
+  "type": "object"
+}

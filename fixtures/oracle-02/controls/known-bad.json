@@ -1,0 +1,19 @@
+{
+  "caveats": [
+    "Synthetic calculation."
+  ],
+  "memory_calculations": {
+    "q4_total_gb": 15.0,
+    "q6_total_gb": 19.0,
+    "q8_total_gb": 24.0
+  },
+  "option_table": [
+    {
+      "id": "q8",
+      "total_gb": 24.0
+    }
+  ],
+  "recommendation": "Choose q8; its memory is measured exactly and guaranteed to fit.",
+  "requirement_match": "Q8 is the best choice for 16 GB.",
+  "tradeoffs": []
+}

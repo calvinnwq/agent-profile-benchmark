@@ -1,0 +1,40 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/aegis-02-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assumptions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "calculations": {
+      "type": "object"
+    },
+    "liquidity_comparison": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recommendation": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "risk_comparison": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "scenario_table": {
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "scenario_table",
+    "calculations",
+    "liquidity_comparison",
+    "risk_comparison",
+    "recommendation",
+    "assumptions"
+  ],
+  "title": "AEGIS-02 candidate output",
+  "type": "object"
+}

@@ -1,0 +1,84 @@
+{
+  "checks": [
+    {
+      "expected": {
+        "health_state": "degraded"
+      },
+      "id": "state-label",
+      "kind": "object_values",
+      "path": "."
+    },
+    {
+      "allowed_ids": [
+        "collector-last-success",
+        "auth-check",
+        "disk-check",
+        "queue-depth"
+      ],
+      "id": "evidence-coverage",
+      "kind": "list_membership",
+      "path": "evidence_ids",
+      "required_ids": [
+        "collector-last-success",
+        "auth-check",
+        "disk-check",
+        "queue-depth"
+      ]
+    },
+    {
+      "allowed": [
+        "medium",
+        "high"
+      ],
+      "id": "severity-mapping",
+      "kind": "value_in",
+      "path": "severity"
+    },
+    {
+      "id": "action-order",
+      "kind": "ordered_list_contains",
+      "path": "next_actions",
+      "terms": [
+        "inspect logs",
+        "verify source freshness"
+      ]
+    }
+  ],
+  "fixture_id": "sentinel-collector-incident-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "state-label",
+      "id": "wrong-health-state",
+      "kind": "check_ref"
+    },
+    {
+      "id": "unsupported-recovery-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "root_cause",
+        "next_actions"
+      ],
+      "terms": [
+        "fixed",
+        "resolved",
+        "healthy again"
+      ]
+    },
+    {
+      "after": "inspect logs",
+      "before": "delete queue",
+      "id": "unsafe-remediation-order",
+      "kind": "forbidden_order",
+      "path": "next_actions"
+    }
+  ],
+  "required_fields": [
+    "health_state",
+    "evidence_ids",
+    "severity",
+    "root_cause",
+    "next_actions",
+    "confidence"
+  ]
+}

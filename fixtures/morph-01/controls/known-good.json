@@ -1,0 +1,25 @@
+{
+  "assumptions": [
+    "The first release uses the supplied sources and a narrow team workflow."
+  ],
+  "must_have": [
+    "source connectors",
+    "daily digest",
+    "team review"
+  ],
+  "problem": "Async updates are fragmented across tools and hard to scan.",
+  "product_promise": "Deliver one clear daily brief for each team.",
+  "should_have": [
+    "email delivery",
+    "basic history"
+  ],
+  "success_metrics": [
+    "Reach a 60% weekly active team rate.",
+    "Keep setup under 10 minutes."
+  ],
+  "target_user": "Time-poor remote teams that need one daily brief.",
+  "wont_have": [
+    "native mobile app",
+    "custom enterprise workflows"
+  ]
+}

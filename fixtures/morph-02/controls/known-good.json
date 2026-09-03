@@ -1,0 +1,44 @@
+{
+  "call_to_action": "Request pilot access",
+  "claims_register": [
+    {
+      "claim": "Lantern consolidates the supplied sources.",
+      "claim_id": "consolidates-supplied-sources",
+      "evidence_id": "proof-connectors"
+    },
+    {
+      "claim": "Lantern supports a daily review.",
+      "claim_id": "daily-review",
+      "evidence_id": "proof-setup"
+    }
+  ],
+  "message_hierarchy": [
+    "Lantern gives time-poor remote teams one clear daily brief.",
+    "It consolidates supplied sources into a focused daily review."
+  ],
+  "open_questions": [
+    "Which pilot teams should receive the first invitation?"
+  ],
+  "page_sections": [
+    {
+      "id": "hero",
+      "purpose": "State the daily brief promise."
+    },
+    {
+      "id": "how-it-works",
+      "purpose": "Show the three-step source-to-brief flow."
+    },
+    {
+      "id": "proof",
+      "purpose": "Use the supplied connector and setup proof points."
+    },
+    {
+      "id": "cta",
+      "purpose": "Invite a pilot request."
+    }
+  ],
+  "proof_points": [
+    "proof-connectors",
+    "proof-setup"
+  ]
+}

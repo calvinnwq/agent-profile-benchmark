@@ -1,0 +1,52 @@
+{
+  "days": [
+    {
+      "id": "day-1",
+      "location": "trailhead",
+      "window": "10:00-16:00"
+    },
+    {
+      "id": "day-2",
+      "location": "ridge camp",
+      "window": "06:30-17:00"
+    },
+    {
+      "id": "day-3",
+      "location": "trailhead",
+      "window": "07:00-14:00"
+    }
+  ],
+  "evidence_ids": [
+    "route-window",
+    "shuttle-timetable",
+    "park-rules"
+  ],
+  "fixture_id": "atlas-route-logistics-v1",
+  "fixture_version": "1.0.0",
+  "required_bookings": [
+    "park-permit",
+    "return-shuttle"
+  ],
+  "route": "Coastal ridge loop",
+  "safety_gates": [
+    "weather",
+    "water",
+    "turnaround"
+  ],
+  "transfers": [
+    {
+      "duration_hours": 2,
+      "from": "city",
+      "id": "transfer-1",
+      "mode": "train",
+      "to": "trailhead"
+    },
+    {
+      "duration_hours": 2,
+      "from": "trailhead",
+      "id": "transfer-2",
+      "mode": "shuttle",
+      "to": "city"
+    }
+  ]
+}

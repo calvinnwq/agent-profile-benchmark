@@ -1,0 +1,40 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/aegis-01-output.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allocation": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "assumptions": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "caveats": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "constraint_gaps": {
+      "minItems": 1,
+      "type": "array"
+    },
+    "portfolio_totals": {
+      "type": "object"
+    },
+    "recommendation": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "portfolio_totals",
+    "allocation",
+    "constraint_gaps",
+    "recommendation",
+    "assumptions",
+    "caveats"
+  ],
+  "title": "AEGIS-01 candidate output",
+  "type": "object"
+}

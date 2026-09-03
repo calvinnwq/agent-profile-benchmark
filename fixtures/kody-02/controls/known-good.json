@@ -1,0 +1,98 @@
+{
+  "actions": [
+    {
+      "id": "verify-index-gap",
+      "owner": "Morgan",
+      "status": "not_started"
+    },
+    {
+      "id": "confirm-rollback-window",
+      "owner": "Lee",
+      "status": "not_started"
+    },
+    {
+      "id": "record-owner-decision",
+      "owner": "Priya",
+      "status": "not_started"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "schema-complete-vs-gap",
+      "summary": "Morgan reports complete export while Priya reports two missing indexes."
+    },
+    {
+      "id": "rollback-unconfirmed",
+      "summary": "A rollback window is needed but remains unconfirmed."
+    }
+  ],
+  "decisions": [
+    {
+      "id": "hold-migration",
+      "statement": "Hold migration until the index gap and rollback window are resolved.",
+      "status": "pending"
+    }
+  ],
+  "evidence_links": [
+    {
+      "evidence_id": "note-schema",
+      "supports": [
+        "schema-export"
+      ]
+    },
+    {
+      "evidence_id": "note-dry-run",
+      "supports": [
+        "dry-run"
+      ]
+    },
+    {
+      "evidence_id": "note-index-gap",
+      "supports": [
+        "index-gap"
+      ]
+    },
+    {
+      "evidence_id": "note-rollback",
+      "supports": [
+        "rollback-window"
+      ]
+    },
+    {
+      "evidence_id": "note-owner",
+      "supports": [
+        "migration-owner"
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "id": "schema-export",
+      "summary": "An export exists for the current tables."
+    },
+    {
+      "id": "dry-run",
+      "summary": "The dry run completed without runtime errors."
+    },
+    {
+      "id": "index-gap",
+      "summary": "Two indexes are absent from the export."
+    },
+    {
+      "id": "rollback-window",
+      "summary": "The rollback window is not confirmed."
+    },
+    {
+      "id": "migration-owner",
+      "summary": "Priya is the proposed migration owner."
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "rollback-window",
+      "next_action": "Confirm with the migration owner.",
+      "question": "What rollback window is approved?",
+      "status": "unresolved"
+    }
+  ]
+}

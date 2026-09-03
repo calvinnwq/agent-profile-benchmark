@@ -1,0 +1,46 @@
+{
+  "findings": [
+    {
+      "id": "nav-contrast",
+      "summary": "Navigation text has insufficient contrast."
+    },
+    {
+      "id": "submit-focus",
+      "summary": "Submit button lacks a visible focus indicator."
+    },
+    {
+      "id": "table-overflow",
+      "summary": "The table overflows narrow viewports."
+    }
+  ],
+  "locations": {
+    "nav-contrast": ".nav",
+    "submit-focus": "button#submit",
+    "table-overflow": ".table"
+  },
+  "recommended_fixes": [
+    {
+      "fix": "Raise text contrast to an accessible ratio.",
+      "id": "nav-contrast"
+    },
+    {
+      "fix": "Add a visible keyboard focus style.",
+      "id": "submit-focus"
+    },
+    {
+      "fix": "Provide responsive table handling without hiding data.",
+      "id": "table-overflow"
+    }
+  ],
+  "review_summary": "This is a static artifact review; no live browser inspection was performed.",
+  "severity": {
+    "nav-contrast": "high",
+    "submit-focus": "high",
+    "table-overflow": "medium"
+  },
+  "user_impact": {
+    "nav-contrast": "Low-vision users may miss navigation.",
+    "submit-focus": "Keyboard users lose position.",
+    "table-overflow": "Small-screen users must scroll horizontally."
+  }
+}

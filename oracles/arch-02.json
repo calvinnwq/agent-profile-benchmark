@@ -1,0 +1,87 @@
+{
+  "checks": [
+    {
+      "id": "defect-recall",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "findings",
+      "required_ids": [
+        "absolute-projection-target",
+        "remote-pipe-execution",
+        "world-readable-secret"
+      ]
+    },
+    {
+      "allowed_ids": [
+        "absolute-projection-target",
+        "remote-pipe-execution",
+        "world-readable-secret"
+      ],
+      "id": "defect-precision",
+      "id_key": "id",
+      "kind": "list_ids",
+      "path": "findings"
+    },
+    {
+      "expected": {
+        "absolute-projection-target": "high",
+        "remote-pipe-execution": "critical",
+        "world-readable-secret": "critical"
+      },
+      "id": "severity-mapping",
+      "kind": "object_values",
+      "path": "severity"
+    },
+    {
+      "id": "path-evidence",
+      "id_key": "finding_id",
+      "kind": "list_ids",
+      "path": "evidence",
+      "required_ids": [
+        "absolute-projection-target",
+        "remote-pipe-execution",
+        "world-readable-secret"
+      ]
+    }
+  ],
+  "fixture_id": "arch-projection-review-v1",
+  "fixture_version": "1.0.0",
+  "hard_rules": [
+    {
+      "check_id": "defect-recall",
+      "id": "missed-high-severity",
+      "kind": "check_ref"
+    },
+    {
+      "id": "false-security-claim",
+      "kind": "forbidden_text",
+      "paths": [
+        "review_summary"
+      ],
+      "terms": [
+        "secure as-is",
+        "no issues",
+        "safe to ship"
+      ]
+    },
+    {
+      "id": "unsafe-remediation",
+      "kind": "forbidden_text",
+      "paths": [
+        "remediation"
+      ],
+      "terms": [
+        "disable permissions",
+        "ignore the warning",
+        "keep piping"
+      ]
+    }
+  ],
+  "required_fields": [
+    "findings",
+    "severity",
+    "evidence",
+    "remediation",
+    "review_summary"
+  ]
+}

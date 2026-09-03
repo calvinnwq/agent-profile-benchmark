@@ -1,0 +1,52 @@
+{
+  "allowed_tools": [],
+  "benchmark_ready": true,
+  "benchmark_version": "0.2.0",
+  "controls": [
+    {
+      "condition": "known-good-control",
+      "expected_status": "passed",
+      "path": "controls/known-good.json",
+      "sha256": "sha256:ebfea0881984108781a289ae1cfb14c4893a2e7d5c14defe2394015cbfc3e701"
+    },
+    {
+      "condition": "known-bad-control",
+      "expected_status": "failed",
+      "path": "controls/known-bad.json",
+      "sha256": "sha256:274dfdc97e3bc5bd07fa50b79c8260be629de52f01d39dcc3fadbcacd76caae9"
+    }
+  ],
+  "evaluator": {
+    "path": "../../scripts/evaluate_task.py",
+    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
+    "version": "task-oracle-v1"
+  },
+  "fixture": {
+    "id": "seraph-dashboard-interactions-v1",
+    "path": "input.json",
+    "sha256": "sha256:72da8d3ebfee677cee640b78f32e2435394ddec1267b4d69d79a8403f172e419",
+    "status": "frozen",
+    "version": "1.0.0"
+  },
+  "oracle": {
+    "path": "../../oracles/seraph-02.json",
+    "sha256": "sha256:8873fb72e95dcfd7296d3a4441520af3adddc620d0bb5b2b0825c6c4ee6a8ac4"
+  },
+  "output_schema": {
+    "path": "../../schemas/seraph-02-output.schema.json",
+    "sha256": "sha256:2b8f26bfa0d6132ad11af7e617d6f184c5aaa32638b6e0f70460c34c628758a5"
+  },
+  "profile_id": "seraph",
+  "prompt": {
+    "path": "prompt.txt",
+    "sha256": "sha256:cf0452ec9531ce3b17de5bd286a107c6dc33bba55a7f500e666d62cf80c75edf",
+    "status": "frozen"
+  },
+  "release_gate": "../../scripts/validate_benchmark_ready.py",
+  "run_record_schema": {
+    "path": "../../schemas/task-run-record.schema.json",
+    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+  },
+  "status": "benchmark-ready",
+  "task_id": "SERAPH-02"
+}

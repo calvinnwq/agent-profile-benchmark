@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
-EXPECTED_BENCHMARK_VERSION = "0.1.0"
+EXPECTED_BENCHMARK_VERSION = "0.2.0"
 EXPECTED_LEDGER_SCHEMA = "../schemas/task-contract.schema.json"
-EXPECTED_LEDGER_FINGERPRINT = "90204d420d797568c047b22a60396bccc47699b506cb3d51305d620340c82cf1"
+EXPECTED_LEDGER_FINGERPRINT = "7632bac24f0d8b815c05fdb4d71197d7364ced10e5c858e9b2457c870eb60b96"
 EXPECTED_PROFILES = {
     "kody",
     "aegis",
@@ -96,6 +96,10 @@ def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
             raise DuplicateJSONKeyError(f"duplicate JSON object key {key!r}")
         value[key] = item
     return value
+
+
+def _reject_nonfinite_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number {value!r} is not supported")
 
 
 def _json_type_matches(value: Any, expected: str) -> bool:
@@ -344,10 +348,11 @@ def _load_schema_errors(value: Any) -> list[str]:
         schema = json.loads(
             SCHEMA_PATH.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         return [f"unable to load contract schema: {exc}"]
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         return [f"unable to load contract schema ({type(exc).__name__})"]
     return [f"schema: {error}" for error in validate_schema_instance(value, schema)]
 
@@ -662,7 +667,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if fingerprint is None:
         errors.append("ledger cannot be fingerprinted as strict JSON")
     elif fingerprint != EXPECTED_LEDGER_FINGERPRINT:
-        errors.append("ledger content does not match the frozen v0.1.0 contract fingerprint")
+        errors.append("ledger content does not match the frozen v0.2.0 contract fingerprint")
     _scan_public_text(ledger, "ledger", errors)
 
     if ledger.get("$schema") != EXPECTED_LEDGER_SCHEMA:
@@ -780,7 +785,7 @@ def validate_ledger(ledger: Any) -> list[str]:
             and isinstance(task_ids_value, list)
             and task_ids_value != list(expected_task_ids)
         ):
-            errors.append(f"{profile_path}.task_ids must match the frozen v0.1.0 task registry")
+            errors.append(f"{profile_path}.task_ids must match the frozen v0.2.0 task registry")
         _validate_string_list(profile.get("primary_dimensions"), f"{profile_path}.primary_dimensions", errors)
 
     tasks = ledger.get("tasks")
@@ -805,7 +810,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if len(task_ids) != len(set(task_ids)):
         errors.append("ledger.tasks contains duplicate ids")
     if set(task_ids) != EXPECTED_TASK_IDS:
-        errors.append("ledger.tasks must match the frozen v0.1.0 task registry")
+        errors.append("ledger.tasks must match the frozen v0.2.0 task registry")
     for profile_id, profile_tasks in tasks_by_profile.items():
         if len(profile_tasks) != 2:
             errors.append(f"profile {profile_id} must have exactly two tasks")
@@ -827,14 +832,6 @@ def validate_ledger(ledger: Any) -> list[str]:
 
     ledger_status = ledger.get("status")
     if isinstance(ledger_status, str) and ledger_status in EXPECTED_STATUSES:
-        if ledger_status == "benchmark-ready":
-            errors.append(
-                "ledger readiness cannot be benchmark-ready until evaluator and control evidence is modeled"
-            )
-        if ledger_status == "fixture-ready":
-            errors.append(
-                "ledger readiness cannot be fixture-ready until fixture, prompt, evaluator, and control evidence is modeled"
-            )
         for task in tasks:
             if not isinstance(task, dict):
                 continue
@@ -856,10 +853,10 @@ def validate_ledger(ledger: Any) -> list[str]:
                 fixture_status != "to_be_frozen" or prompt_status != "to_be_frozen"
             ):
                 errors.append(f"tasks[{task_id}] contract-draft requires unfrozen fixture and prompt")
-            if ledger_status == "fixture-ready" and (
+            if ledger_status in {"fixture-ready", "benchmark-ready"} and (
                 fixture_status != "frozen" or prompt_status != "frozen"
             ):
-                errors.append(f"tasks[{task_id}] fixture-ready requires frozen fixture and prompt")
+                errors.append(f"tasks[{task_id}] {ledger_status} requires frozen fixture and prompt")
 
     return errors
 
@@ -878,11 +875,12 @@ def main(argv: list[str] | None = None) -> int:
         ledger = json.loads(
             args.input.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_json_keys,
+            parse_constant=_reject_nonfinite_json_constant,
         )
     except DuplicateJSONKeyError as exc:
         print(f"validation failed: unable to read input: {exc}", file=sys.stderr)
         return 1
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         print(f"validation failed: unable to read input ({type(exc).__name__})", file=sys.stderr)
         return 1
 
