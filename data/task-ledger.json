@@ -2,7 +2,7 @@
   "$schema": "../schemas/task-contract.schema.json",
   "schema_version": "0.1.0",
   "benchmark_id": "agent-profile-benchmark",
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.3.0",
   "status": "benchmark-ready",
   "evaluation_policy": {
     "execution_boundary": "offline_replay",
@@ -328,6 +328,9 @@
         ],
         "output_constraints": [
           "Preserve source identifiers for every material claim.",
+          "Return facts as objects with id and summary; conflicts as objects with id, summary, and status; evidence_links as objects with evidence_id and supports; decisions as objects with id, statement, and status; actions as objects with id, owner, and status; and open_questions as objects with id, question, status, and next_action.",
+          "Use the exact task-defined IDs: facts use schema-export, dry-run, index-gap, rollback-window, and migration-owner; conflicts use schema-complete-vs-gap and rollback-unconfirmed; evidence links preserve note-schema to schema-export, note-dry-run to dry-run, note-index-gap to index-gap, note-rollback to rollback-window, and note-owner to migration-owner; and actions use verify-index-gap, confirm-rollback-window, and record-owner-decision.",
+          "Assign every required action an owner from the available owners and use the task-defined status values; keep both seeded conflicts unresolved unless the packet provides resolution evidence.",
           "Do not resolve a conflict without evidence or an explicit decision rule.",
           "Separate completed work from proposed next actions."
         ]

@@ -49,7 +49,7 @@ def _leaderboard() -> dict[str, Any]:
     return {
         "schema_version": "leaderboard-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.3.0",
         "policy_id": "leaderboard-v1",
         "policy_version": "1.0.0",
         "input_snapshot_id": "repeat-001",

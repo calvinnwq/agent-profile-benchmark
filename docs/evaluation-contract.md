@@ -60,7 +60,7 @@ Reviewers should not reward a response for matching the historical solution when
 
 `benchmark-ready` means the prompt, fixture, evaluator oracle, and known-good and known-bad controls have passed validation.
 
-For benchmark version `0.2.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
+For benchmark version `0.3.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
 `python3 scripts/validate_benchmark.py` validates the frozen ledger contract, while `python3 scripts/validate_benchmark_ready.py` validates artifact bindings and both controls for all 18 tasks.
 
 No result should be used for model routing while a task remains `contract-draft`.
@@ -150,7 +150,7 @@ The command does not publish scores or create a model matrix.
 
 ## Re-runnable leaderboard workflow
 
-`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.2.0`.
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.3.0`.
 It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
 
 Roster snapshots must conform to `schemas/model-roster.schema.json`.

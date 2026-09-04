@@ -11,7 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "data" / "release-artifact-lock.json"
-EXPECTED_RELEASE_LOCK_FINGERPRINT = "44b54bf2dde79f8093d0e62b9d2d2b633f564e338a4b9bf558a34f9494ad813a"
+EXPECTED_RELEASE_LOCK_FINGERPRINT = "a93fc8f6a536c23f19dc72e3c1901434fa8194f5c77bf52d87c4ae30833533ca"
 LOCK_VERSION = "1"
 TASK_ARTIFACT_KEYS = (
     "manifest",
@@ -109,7 +109,7 @@ def load_release_lock() -> dict[str, Any]:
         raise ReleaseLockError("release lock schema pointer is invalid")
     if lock.get("benchmark_id") != "agent-profile-benchmark":
         raise ReleaseLockError("release lock benchmark identity is invalid")
-    if lock.get("benchmark_version") != "0.2.0":
+    if lock.get("benchmark_version") != "0.3.0":
         raise ReleaseLockError("release lock benchmark version is invalid")
     if lock.get("lock_version") != LOCK_VERSION:
         raise ReleaseLockError("release lock version is invalid")

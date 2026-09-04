@@ -1,33 +1,9 @@
 {
-  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/kody-02-output.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/kody-02-output.schema.json",
+  "title": "KODY-02 candidate output",
+  "type": "object",
   "additionalProperties": false,
-  "properties": {
-    "actions": {
-      "minItems": 1,
-      "type": "array"
-    },
-    "conflicts": {
-      "minItems": 1,
-      "type": "array"
-    },
-    "decisions": {
-      "minItems": 1,
-      "type": "array"
-    },
-    "evidence_links": {
-      "minItems": 1,
-      "type": "array"
-    },
-    "facts": {
-      "minItems": 1,
-      "type": "array"
-    },
-    "open_questions": {
-      "minItems": 1,
-      "type": "array"
-    }
-  },
   "required": [
     "facts",
     "conflicts",
@@ -36,6 +12,191 @@
     "actions",
     "open_questions"
   ],
-  "title": "KODY-02 candidate output",
-  "type": "object"
+  "properties": {
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/conflict"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidenceLink"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/openQuestion"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "summary",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "summary": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "unresolved",
+            "resolved"
+          ]
+        }
+      }
+    },
+    "evidenceLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "supports"
+      ],
+      "properties": {
+        "evidence_id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "supports": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonEmptyString"
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "confirmed",
+            "rejected"
+          ]
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "owner",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "owner": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "not_started",
+            "in_progress",
+            "completed",
+            "blocked"
+          ]
+        }
+      }
+    },
+    "openQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "question",
+        "status",
+        "next_action"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "question": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "unresolved",
+            "resolved"
+          ]
+        },
+        "next_action": {
+          "$ref": "#/$defs/nonEmptyString"
+        }
+      }
+    }
+  }
 }

@@ -1,7 +1,7 @@
 {
+  "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
-  "slice_status": "benchmark-ready",
+  "benchmark_version": "0.3.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_kody01.py",
-    "version": "kody-01-oracle-v2",
-    "sha256": "sha256:6b31ec05a883e8a3b94cef56f85ce4a09e5000c77d2f3f11e1925f2e7c859f53"
+    "sha256": "sha256:6b31ec05a883e8a3b94cef56f85ce4a09e5000c77d2f3f11e1925f2e7c859f53",
+    "version": "kody-01-oracle-v2"
   },
   "fixture": {
     "id": "kody-plan-extraction-v1",
@@ -45,9 +45,9 @@
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
   },
+  "slice_status": "benchmark-ready",
   "status": "benchmark-ready",
-  "task_id": "KODY-01",
-  "allowed_tools": []
+  "task_id": "KODY-01"
 }

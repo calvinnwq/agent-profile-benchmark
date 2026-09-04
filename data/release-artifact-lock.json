@@ -1,12 +1,12 @@
 {
   "$schema": "../schemas/release-artifact-lock.schema.json",
   "benchmark_id": "agent-profile-benchmark",
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.3.0",
   "lock_version": "1",
   "shared": {
     "contract_schema": {
       "path": "schemas/task-contract.schema.json",
-      "sha256": "sha256:8e3ea88c371e2afcfd056927228c2c6fe529fd949b6b81d69df0b9144aa9bbcf"
+      "sha256": "sha256:898104142bd3847fefab512cdbd89fa209d5a2b81673ec985153564ebdb87d34"
     },
     "evaluator_kody01": {
       "path": "scripts/evaluate_kody01.py",
@@ -26,15 +26,15 @@
     },
     "kody_run_schema": {
       "path": "schemas/kody-01-run-record.schema.json",
-      "sha256": "sha256:488a9ec056b5fd1864fabe344716fd30f0faecb8cffd47d47c44a3585f18aeac"
+      "sha256": "sha256:35b771ad3adfbbee2a8ccd8b98a1fc5bafa8fad03979c31c84307fdd2498501d"
     },
     "kody_validator": {
       "path": "scripts/validate_kody01.py",
-      "sha256": "sha256:fd5a872ce499438175e3d33a5963988b24ee9a840a52cc78fe8743601d018f22"
+      "sha256": "sha256:3032bb6b0d648bd488f154b70e65e91d02bee0b5584fe4c326b96c8de5a14c05"
     },
     "ledger": {
       "path": "data/task-ledger.json",
-      "sha256": "sha256:6b9177b8f2b8ce8b064b13addd545f2759ab6c5a802fa7f0447b1aa787307d12"
+      "sha256": "sha256:9ff280e746ca3f4822d709ebdc1dc10aab53a95691e69a8916b964d4d072b6c2"
     },
     "model_runner": {
       "path": "scripts/run_task_model.py",
@@ -42,7 +42,7 @@
     },
     "release_lock_schema": {
       "path": "schemas/release-artifact-lock.schema.json",
-      "sha256": "sha256:c87acf43927c67c2100f52613b387cf3161651e25d893541df8535b857fff550"
+      "sha256": "sha256:c3ea84cdf3b92f1433d3fe0f60939696dfbbbb08df820c25c781c05a6c928362"
     },
     "release_validator": {
       "path": "scripts/validate_benchmark_ready.py",
@@ -54,11 +54,11 @@
     },
     "replay_task": {
       "path": "scripts/replay_task.py",
-      "sha256": "sha256:72036a5f2c681e756bfd906f0c1654e6576708e70213204a98c354430e321761"
+      "sha256": "sha256:cf71fdcb1b655112422c1989beebace17c267dbdccef023e5c81555d9a7d3da4"
     },
     "run_record_schema": {
       "path": "schemas/task-run-record.schema.json",
-      "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+      "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
     }
   },
   "tasks": {
@@ -82,7 +82,7 @@
         },
         "manifest": {
           "path": "fixtures/aegis-01/manifest.json",
-          "sha256": "sha256:160c405fe646b5102033fcbeda9748fce17639d7f49939f876298c861b7cd475"
+          "sha256": "sha256:fd4a63c85a7c2499893992ffdfcc9e18ed4f9ed9c4456705925cb1815167ad3d"
         },
         "oracle": {
           "path": "oracles/aegis-01.json",
@@ -102,7 +102,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "aegis-synthetic-portfolio-v1",
@@ -128,7 +128,7 @@
         },
         "manifest": {
           "path": "fixtures/aegis-02/manifest.json",
-          "sha256": "sha256:fac1c06f33c1d3a93925bde1c5d6cbca187520a3d35dbe23ee0c75fbd2f4d3ed"
+          "sha256": "sha256:701eaf080e5b7dcd337e0437f3f978a455962f7ab6325d294c6ec29eabe608f2"
         },
         "oracle": {
           "path": "oracles/aegis-02.json",
@@ -148,7 +148,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "aegis-strategy-comparison-v1",
@@ -174,7 +174,7 @@
         },
         "manifest": {
           "path": "fixtures/arch-01/manifest.json",
-          "sha256": "sha256:bdfd050f2da19a88b1a2b15a0f8e72278aa5fa072c8ac6800be4fe8aed278340"
+          "sha256": "sha256:1084a9407c3b0f3150b1cbc33ecbb37cc4de6d4009ec247c0f8c0c0dfd1df5a7"
         },
         "oracle": {
           "path": "oracles/arch-01.json",
@@ -194,7 +194,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "arch-authentication-fix-v1",
@@ -220,7 +220,7 @@
         },
         "manifest": {
           "path": "fixtures/arch-02/manifest.json",
-          "sha256": "sha256:5ccdc22f415ef1e722aae7c2b7ca10f3ee2d9b7aa3b7798b91a67f755528ec37"
+          "sha256": "sha256:e8e23f27b7de37b225f3697799f7b4f10181991ec5bc0d0d7bf7b398fa18d7ec"
         },
         "oracle": {
           "path": "oracles/arch-02.json",
@@ -240,7 +240,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "arch-projection-review-v1",
@@ -266,7 +266,7 @@
         },
         "manifest": {
           "path": "fixtures/atlas-01/manifest.json",
-          "sha256": "sha256:60661726a01374036ce43b964f7ab3da37657f690397be300eb875602f6ab04a"
+          "sha256": "sha256:31fcefae0d8b659c5e4066db773f43864e8cf057411b9a3ae5baba31cd3891fd"
         },
         "oracle": {
           "path": "oracles/atlas-01.json",
@@ -286,7 +286,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "atlas-cook-kit-selection-v1",
@@ -312,7 +312,7 @@
         },
         "manifest": {
           "path": "fixtures/atlas-02/manifest.json",
-          "sha256": "sha256:4e477f4e921983e7917ad322d43692cea0e7f918176dd3c9e64aa5a03b1f4468"
+          "sha256": "sha256:15d3c490c17640e0c585ee5eda264a70d9d53b3ce7d6848aab112ebb89c72fff"
         },
         "oracle": {
           "path": "oracles/atlas-02.json",
@@ -332,7 +332,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "atlas-route-logistics-v1",
@@ -358,7 +358,7 @@
         },
         "manifest": {
           "path": "fixtures/kody-01/manifest.json",
-          "sha256": "sha256:e517a8317012f4fc33fe1404093979f2cffa3972e37101f99b43a47a3431677f"
+          "sha256": "sha256:0942cd04f2e3c60f3f5505b2c6cf1200a7e2b52a44d3290b2c22cbb5a298fbf5"
         },
         "oracle": {
           "path": "oracles/kody-01.json",
@@ -378,7 +378,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "kody-plan-extraction-v1",
@@ -400,11 +400,11 @@
         },
         "known_good": {
           "path": "fixtures/kody-02/controls/known-good.json",
-          "sha256": "sha256:629db7bf72aa58d62d7cd4d679d0d868701c43aaf688f369251734872f335793"
+          "sha256": "sha256:b771143bfffa2e7e5b29bc3d0c94d511f00c2c46e6b53a6d526f373f95796c29"
         },
         "manifest": {
           "path": "fixtures/kody-02/manifest.json",
-          "sha256": "sha256:4ae3bd3a657f5b34e819096b413d9b0277012337f5f677125b1cf918a9c23132"
+          "sha256": "sha256:693ff0e541359344d00120ca13e881fc9102b3d2ddb4d590f0d80dd63e9355e7"
         },
         "oracle": {
           "path": "oracles/kody-02.json",
@@ -412,11 +412,11 @@
         },
         "output_schema": {
           "path": "schemas/kody-02-output.schema.json",
-          "sha256": "sha256:f3a53e1a9a2e7dd16f7133b035cacd941bc6df490227018a56d4d8ecebdfc751"
+          "sha256": "sha256:83f325f8c3848dbfd703a148a880a859f9f91066b61889ed31563f140e28bd49"
         },
         "prompt": {
           "path": "fixtures/kody-02/prompt.txt",
-          "sha256": "sha256:5e3643dae2ee4893c4bd3324b858bf23ae230299552099eae1d57485fe5a79da"
+          "sha256": "sha256:9911ac8c7a80b833360fc2a4af8dd52eed00e9b3bd82f89fe8d9a1936732e3ac"
         },
         "release_gate": {
           "path": "scripts/validate_benchmark_ready.py",
@@ -424,7 +424,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "kody-conflicting-handoffs-v1",
@@ -450,7 +450,7 @@
         },
         "manifest": {
           "path": "fixtures/morph-01/manifest.json",
-          "sha256": "sha256:62ddbf45ed5b6797455f14aea6993a47bafaad163e86ac726f638c4de83167b8"
+          "sha256": "sha256:001125f2f708a0c093e8f380cfc27bcaaf7aaeb33209f39a55d57db46d69203c"
         },
         "oracle": {
           "path": "oracles/morph-01.json",
@@ -470,7 +470,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "morph-mvp-definition-v1",
@@ -496,7 +496,7 @@
         },
         "manifest": {
           "path": "fixtures/morph-02/manifest.json",
-          "sha256": "sha256:4817f16719ab1586ae85455b3528583a48b768f310ea422bc2976a4546aceb6a"
+          "sha256": "sha256:52b32da5e482719594c47fa27ba96bd4489238c694791739a15f80f89929676a"
         },
         "oracle": {
           "path": "oracles/morph-02.json",
@@ -516,7 +516,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "morph-launch-direction-v1",
@@ -542,7 +542,7 @@
         },
         "manifest": {
           "path": "fixtures/oracle-01/manifest.json",
-          "sha256": "sha256:ba716af4df34735fb749a299025e443c28d2746b627e4895a2a14a7c87603d2e"
+          "sha256": "sha256:e17f0a61bbfb6ac752f88e6c7ac1eb4c553c10889925c2ee1cf0ce9bd28d857e"
         },
         "oracle": {
           "path": "oracles/oracle-01.json",
@@ -562,7 +562,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "oracle-official-rules-v1",
@@ -588,7 +588,7 @@
         },
         "manifest": {
           "path": "fixtures/oracle-02/manifest.json",
-          "sha256": "sha256:0b744cc11ae9d67f16c3b76ba5781e1b3428ee20850cd11ac27d9587e7460e84"
+          "sha256": "sha256:52cfe95b89eac9c7c06e6b00ab6be767c457087b190152dd5fbc567fd58b07b4"
         },
         "oracle": {
           "path": "oracles/oracle-02.json",
@@ -608,7 +608,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "oracle-quant-comparison-v1",
@@ -634,7 +634,7 @@
         },
         "manifest": {
           "path": "fixtures/sentinel-01/manifest.json",
-          "sha256": "sha256:309e5976923df55ac80080dd172e06ab27dd93ac2759a172f7eb945687c1b9cd"
+          "sha256": "sha256:ea67b5e69d7e1798fd274dc172d2350786365db6514d6eee9fcb63f2ce7a024f"
         },
         "oracle": {
           "path": "oracles/sentinel-01.json",
@@ -654,7 +654,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "sentinel-collector-incident-v1",
@@ -680,7 +680,7 @@
         },
         "manifest": {
           "path": "fixtures/sentinel-02/manifest.json",
-          "sha256": "sha256:4529fa1d02d78f81a09689b7e8e77b83059c95acc76743cb23368140c68aeee8"
+          "sha256": "sha256:89fc7d191d99979c2bd926ed0c053c503ba6d03e385129bd6dbecdfa3e0ee3c6"
         },
         "oracle": {
           "path": "oracles/sentinel-02.json",
@@ -700,7 +700,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "sentinel-brief-health-v1",
@@ -726,7 +726,7 @@
         },
         "manifest": {
           "path": "fixtures/seraph-01/manifest.json",
-          "sha256": "sha256:5d1933ab7f783fe45ec37e6164a6676c739a0fcbc69c099219e0f93358ffed75"
+          "sha256": "sha256:6fa2c0502b90c23d0788db0503ace849050d5a578fcc26adc70e5c02589b9647"
         },
         "oracle": {
           "path": "oracles/seraph-01.json",
@@ -746,7 +746,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "seraph-html-critique-v1",
@@ -772,7 +772,7 @@
         },
         "manifest": {
           "path": "fixtures/seraph-02/manifest.json",
-          "sha256": "sha256:a78f862089a9a8f29a98a1f1c8b6381ad5090bda4fbb1b37d7daedb0656c818b"
+          "sha256": "sha256:b7672888908678bad9c4238c10054e611bac636a1ac0f09ea43f3f7f349b109b"
         },
         "oracle": {
           "path": "oracles/seraph-02.json",
@@ -792,7 +792,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "seraph-dashboard-interactions-v1",
@@ -818,7 +818,7 @@
         },
         "manifest": {
           "path": "fixtures/tank-01/manifest.json",
-          "sha256": "sha256:477aa53055a1f4c383d9470c212952ff17eaa1ba020b2b6fa2df0029f59ac64b"
+          "sha256": "sha256:0a872334b557e88f3bea8c1e054b6850f4dd8e29d32af95d4cd0d9daf62100fd"
         },
         "oracle": {
           "path": "oracles/tank-01.json",
@@ -838,7 +838,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "tank-training-plan-v1",
@@ -864,7 +864,7 @@
         },
         "manifest": {
           "path": "fixtures/tank-02/manifest.json",
-          "sha256": "sha256:782804ffa45996a29324e9ce64e77d9f4db9c5deb23d23b6e5570e2b439b3adc"
+          "sha256": "sha256:4b1b400661d6f64f37ad1d08fdbdec20a7919d17b612eb1188510b64669d7fd7"
         },
         "oracle": {
           "path": "oracles/tank-02.json",
@@ -884,7 +884,7 @@
         },
         "run_record_schema": {
           "path": "schemas/task-run-record.schema.json",
-          "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+          "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
         }
       },
       "fixture_id": "tank-training-adaptation-v1",

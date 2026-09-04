@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
-EXPECTED_BENCHMARK_VERSION = "0.2.0"
+EXPECTED_BENCHMARK_VERSION = "0.3.0"
 EXPECTED_LEDGER_SCHEMA = "../schemas/task-contract.schema.json"
-EXPECTED_LEDGER_FINGERPRINT = "7632bac24f0d8b815c05fdb4d71197d7364ced10e5c858e9b2457c870eb60b96"
+EXPECTED_LEDGER_FINGERPRINT = "0b3693b0945e036f304b61b1ae2442f3505d8adcf991926ad0ca2e83d7a54e5a"
 EXPECTED_PROFILES = {
     "kody",
     "aegis",
@@ -667,7 +667,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if fingerprint is None:
         errors.append("ledger cannot be fingerprinted as strict JSON")
     elif fingerprint != EXPECTED_LEDGER_FINGERPRINT:
-        errors.append("ledger content does not match the frozen v0.2.0 contract fingerprint")
+        errors.append("ledger content does not match the frozen v0.3.0 contract fingerprint")
     _scan_public_text(ledger, "ledger", errors)
 
     if ledger.get("$schema") != EXPECTED_LEDGER_SCHEMA:
@@ -785,7 +785,7 @@ def validate_ledger(ledger: Any) -> list[str]:
             and isinstance(task_ids_value, list)
             and task_ids_value != list(expected_task_ids)
         ):
-            errors.append(f"{profile_path}.task_ids must match the frozen v0.2.0 task registry")
+            errors.append(f"{profile_path}.task_ids must match the frozen v0.3.0 task registry")
         _validate_string_list(profile.get("primary_dimensions"), f"{profile_path}.primary_dimensions", errors)
 
     tasks = ledger.get("tasks")
@@ -810,7 +810,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if len(task_ids) != len(set(task_ids)):
         errors.append("ledger.tasks contains duplicate ids")
     if set(task_ids) != EXPECTED_TASK_IDS:
-        errors.append("ledger.tasks must match the frozen v0.2.0 task registry")
+        errors.append("ledger.tasks must match the frozen v0.3.0 task registry")
     for profile_id, profile_tasks in tasks_by_profile.items():
         if len(profile_tasks) != 2:
             errors.append(f"profile {profile_id} must have exactly two tasks")

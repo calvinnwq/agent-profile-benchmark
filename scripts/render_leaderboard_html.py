@@ -1142,7 +1142,7 @@ def render_html(
       <div>
         <p class="eyebrow">Nous Portal / Agent Profile Benchmark</p>
         <h1>Which free models held the line?</h1>
-        <p class="lede">A benchmark-specific model leaderboard and routing aid for the frozen <code>0.2.0</code> task suite. It measures contract-following across fixed agent profiles, not general intelligence.</p>
+        <p class="lede">A benchmark-specific model leaderboard and routing aid for the frozen <code>0.3.0</code> task suite. It measures contract-following across fixed agent profiles, not general intelligence.</p>
         <div class="actions">
           <a class="button primary" href="#leaderboard">Read the ranking</a>
           <a class="button" href="#method">How to read this</a>

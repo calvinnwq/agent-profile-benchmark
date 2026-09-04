@@ -55,7 +55,7 @@ INPUT_SCHEMA = ROOT / "schemas" / "leaderboard-input.schema.json"
 OUTPUT_SCHEMA = ROOT / "schemas" / "leaderboard-output.schema.json"
 DEFAULT_RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
 SUPPORTED_POLICY_VERSION = "1.0.0"
-EXPECTED_POLICY_FINGERPRINT = "9e52b7f7e6a2ec485393a0be53797b48ed3a07645c53699bc39f7982a129faea"
+EXPECTED_POLICY_FINGERPRINT = "1100cfa574d505e295dc6957333cf97d445113356703825fe222da60bd615384"
 UNRESOLVED_IDENTITY_VALUES = {"", "none", "unresolved"}
 VALID_AVAILABILITY = {"eligible", "excluded"}
 VALID_RUN_STATUSES = {"passed", "failed", "blocked"}
@@ -249,7 +249,7 @@ def _load_ledger(
     if ledger.get("benchmark_id") != benchmark_id or ledger.get("benchmark_version") != benchmark_version:
         raise LeaderboardInputError("benchmark ledger identity does not match the leaderboard input")
     if require_frozen and _canonical_fingerprint(ledger) != EXPECTED_LEDGER_FINGERPRINT:
-        raise LeaderboardInputError("benchmark ledger does not match the sealed v0.2.0 contract")
+        raise LeaderboardInputError("benchmark ledger does not match the sealed v0.3.0 contract")
     raw_profiles = ledger.get("profiles")
     raw_tasks = ledger.get("tasks")
     if not isinstance(raw_profiles, list) or not isinstance(raw_tasks, list):

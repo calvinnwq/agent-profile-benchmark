@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.3.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -45,7 +45,7 @@
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
   },
   "status": "benchmark-ready",
   "task_id": "AEGIS-02"

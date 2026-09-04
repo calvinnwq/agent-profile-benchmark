@@ -1,13 +1,13 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.3.0",
   "controls": [
     {
       "condition": "known-good-control",
       "expected_status": "passed",
       "path": "controls/known-good.json",
-      "sha256": "sha256:629db7bf72aa58d62d7cd4d679d0d868701c43aaf688f369251734872f335793"
+      "sha256": "sha256:b771143bfffa2e7e5b29bc3d0c94d511f00c2c46e6b53a6d526f373f95796c29"
     },
     {
       "condition": "known-bad-control",
@@ -34,18 +34,18 @@
   },
   "output_schema": {
     "path": "../../schemas/kody-02-output.schema.json",
-    "sha256": "sha256:f3a53e1a9a2e7dd16f7133b035cacd941bc6df490227018a56d4d8ecebdfc751"
+    "sha256": "sha256:83f325f8c3848dbfd703a148a880a859f9f91066b61889ed31563f140e28bd49"
   },
   "profile_id": "kody",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:5e3643dae2ee4893c4bd3324b858bf23ae230299552099eae1d57485fe5a79da",
+    "sha256": "sha256:9911ac8c7a80b833360fc2a4af8dd52eed00e9b3bd82f89fe8d9a1936732e3ac",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
   },
   "status": "benchmark-ready",
   "task_id": "KODY-02"
