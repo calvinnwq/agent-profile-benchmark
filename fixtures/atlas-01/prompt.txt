@@ -5,3 +5,7 @@ Required top-level fields: selected_item_ids, weight_total, cost_total, fuel_pla
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- selected_item_ids must use supplied catalogue IDs: stove-a, pot-a, windscreen-a, stove-b, or mug-a.
+- fuel_plan includes fuel_type and non-negative canister_count.

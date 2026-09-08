@@ -4,6 +4,48 @@
     "Priya",
     "Lee"
   ],
+  "fact_contract": [
+    {
+      "forbidden": ["no export exists", "export does not exist"],
+      "id": "schema-export",
+      "required_any": ["export"]
+    },
+    {
+      "forbidden": ["dry run failed", "dry run did not complete", "never succeeded", "unavailable"],
+      "id": "dry-run",
+      "required_any": ["dry run"]
+    },
+    {
+      "count": {
+        "number_words": ["two"],
+        "unit_terms": ["index", "indexes", "indices"],
+        "value": 2
+      },
+      "forbidden": ["no indexes are absent", "all indexes are present", "complete export"],
+      "id": "index-gap",
+      "polarity": {
+        "anchors": ["absent", "missing"],
+        "expected": "affirmed"
+      },
+      "required_any": ["absent", "missing"]
+    },
+    {
+      "forbidden": ["rollback window is confirmed", "rollback is confirmed", "unavailable", "cannot be performed"],
+      "id": "rollback-window",
+      "polarity": {
+        "anchors": ["rollback"],
+        "expected": "negative",
+        "negative_terms": ["unconfirmed", "not confirmed", "has not been confirmed"],
+        "positive_terms": ["confirmed", "available", "can be performed", "ready"]
+      },
+      "required_any": ["rollback"]
+    },
+    {
+      "forbidden": ["no owner", "owner is unknown", "not priya"],
+      "id": "migration-owner",
+      "required_all": ["owner", "priya"]
+    }
+  ],
   "fixture_id": "kody-conflicting-handoffs-v1",
   "fixture_version": "1.0.0",
   "reports": [

@@ -2,6 +2,25 @@ You are completing benchmark task KODY-02: Synthetic migration handoff reconcili
 
 Return exactly one JSON object and no Markdown.
 Required top-level fields: facts, conflicts, evidence_links, decisions, actions, open_questions.
+
+Each required field has an exact array-of-objects shape:
+- facts: an array of objects with id and summary.
+- conflicts: an array of objects with id, summary, and status.
+- evidence_links: an array of objects with evidence_id and supports, where supports is an array of fact IDs.
+- decisions: an array of objects with id, statement, and status.
+- actions: an array of objects with id, owner, and status.
+- open_questions: an array of objects with id, question, status, and next_action.
+
 Use only the supplied synthetic packet; do not browse or perform external actions.
-Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
+Use only supplied source IDs and owners from the packet.
+Use these status values: conflicts and open_questions use unresolved or resolved; decisions use pending, confirmed, or rejected; actions use not_started, in_progress, completed, or blocked.
+Use these exact task-defined identifiers:
+- facts: schema-export, dry-run, index-gap, rollback-window, migration-owner.
+- conflicts: schema-complete-vs-gap and rollback-unconfirmed; both are unresolved.
+- evidence_links: note-schema supports schema-export; note-dry-run supports dry-run; note-index-gap supports index-gap; note-rollback supports rollback-window; note-owner supports migration-owner.
+- actions: verify-index-gap, confirm-rollback-window, record-owner-decision.
+Assign each action an owner from available_owners and use not_started unless the packet confirms progress.
+Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts, owners, approvals, or confirmations.
+Retain every required fact, seeded conflict, required evidence link, required action, and unresolved question from the packet.
+Do not mark work completed or a decision confirmed unless the packet confirms it.
 Follow the task-specific requirements in the packet and keep the output concise but complete.

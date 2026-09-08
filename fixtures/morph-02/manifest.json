@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "morph-launch-direction-v1",
@@ -39,13 +39,13 @@
   "profile_id": "morph",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:18e2a7b36aad6acd92a78bd132d894ecd91d527f24add3bcdf4a3015109cf7ae",
+    "sha256": "sha256:f2baad1f2cf46468ae73c38c7f7104e7f3cac4e4c28d8edf44c01f9eb54c9a56",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "MORPH-02"

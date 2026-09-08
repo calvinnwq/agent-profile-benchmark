@@ -5,3 +5,6 @@ Required top-level fields: findings, locations, severity, user_impact, recommend
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Canonical finding IDs are nav-contrast, submit-focus, and table-overflow.
+Use those IDs consistently in findings, locations, severity, user_impact, and recommended_fixes.

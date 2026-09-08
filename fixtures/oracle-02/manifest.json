@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "oracle-quant-comparison-v1",
@@ -34,18 +34,18 @@
   },
   "output_schema": {
     "path": "../../schemas/oracle-02-output.schema.json",
-    "sha256": "sha256:37b708f174f4f0d03ef876b3df4def4d26367ec5ea22398eb8e58881df93c51a"
+    "sha256": "sha256:dee7fde2f28775e4f58ea9fbd72445a891e0188cf2911a37fdc1a81cd0941cf5"
   },
   "profile_id": "oracle",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:08055d186c2e8c15daa67e812bebeff095b9383d7ccff57f8d6253ad5d2c144b",
+    "sha256": "sha256:eab9126f9451d4bf7cd8c95f1f34f34be5ac3cd3dd34d58d7c1dd71a9471fcce",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "ORACLE-02"

@@ -78,7 +78,7 @@ def _bound_paths(manifest: dict[str, Any]) -> tuple[Path, Path, Path, Path, Path
     _require(manifest.get("task_id") == "KODY-01", "manifest task binding is not KODY-01")
     _require(manifest.get("profile_id") == "kody", "manifest profile binding is not kody")
     _require(manifest.get("slice_status") == "benchmark-ready", "manifest slice status must be benchmark-ready")
-    _require(manifest.get("benchmark_version") == "0.2.0", "manifest benchmark version must be 0.2.0")
+    _require(manifest.get("benchmark_version") == "0.4.0", "manifest benchmark version must be 0.4.0")
     _require(manifest.get("status") == "benchmark-ready", "manifest status must be benchmark-ready")
     _require(manifest.get("benchmark_ready") is True, "benchmark-ready slice must claim benchmark readiness")
     _require(manifest.get("allowed_tools") == [], "KODY-01 must declare an empty tool surface")
@@ -115,11 +115,11 @@ def _bound_paths(manifest: dict[str, Any]) -> tuple[Path, Path, Path, Path, Path
     _require(output_schema_path == EXPECTED_OUTPUT_SCHEMA, "manifest output schema path is not bound")
     _require(
         run_schema_path == EXPECTED_COMMON_RUN_SCHEMA,
-        "manifest run-record schema must use the shared v0.2.0 schema",
+        "manifest run-record schema must use the shared v0.4.0 schema",
     )
     _require(
         gate_path == EXPECTED_RELEASE_GATE,
-        "manifest release-gate path must use the global v0.2.0 release gate",
+        "manifest release-gate path must use the global v0.4.0 release gate",
     )
 
     _require(

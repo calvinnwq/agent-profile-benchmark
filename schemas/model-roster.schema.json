@@ -18,7 +18,7 @@
     "$id": {"type": "string"},
     "schema_version": {"type": "string", "const": "model-roster-v1"},
     "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
-    "benchmark_version": {"type": "string", "const": "0.2.0"},
+    "benchmark_version": {"type": "string", "const": "0.4.0"},
     "snapshot_id": {"type": "string", "minLength": 1},
     "provider": {"type": "string", "minLength": 1},
     "captured_at": {"type": "string", "minLength": 1},

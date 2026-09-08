@@ -45,6 +45,11 @@ try:
 except ImportError:  # pragma: no cover - package-style import
     from scripts.replay_task import INPUT_COMPOSITION_VERSION, INPUT_SEPARATOR
 
+try:
+    from leaderboard_aggregate import validate_aggregate
+except ImportError:  # pragma: no cover - package-style import
+    from scripts.leaderboard_aggregate import validate_aggregate
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER = ROOT / "data" / "task-ledger.json"
@@ -55,7 +60,7 @@ INPUT_SCHEMA = ROOT / "schemas" / "leaderboard-input.schema.json"
 OUTPUT_SCHEMA = ROOT / "schemas" / "leaderboard-output.schema.json"
 DEFAULT_RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
 SUPPORTED_POLICY_VERSION = "1.0.0"
-EXPECTED_POLICY_FINGERPRINT = "9e52b7f7e6a2ec485393a0be53797b48ed3a07645c53699bc39f7982a129faea"
+EXPECTED_POLICY_FINGERPRINT = "0aa9d3b0d7183ca86097662ad98d7b55de2f9ee9e392ad3d9d58d02818cd9f67"
 UNRESOLVED_IDENTITY_VALUES = {"", "none", "unresolved"}
 VALID_AVAILABILITY = {"eligible", "excluded"}
 VALID_RUN_STATUSES = {"passed", "failed", "blocked"}
@@ -249,7 +254,7 @@ def _load_ledger(
     if ledger.get("benchmark_id") != benchmark_id or ledger.get("benchmark_version") != benchmark_version:
         raise LeaderboardInputError("benchmark ledger identity does not match the leaderboard input")
     if require_frozen and _canonical_fingerprint(ledger) != EXPECTED_LEDGER_FINGERPRINT:
-        raise LeaderboardInputError("benchmark ledger does not match the sealed v0.2.0 contract")
+        raise LeaderboardInputError("benchmark ledger does not match the sealed v0.4.0 contract")
     raw_profiles = ledger.get("profiles")
     raw_tasks = ledger.get("tasks")
     if not isinstance(raw_profiles, list) or not isinstance(raw_tasks, list):
@@ -462,6 +467,7 @@ def _trusted_task_bindings(task_ids: Iterable[str]) -> dict[str, dict[str, str]]
                 "fixture_fingerprint": artifacts["fixture"]["sha256"],
                 "input_fingerprint": _bytes_fingerprint(prompt_bytes + INPUT_SEPARATOR + fixture_bytes),
                 "input_composition_version": INPUT_COMPOSITION_VERSION,
+                "evaluator_version": binding["evaluator_version"],
             }
         return bindings
     except (KeyError, OSError, ReleaseLockError, TypeError, UnicodeError) as exc:
@@ -569,6 +575,7 @@ def _run_metrics(record: dict[str, Any]) -> dict[str, Any]:
         "automatic_check_pass_rate": round(auto_rate, 6),
         "hard_failure": bool(hard_failure_ids),
         "invalid_output": "invalid-output" in hard_failure_ids,
+        "non_json_output": record.get("output_parse_status") == "invalid-json",
         "human_quality_score": human_score,
         "human_score_available": human_available,
         "latency_ms": record.get("latency_ms") if _finite_number(record.get("latency_ms")) else None,
@@ -637,15 +644,69 @@ def _model_entry(
             key=lambda item: (item.get("completed_at", ""), item["run_id"]),
         )
         comparable = [record for record in task_records if record["_comparable"]]
+        task_metrics = [_run_metrics(record) for record in task_records]
+        comparable_metrics = [_run_metrics(record) for record in comparable]
         cell = {
             "task_id": task_id,
             "profile_id": task_profile[task_id],
             "attempted_runs": len(task_records),
+            "completed_execution_records": sum(
+                record.get("execution_status") == "completed" for record in task_records
+            ),
+            "execution_blocked_runs": sum(
+                record.get("execution_status") == "blocked" for record in task_records
+            ),
+            "all_attempt_process_or_timeout_failures": sum(
+                record.get("execution_status") in {"failed", "timed_out"} for record in task_records
+            ),
+            "resolved_identity_runs": sum(record.get("resolution_status") == "resolved" for record in task_records),
+            "parseable_output_runs": sum(not item["non_json_output"] for item in task_metrics),
+            "non_json_output_runs": sum(item["non_json_output"] for item in task_metrics),
+            "all_attempt_hard_failure_runs": sum(item["hard_failure"] for item in task_metrics),
+            "all_attempt_hard_failure_entries": sum(
+                len(record.get("hard_failures", [])) for record in task_records
+            ),
+            "all_attempt_invalid_output_runs": sum(item["invalid_output"] for item in task_metrics),
+            "all_attempt_automatic_check_pass_runs": sum(
+                bool(item["automatic_check_statuses"])
+                and all(status == "pass" for status in item["automatic_check_statuses"])
+                for item in task_metrics
+            ),
+            "evaluator_blocked_runs": sum(
+                any(
+                    isinstance(check, dict) and check.get("status") == "blocked"
+                    for check in record.get("automatic_checks", [])
+                )
+                for record in task_records
+            ),
             "comparable_runs": len(comparable),
+            "comparable_resolved_runs": len(comparable),
             "excluded_runs": len(task_records) - len(comparable),
             "excluded_provider_or_identity_runs": sum(not record["_identity_resolved"] for record in task_records),
             "blocked_or_unverified_runs": sum(
                 record["_identity_resolved"] and not record["_comparable"] for record in task_records
+            ),
+            "comparable_hard_failure_runs": sum(item["hard_failure"] for item in comparable_metrics),
+            "comparable_invalid_output_runs": sum(item["invalid_output"] for item in comparable_metrics),
+            "comparable_full_contract_pass_runs": sum(item["full_contract_pass"] for item in comparable_metrics),
+            "full_contract_pass_runs": sum(item["full_contract_pass"] for item in comparable_metrics),
+            "comparable_automatic_check_pass_runs": sum(
+                bool(item["automatic_check_statuses"])
+                and all(status == "pass" for status in item["automatic_check_statuses"])
+                for item in comparable_metrics
+            ),
+            "all_automatic_checks_pass_runs": sum(
+                bool(item["automatic_check_statuses"])
+                and all(status == "pass" for status in item["automatic_check_statuses"])
+                for item in task_metrics
+            ),
+            "comparable_process_or_timeout_failures": sum(
+                record.get("execution_status") in {"failed", "timed_out"} for record in comparable
+            ),
+            "hard_failure_runs": sum(item["hard_failure"] for item in comparable_metrics),
+            "invalid_output_runs": sum(item["invalid_output"] for item in comparable_metrics),
+            "process_or_timeout_failures": sum(
+                record.get("execution_status") in {"failed", "timed_out"} for record in comparable
             ),
             "replicate_count": len(comparable),
             "coverage_status": "covered" if comparable else "missing",
@@ -929,27 +990,91 @@ def build_leaderboard(
         for record, metrics in zip(records, all_run_metrics)
         if record["_comparable"]
     ]
+    planned_cells = len(roster["models"]) * len(ordered_tasks)
+    observed_cells = {(record["_model_id"], record["task_id"]) for record in records}
+    launch_failures = max(0, planned_cells - len(observed_cells))
+    all_hard_failure_runs = sum(item["hard_failure"] for item in all_run_metrics)
+    all_invalid_output_runs = sum(item["invalid_output"] for item in all_run_metrics)
+    all_automatic_check_pass_runs = sum(
+        bool(item["automatic_check_statuses"])
+        and all(status == "pass" for status in item["automatic_check_statuses"])
+        for item in all_run_metrics
+    )
+    comparable_hard_failure_runs = sum(item["hard_failure"] for item in comparable_metrics)
+    comparable_invalid_output_runs = sum(item["invalid_output"] for item in comparable_metrics)
+    all_process_or_timeout_failures = sum(
+        record["execution_status"] in {"failed", "timed_out"} for record in records
+    )
+    comparable_process_or_timeout_failures = sum(
+        record["execution_status"] in {"failed", "timed_out"} for record in comparable_records
+    )
     aggregate = {
+        "planned_cells": planned_cells,
+        "launch_failures": launch_failures,
         "attempted_runs": len(records),
+        "completed_execution_records": sum(record["execution_status"] == "completed" for record in records),
+        "execution_blocked_runs": sum(record["execution_status"] == "blocked" for record in records),
+        "all_attempt_process_or_timeout_failures": all_process_or_timeout_failures,
+        "comparable_process_or_timeout_failures": comparable_process_or_timeout_failures,
+        "process_or_timeout_failures": comparable_process_or_timeout_failures,
+        "resolved_identity_runs": sum(record["resolution_status"] == "resolved" for record in records),
+        "parseable_output_runs": sum(not item["non_json_output"] for item in all_run_metrics),
+        "non_json_output_runs": sum(item["non_json_output"] for item in all_run_metrics),
+        "all_attempt_hard_failure_runs": all_hard_failure_runs,
+        "all_attempt_hard_failure_entries": sum(len(record.get("hard_failures", [])) for record in records),
+        "all_attempt_invalid_output_runs": all_invalid_output_runs,
+        "evaluator_blocked_runs": sum(
+            any(isinstance(check, dict) and check.get("status") == "blocked" for check in record.get("automatic_checks", []))
+            for record in records
+        ),
         "comparable_resolved_runs": len(comparable_records),
         "excluded_provider_or_identity_runs": sum(not record["_identity_resolved"] for record in records),
         "blocked_or_unverified_runs": sum(
             record["_identity_resolved"] and not record["_comparable"] for record in records
         ),
+        "comparable_full_contract_pass_runs": sum(item["full_contract_pass"] for item in comparable_metrics),
         "full_contract_pass_runs": sum(item["full_contract_pass"] for item in comparable_metrics),
-        "all_automatic_checks_pass_runs": sum(
+        "all_attempt_automatic_check_pass_runs": all_automatic_check_pass_runs,
+        "all_automatic_checks_pass_runs": all_automatic_check_pass_runs,
+        "comparable_automatic_check_pass_runs": sum(
             bool(metrics["automatic_check_statuses"])
             and all(status == "pass" for status in metrics["automatic_check_statuses"])
             for metrics in comparable_metrics
         ),
-        "hard_failure_runs": sum(item["hard_failure"] for item in comparable_metrics),
-        "invalid_output_runs": sum(item["invalid_output"] for item in comparable_metrics),
-        "process_or_timeout_failures": sum(
-            record["execution_status"] in {"failed", "timed_out"}
-            for record in comparable_records
-        ),
+        "comparable_hard_failure_runs": comparable_hard_failure_runs,
+        "hard_failure_runs": comparable_hard_failure_runs,
+        "comparable_invalid_output_runs": comparable_invalid_output_runs,
+        "invalid_output_runs": comparable_invalid_output_runs,
         "human_scores_assigned": any(item["human_score_available"] for item in comparable_metrics),
     }
+    cell_totals = {
+        "planned_cells": planned_cells,
+        "launch_failures": launch_failures,
+        **{
+            name: sum(cell.get(name, 0) for entry in entries for cell in entry["task_cells"])
+            for name in (
+                "attempted_runs",
+            "completed_execution_records",
+            "parseable_output_runs",
+            "all_attempt_hard_failure_runs",
+            "all_attempt_invalid_output_runs",
+            "all_attempt_automatic_check_pass_runs",
+            "comparable_resolved_runs",
+            "excluded_provider_or_identity_runs",
+            "blocked_or_unverified_runs",
+            "comparable_hard_failure_runs",
+            "comparable_invalid_output_runs",
+            )
+        },
+    }
+    try:
+        validate_aggregate(
+            aggregate,
+            cell_totals=cell_totals,
+            scope_totals={"planned_cells": planned_cells, "launch_failures": launch_failures},
+        )
+    except ValueError as exc:
+        raise LeaderboardInputError(str(exc)) from exc
     release_locks = sorted({record["release_lock_fingerprint"] for record in records})
     generated_at = input_manifest.get("generated_at") or roster.get("captured_at")
     if not isinstance(generated_at, str) or not generated_at:

@@ -4,25 +4,136 @@
   "additionalProperties": false,
   "properties": {
     "findings": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "summary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "nav-contrast",
+              "submit-focus",
+              "table-overflow"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
     },
     "locations": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nav-contrast",
+        "submit-focus",
+        "table-overflow"
+      ],
+      "properties": {
+        "nav-contrast": {
+          "type": "string"
+        },
+        "submit-focus": {
+          "type": "string"
+        },
+        "table-overflow": {
+          "type": "string"
+        }
+      }
     },
     "recommended_fixes": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "fix"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "nav-contrast",
+              "submit-focus",
+              "table-overflow"
+            ]
+          },
+          "fix": {
+            "type": "string"
+          }
+        }
+      }
     },
     "review_summary": {
       "minLength": 1,
       "type": "string"
     },
     "severity": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nav-contrast",
+        "submit-focus",
+        "table-overflow"
+      ],
+      "properties": {
+        "nav-contrast": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "submit-focus": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "table-overflow": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        }
+      }
     },
     "user_impact": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nav-contrast",
+        "submit-focus",
+        "table-overflow"
+      ],
+      "properties": {
+        "nav-contrast": {
+          "type": "string"
+        },
+        "submit-focus": {
+          "type": "string"
+        },
+        "table-overflow": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

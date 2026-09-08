@@ -1,54 +1,24 @@
 {
   "checks": [
     {
-      "id": "defect-recall",
-      "id_key": "id",
-      "kind": "list_ids",
-      "path": "findings",
-      "required_ids": [
-        "absolute-projection-target",
-        "remote-pipe-execution",
-        "world-readable-secret"
-      ]
-    },
-    {
-      "allowed_ids": [
-        "absolute-projection-target",
-        "remote-pipe-execution",
-        "world-readable-secret"
-      ],
-      "id": "defect-precision",
-      "id_key": "id",
-      "kind": "list_ids",
-      "path": "findings"
-    },
-    {
-      "expected": {
-        "absolute-projection-target": "high",
-        "remote-pipe-execution": "critical",
-        "world-readable-secret": "critical"
-      },
-      "id": "severity-mapping",
-      "kind": "object_values",
-      "path": "severity"
-    },
-    {
-      "id": "path-evidence",
-      "id_key": "finding_id",
-      "kind": "list_ids",
-      "path": "evidence",
-      "required_ids": [
-        "absolute-projection-target",
-        "remote-pipe-execution",
-        "world-readable-secret"
-      ]
+      "evidence_location_key": "location",
+      "evidence_path": "evidence",
+      "finding_id_key": "id",
+      "finding_summary_key": "summary",
+      "fixture_path": "artifact_files",
+      "fixture_location_key": "path",
+      "id": "defect-consistency",
+      "kind": "defect_consistency",
+      "remediation_id_key": "finding_id",
+      "remediation_path": "remediation",
+      "severity_path": "severity"
     }
   ],
   "fixture_id": "arch-projection-review-v1",
-  "fixture_version": "1.0.0",
+  "fixture_version": "1.1.0",
   "hard_rules": [
     {
-      "check_id": "defect-recall",
+      "check_id": "defect-consistency",
       "id": "missed-high-severity",
       "kind": "check_ref"
     },

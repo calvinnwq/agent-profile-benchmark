@@ -1,6 +1,14 @@
 {
   "checks": [
     {
+      "id": "fact-consistency",
+      "fixture_contract_path": "fact_contract",
+      "kind": "fact_consistency",
+      "path": "facts",
+      "id_key": "id",
+      "text_key": "summary"
+    },
+    {
       "id": "fact-retention",
       "id_key": "id",
       "kind": "list_ids",

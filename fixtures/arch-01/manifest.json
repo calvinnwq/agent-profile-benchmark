@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "arch-authentication-fix-v1",
@@ -34,18 +34,18 @@
   },
   "output_schema": {
     "path": "../../schemas/arch-01-output.schema.json",
-    "sha256": "sha256:9e4fbc94ce02cf96de6b689180fbd0763faf57ab44a943e5d529eb40c714bd43"
+    "sha256": "sha256:d327be6377778c5d2cdcd65541eacea83f69daa38d16d4d4be233f4d633bc327"
   },
   "profile_id": "arch",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:6d094157a596615dbeb916cf369f40380bebf8906137b089a8fc0ed2b46ca502",
+    "sha256": "sha256:51c07b6d2d930aba913d9f25e68b7bf130020e3d0ce5e21a9dd717501849538f",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "ARCH-01"

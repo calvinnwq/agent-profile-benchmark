@@ -5,3 +5,6 @@ Required top-level fields: claim_register, source_links, scope_and_dates, confli
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Use only the supplied source IDs rulebook-2026 and park-alert-2026-06 when linking claims.
+The supplied claim IDs are booking-window, fire-ban, and north-track-closure; preserve their dates and scope.

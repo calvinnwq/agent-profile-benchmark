@@ -5,3 +5,6 @@ Required top-level fields: plan_changes, preserved_goal, recovery_adjustment, st
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+The availability adjustment must reduce the week to two easy sessions; the equivalent numeral 2 is accepted for the word two.
+Do not catch up missed volume, preserve the half marathon goal, and use rest/escalation language for pain.

@@ -19,10 +19,12 @@
   "conflicts": [
     {
       "id": "schema-complete-vs-gap",
+      "status": "unresolved",
       "summary": "Morgan reports complete export while Priya reports two missing indexes."
     },
     {
       "id": "rollback-unconfirmed",
+      "status": "unresolved",
       "summary": "A rollback window is needed but remains unconfirmed."
     }
   ],

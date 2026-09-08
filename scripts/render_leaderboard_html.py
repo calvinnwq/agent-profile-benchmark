@@ -16,6 +16,11 @@ try:
 except ImportError:  # pragma: no cover - package-style import
     from scripts.validate_benchmark import validate_schema_instance
 
+try:
+    from leaderboard_aggregate import validate_aggregate
+except ImportError:  # pragma: no cover - package-style import
+    from scripts.leaderboard_aggregate import validate_aggregate
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_POLICY = ROOT / "data" / "leaderboard-policy.json"
@@ -806,13 +811,51 @@ def _validate_leaderboard_structure(
     models = _list(data.get("models"), "leaderboard.models")
     if not models:
         raise RenderError("leaderboard.models must not be empty")
+    overall_scope = _required_mapping(data.get("overall"), "leaderboard.overall")
+    _validate_ranking_view(overall_scope, "leaderboard.overall")
+    scope_rows = list(_list(overall_scope.get("ranked"), "leaderboard.overall.ranked"))
+    scope_rows += _list(overall_scope.get("unranked"), "leaderboard.overall.unranked")
+    scope_rows += _list(overall_scope.get("excluded"), "leaderboard.overall.excluded")
+    task_totals = {
+        row["coverage"]["tasks_total"]
+        for row in scope_rows
+        if isinstance(row, dict) and isinstance(row.get("coverage"), dict)
+    }
+    if len(task_totals) != 1:
+        raise RenderError("leaderboard.overall rows must declare one common tasks_total")
+    declared_task_total = task_totals.pop()
+    expected_planned_cells = len(models) * declared_task_total
+    observed_cells = 0
     model_ids: set[str] = set()
     model_metadata: dict[str, tuple[str, str]] = {}
     aggregate_totals = {
+        "planned_cells": expected_planned_cells,
+        "launch_failures": 0,
         "attempted_runs": 0,
+        "completed_execution_records": 0,
+        "execution_blocked_runs": 0,
+        "all_attempt_process_or_timeout_failures": 0,
+        "resolved_identity_runs": 0,
+        "parseable_output_runs": 0,
+        "non_json_output_runs": 0,
+        "all_attempt_hard_failure_runs": 0,
+        "all_attempt_hard_failure_entries": 0,
+        "all_attempt_invalid_output_runs": 0,
+        "all_attempt_automatic_check_pass_runs": 0,
+        "evaluator_blocked_runs": 0,
         "comparable_resolved_runs": 0,
         "excluded_provider_or_identity_runs": 0,
         "blocked_or_unverified_runs": 0,
+        "comparable_full_contract_pass_runs": 0,
+        "full_contract_pass_runs": 0,
+        "comparable_automatic_check_pass_runs": 0,
+        "all_automatic_checks_pass_runs": 0,
+        "comparable_process_or_timeout_failures": 0,
+        "comparable_hard_failure_runs": 0,
+        "hard_failure_runs": 0,
+        "comparable_invalid_output_runs": 0,
+        "invalid_output_runs": 0,
+        "process_or_timeout_failures": 0,
     }
     for index, model in enumerate(models):
         name = f"leaderboard.models[{index}]"
@@ -838,6 +881,7 @@ def _validate_leaderboard_structure(
             if task_id in seen_task_ids:
                 raise RenderError(f"{cell_name}.task_id is duplicated")
             seen_task_ids.add(task_id)
+            observed_cells += 1
             attempted_count = _nonnegative_int(cell.get("attempted_runs"), f"{cell_name}.attempted_runs")
             comparable_count = _nonnegative_int(cell.get("comparable_runs"), f"{cell_name}.comparable_runs")
             excluded_count = _nonnegative_int(cell.get("excluded_runs"), f"{cell_name}.excluded_runs")
@@ -853,10 +897,68 @@ def _validate_leaderboard_structure(
                 raise RenderError(f"{cell_name} comparable and excluded counts do not add up")
             if provider_count + blocked_count != excluded_count:
                 raise RenderError(f"{cell_name} exclusion counts do not add up")
+            cell_values = {
+                key: _nonnegative_int(cell.get(key), f"{cell_name}.{key}")
+                for key in (
+                    "execution_blocked_runs",
+                    "all_attempt_process_or_timeout_failures",
+                    "resolved_identity_runs",
+                    "non_json_output_runs",
+                    "all_attempt_hard_failure_entries",
+                    "evaluator_blocked_runs",
+                    "comparable_resolved_runs",
+                    "comparable_full_contract_pass_runs",
+                    "full_contract_pass_runs",
+                    "comparable_automatic_check_pass_runs",
+                    "all_automatic_checks_pass_runs",
+                    "comparable_process_or_timeout_failures",
+                    "hard_failure_runs",
+                    "invalid_output_runs",
+                    "process_or_timeout_failures",
+                )
+            }
+            cell_aggregate = {
+                "planned_cells": attempted_count,
+                "launch_failures": 0,
+                "attempted_runs": attempted_count,
+                "completed_execution_records": _nonnegative_int(
+                    cell.get("completed_execution_records"), f"{cell_name}.completed_execution_records"
+                ),
+                **cell_values,
+                "parseable_output_runs": _nonnegative_int(
+                    cell.get("parseable_output_runs"), f"{cell_name}.parseable_output_runs"
+                ),
+                "all_attempt_hard_failure_runs": _nonnegative_int(
+                    cell.get("all_attempt_hard_failure_runs"), f"{cell_name}.all_attempt_hard_failure_runs"
+                ),
+                "all_attempt_invalid_output_runs": _nonnegative_int(
+                    cell.get("all_attempt_invalid_output_runs"), f"{cell_name}.all_attempt_invalid_output_runs"
+                ),
+                "all_attempt_automatic_check_pass_runs": _nonnegative_int(
+                    cell.get("all_attempt_automatic_check_pass_runs"),
+                    f"{cell_name}.all_attempt_automatic_check_pass_runs",
+                ),
+                "excluded_provider_or_identity_runs": provider_count,
+                "blocked_or_unverified_runs": blocked_count,
+                "comparable_hard_failure_runs": _nonnegative_int(
+                    cell.get("comparable_hard_failure_runs"), f"{cell_name}.comparable_hard_failure_runs"
+                ),
+                "comparable_invalid_output_runs": _nonnegative_int(
+                    cell.get("comparable_invalid_output_runs"), f"{cell_name}.comparable_invalid_output_runs"
+                ),
+                "human_scores_assigned": False,
+            }
+            try:
+                validate_aggregate(cell_aggregate)
+            except ValueError as exc:
+                raise RenderError(f"{cell_name} aggregate is inconsistent: {exc}") from exc
             aggregate_totals["attempted_runs"] += attempted_count
-            aggregate_totals["comparable_resolved_runs"] += comparable_count
-            aggregate_totals["excluded_provider_or_identity_runs"] += provider_count
-            aggregate_totals["blocked_or_unverified_runs"] += blocked_count
+            for key in aggregate_totals:
+                if key not in {"planned_cells", "launch_failures", "attempted_runs"}:
+                    aggregate_totals[key] += cell_aggregate.get(key, 0)
+    aggregate_totals["launch_failures"] = expected_planned_cells - observed_cells
+    if aggregate_totals["launch_failures"] < 0:
+        raise RenderError("leaderboard task cells exceed the declared planned scope")
     overall = _required_mapping(data["overall"], "leaderboard.overall")
     _validate_ranking_view(overall, "leaderboard.overall")
     profiles = _required_mapping(data["profiles"], "leaderboard.profiles")
@@ -893,30 +995,13 @@ def _validate_leaderboard_structure(
     for profile_id, view in profiles.items():
         _assert_view_model_set(view, f"leaderboard.profiles.{profile_id}")
     aggregate = _required_mapping(data["aggregate"], "leaderboard.aggregate")
-    for key in (
-        "attempted_runs",
-        "comparable_resolved_runs",
-        "excluded_provider_or_identity_runs",
-        "blocked_or_unverified_runs",
-    ):
+    for key in aggregate_totals:
         if aggregate.get(key) != aggregate_totals[key]:
             raise RenderError(f"leaderboard.aggregate.{key} disagrees with model task-cell totals")
-    for key in (
-        "attempted_runs",
-        "comparable_resolved_runs",
-        "excluded_provider_or_identity_runs",
-        "blocked_or_unverified_runs",
-        "full_contract_pass_runs",
-        "all_automatic_checks_pass_runs",
-        "hard_failure_runs",
-        "invalid_output_runs",
-        "process_or_timeout_failures",
-    ):
-        value = aggregate.get(key)
-        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
-            raise RenderError(f"leaderboard.aggregate.{key} must be a non-negative integer")
-    if not isinstance(aggregate.get("human_scores_assigned"), bool):
-        raise RenderError("leaderboard.aggregate.human_scores_assigned must be a boolean")
+    try:
+        validate_aggregate(aggregate, cell_totals=aggregate_totals)
+    except ValueError as exc:
+        raise RenderError(str(exc)) from exc
     publication = _required_mapping(data["publication"], "leaderboard.publication")
     for key in (
         "ranking_available",
@@ -1142,7 +1227,7 @@ def render_html(
       <div>
         <p class="eyebrow">Nous Portal / Agent Profile Benchmark</p>
         <h1>Which free models held the line?</h1>
-        <p class="lede">A benchmark-specific model leaderboard and routing aid for the frozen <code>0.2.0</code> task suite. It measures contract-following across fixed agent profiles, not general intelligence.</p>
+        <p class="lede">A benchmark-specific model leaderboard and routing aid for the frozen <code>0.4.0</code> task suite. It measures contract-following across fixed agent profiles, not general intelligence.</p>
         <div class="actions">
           <a class="button primary" href="#leaderboard">Read the ranking</a>
           <a class="button" href="#method">How to read this</a>
@@ -1207,9 +1292,9 @@ def render_html(
         <p class="eyebrow">Evidence ledger</p>
         <h2>What this snapshot contains</h2>
         <div class="grid">
-          <div class="card"><h3>Attempts</h3><p>{_esc(aggregate.get('attempted_runs', 'n/a'))} attempted cells, {_esc(aggregate.get('comparable_resolved_runs', 'n/a'))} comparable after provider and identity checks.</p></div>
-          <div class="card"><h3>Contract quality</h3><p>{_esc(aggregate.get('full_contract_pass_runs', 'n/a'))} full-contract passes and {_esc(aggregate.get('all_automatic_checks_pass_runs', 'n/a'))} cells passing every automatic check.</p></div>
-          <div class="card"><h3>Failure visibility</h3><p>{_esc(aggregate.get('hard_failure_runs', 'n/a'))} hard-failure cells, {_esc(aggregate.get('invalid_output_runs', 'n/a'))} invalid-output cells, and {_esc(aggregate.get('process_or_timeout_failures', 'n/a'))} process or timeout failures.</p></div>
+          <div class="card"><h3>Attempts</h3><p>{_esc(aggregate.get('attempted_runs', 'n/a'))} attempted runs ({_esc(aggregate.get('planned_cells', 'n/a'))} planned cells), {_esc(aggregate.get('completed_execution_records', 'n/a'))} completed, and {_esc(aggregate.get('comparable_resolved_runs', 'n/a'))} comparable.</p></div>
+          <div class="card"><h3>Contract quality</h3><p>Comparable subset: {_esc(aggregate.get('comparable_full_contract_pass_runs', aggregate.get('full_contract_pass_runs', 'n/a')))} full-contract passes and {_esc(aggregate.get('comparable_automatic_check_pass_runs', aggregate.get('all_automatic_checks_pass_runs', 'n/a')))} automatic-check passes.</p></div>
+          <div class="card"><h3>Failure visibility</h3><p>All attempts: {_esc(aggregate.get('all_attempt_hard_failure_runs', 'n/a'))} hard-failure runs and {_esc(aggregate.get('all_attempt_invalid_output_runs', 'n/a'))} invalid-output runs. Comparable subset: {_esc(aggregate.get('comparable_hard_failure_runs', aggregate.get('hard_failure_runs', 'n/a')))} hard-failure runs and {_esc(aggregate.get('comparable_invalid_output_runs', aggregate.get('invalid_output_runs', 'n/a')))} invalid-output runs.</p></div>
         </div>
       </section>
 

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/diagnostic-manifest.schema.json",
+  "title": "Agent Profile Benchmark diagnostic manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "benchmark_id",
+    "benchmark_version",
+    "diagnostic_id",
+    "purpose",
+    "decision_surfaces",
+    "cells"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "$id": {"type": "string"},
+    "schema_version": {"const": "diagnostic-manifest-v1"},
+    "benchmark_id": {"const": "agent-profile-benchmark"},
+    "benchmark_version": {"const": "0.4.0"},
+    "diagnostic_id": {"type": "string", "minLength": 1},
+    "purpose": {"const": "validity-diagnostic"},
+    "decision_surfaces": {
+      "type": "array",
+      "const": ["ranking", "promotion", "suitability", "routing"]
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 24,
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cell_id", "model_id", "task_id"],
+        "properties": {
+          "cell_id": {"type": "string", "minLength": 1},
+          "model_id": {"type": "string", "minLength": 1},
+          "task_id": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

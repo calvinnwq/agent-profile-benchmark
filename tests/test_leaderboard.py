@@ -40,7 +40,7 @@ def _run_record(model_id: str, task_id: str, passed: bool, sequence: int) -> dic
     return {
         "run_id": f"{safe_model_id}-{task_id}-{sequence}",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "release_lock_fingerprint": FINGERPRINT,
         "ledger_fingerprint": FINGERPRINT,
         "task_id": task_id,
@@ -52,7 +52,8 @@ def _run_record(model_id: str, task_id: str, passed: bool, sequence: int) -> dic
         "provider_resolved": "nous",
         "resolution_status": "resolved",
         "condition": "model-calibration",
-        "evaluator_version": "task-oracle-v1",
+        "evaluator_version": "task-oracle-v2",
+        "output_parse_status": "json-object",
         "task_manifest_fingerprint": FINGERPRINT,
         "oracle_fingerprint": FINGERPRINT,
         "output_schema_fingerprint": FINGERPRINT,
@@ -88,7 +89,7 @@ def _run_record(model_id: str, task_id: str, passed: bool, sequence: int) -> dic
 def _base_ledger() -> dict[str, Any]:
     return {
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "profiles": [
             {"id": "alpha", "task_ids": ["ALPHA-01", "ALPHA-02"]},
             {"id": "beta", "task_ids": ["BETA-01", "BETA-02", "BETA-03", "BETA-04"]},
@@ -110,7 +111,7 @@ def _base_policy() -> dict[str, Any]:
         "policy_id": "leaderboard-v1",
         "policy_version": "1.0.0",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "scope": "benchmark-specific model leaderboard and routing aid",
         "status": "active",
         "coverage": {
@@ -138,7 +139,7 @@ def _base_roster(model_ids: tuple[str, ...] = ("model-a:free", "model-b:free")) 
     return {
         "schema_version": "model-roster-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "snapshot_id": "synthetic-roster-1",
         "provider": "nous",
         "captured_at": "2026-01-01T00:00:00Z",
@@ -170,7 +171,7 @@ def _build_synthetic_input(
     input_manifest = {
         "schema_version": "leaderboard-input-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "snapshot_id": "synthetic-input-1",
         "roster_path": "roster.json",
         "runs": [],
@@ -404,7 +405,7 @@ class LeaderboardTests(unittest.TestCase):
             _write_json(record_path, record)
             manifest = {
                 "benchmark_id": "agent-profile-benchmark",
-                "benchmark_version": "0.2.0",
+                "benchmark_version": "0.4.0",
                 "runs": [{"run_id": record["run_id"], "record_path": "record.json"}],
             }
 
@@ -712,6 +713,7 @@ class LeaderboardTests(unittest.TestCase):
                 invalid["hard_failures"] = [
                     {"id": "invalid-output", "condition": "decoder", "evidence": ["invalid JSON"]}
                 ]
+                invalid["output_parse_status"] = "invalid-json"
                 records.append(invalid)
             _build_synthetic_input(
                 root,
@@ -721,8 +723,23 @@ class LeaderboardTests(unittest.TestCase):
             result = _run_builder(root)
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            aggregate = output["aggregate"]
             self.assertEqual(
-                output["aggregate"],
+                {
+                    key: aggregate[key]
+                    for key in (
+                        "attempted_runs",
+                        "comparable_resolved_runs",
+                        "excluded_provider_or_identity_runs",
+                        "blocked_or_unverified_runs",
+                        "full_contract_pass_runs",
+                        "all_automatic_checks_pass_runs",
+                        "hard_failure_runs",
+                        "invalid_output_runs",
+                        "process_or_timeout_failures",
+                        "human_scores_assigned",
+                    )
+                },
                 {
                     "attempted_runs": 12,
                     "comparable_resolved_runs": 12,
@@ -734,6 +751,47 @@ class LeaderboardTests(unittest.TestCase):
                     "invalid_output_runs": 6,
                     "process_or_timeout_failures": 0,
                     "human_scores_assigned": False,
+                },
+            )
+            self.assertEqual(
+                {
+                    key: aggregate[key]
+                    for key in (
+                        "planned_cells",
+                        "launch_failures",
+                        "completed_execution_records",
+                        "execution_blocked_runs",
+                        "resolved_identity_runs",
+                        "parseable_output_runs",
+                        "non_json_output_runs",
+                        "all_attempt_hard_failure_runs",
+                        "all_attempt_hard_failure_entries",
+                        "all_attempt_invalid_output_runs",
+                        "evaluator_blocked_runs",
+                        "comparable_full_contract_pass_runs",
+                        "comparable_automatic_check_pass_runs",
+                        "comparable_process_or_timeout_failures",
+                        "comparable_hard_failure_runs",
+                        "comparable_invalid_output_runs",
+                    )
+                },
+                {
+                    "planned_cells": 12,
+                    "launch_failures": 0,
+                    "completed_execution_records": 12,
+                    "execution_blocked_runs": 0,
+                    "resolved_identity_runs": 12,
+                    "parseable_output_runs": 6,
+                    "non_json_output_runs": 6,
+                    "all_attempt_hard_failure_runs": 6,
+                    "all_attempt_hard_failure_entries": 6,
+                    "all_attempt_invalid_output_runs": 6,
+                    "evaluator_blocked_runs": 0,
+                    "comparable_full_contract_pass_runs": 6,
+                    "comparable_automatic_check_pass_runs": 6,
+                    "comparable_process_or_timeout_failures": 0,
+                    "comparable_hard_failure_runs": 6,
+                    "comparable_invalid_output_runs": 6,
                 },
             )
 

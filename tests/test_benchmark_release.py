@@ -31,7 +31,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
     def test_every_task_has_a_frozen_artifact_packet(self) -> None:
         self.assertEqual(self.ledger["status"], "benchmark-ready")
-        self.assertEqual(self.ledger["benchmark_version"], "0.2.0")
+        self.assertEqual(self.ledger["benchmark_version"], "0.4.0")
         for task in self.ledger["tasks"]:
             slug = task["id"].lower()
             with self.subTest(task=task["id"]):
@@ -65,8 +65,49 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
         self.assertEqual(hashlib.sha256(lock_path.read_bytes()).hexdigest(), EXPECTED_RELEASE_LOCK_FINGERPRINT)
         self.assertEqual(lock["benchmark_id"], "agent-profile-benchmark")
-        self.assertEqual(lock["benchmark_version"], "0.2.0")
+        self.assertEqual(lock["benchmark_version"], "0.4.0")
         self.assertEqual(len(lock["tasks"]), 18)
+        self.assertIn("historical_snapshot_manifest", lock["shared"])
+
+    def test_kody02_prompt_and_schema_expose_nested_output_contract(self) -> None:
+        package = ROOT / "fixtures" / "kody-02"
+        prompt = (package / "prompt.txt").read_text(encoding="utf-8")
+        for fragment in (
+            "facts: an array of objects with id and summary.",
+            "conflicts: an array of objects with id, summary, and status.",
+            "evidence_links: an array of objects with evidence_id and supports",
+            "decisions: an array of objects with id, statement, and status.",
+            "actions: an array of objects with id, owner, and status.",
+            "open_questions: an array of objects with id, question, status, and next_action.",
+            "Use these exact task-defined identifiers:",
+            "facts: schema-export, dry-run, index-gap, rollback-window, migration-owner.",
+            "conflicts: schema-complete-vs-gap and rollback-unconfirmed; both are unresolved.",
+            "note-schema supports schema-export",
+            "note-dry-run supports dry-run",
+            "note-index-gap supports index-gap",
+            "note-rollback supports rollback-window",
+            "note-owner supports migration-owner",
+            "actions: verify-index-gap, confirm-rollback-window, record-owner-decision",
+        ):
+            with self.subTest(fragment=fragment):
+                self.assertIn(fragment, prompt)
+
+        schema = json.loads(
+            (ROOT / "schemas" / "kody-02-output.schema.json").read_text(encoding="utf-8")
+        )
+        known_good = json.loads(
+            (package / "controls" / "known-good.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(validate_schema_instance(known_good, schema), [])
+        for path, replacement in (
+            ("facts", "An unstructured fact"),
+            ("evidence_links", {"evidence_id": "note-schema"}),
+            ("actions", {"id": "verify-index-gap", "owner": "Morgan"}),
+        ):
+            malformed = json.loads(json.dumps(known_good))
+            malformed[path][0] = replacement
+            with self.subTest(path=path):
+                self.assertTrue(validate_schema_instance(malformed, schema))
 
     def test_release_lock_rejects_repinned_prompt_in_disposable_copy(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -305,6 +346,11 @@ class BenchmarkReleaseTests(unittest.TestCase):
             evaluation = json.loads(result.stdout)
             self.assertEqual(evaluation["status"], "failed")
             self.assertGreaterEqual(len(evaluation["hard_failures"]), 1, task["id"])
+            if task["id"] == "KODY-02":
+                self.assertEqual(
+                    {item["id"] for item in evaluation["hard_failures"]},
+                    {"silent-conflict", "fabricated-evidence", "lost-action-owner"},
+                )
 
     def test_kody02_rejects_fabricated_evidence_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

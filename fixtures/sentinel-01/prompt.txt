@@ -5,3 +5,6 @@ Required top-level fields: health_state, evidence_ids, severity, root_cause, nex
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Use these supplied evidence IDs when relevant: collector-last-success, auth-check, disk-check, and queue-depth.
+Severity is a declared value such as high or medium; do not claim recovery that the packet does not establish.

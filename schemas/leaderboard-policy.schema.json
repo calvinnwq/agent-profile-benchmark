@@ -23,7 +23,7 @@
     "policy_id": {"type": "string", "const": "leaderboard-v1"},
     "policy_version": {"type": "string", "const": "1.0.0"},
     "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
-    "benchmark_version": {"type": "string", "const": "0.2.0"},
+    "benchmark_version": {"type": "string", "const": "0.4.0"},
     "scope": {"type": "string", "const": "benchmark-specific model leaderboard and routing aid"},
     "status": {"type": "string", "enum": ["active"]},
     "coverage": {

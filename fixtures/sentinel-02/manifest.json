@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.2.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "sentinel-brief-health-v1",
@@ -30,22 +30,22 @@
   },
   "oracle": {
     "path": "../../oracles/sentinel-02.json",
-    "sha256": "sha256:9516450a456a7df234d02d56a3943259957a5973d2cbfa732fefa9943df4f36b"
+    "sha256": "sha256:81a79f5e0fe03531f1e419f657121dafd25415c77d60fa0bb2ce19c8e37b91f6"
   },
   "output_schema": {
     "path": "../../schemas/sentinel-02-output.schema.json",
-    "sha256": "sha256:8ab8bf312f0507c35e6cb33a21700fe67a5b7aef45365c5d72d45f15cef0802a"
+    "sha256": "sha256:fa2ae8433f1ab693eb5cf1e9417c11f32a7d6dedb5ce72e3f8d523ea35977fc0"
   },
   "profile_id": "sentinel",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:870e4efd9914a7b79ead4ea41d3d461c3939ab624433082c55ef869867e1ea12",
+    "sha256": "sha256:9d42e2bfd508a7cf9d03a6baa822eea1b48da0ec1185366d6633185a6faf5912",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:e547c02395ddadb21f0552fa2e492576c4611d3c43959b8529606af39932a159"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "SENTINEL-02"

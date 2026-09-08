@@ -8,24 +8,115 @@
       "type": "string"
     },
     "day_plan": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "day_id",
+          "plan"
+        ],
+        "properties": {
+          "day_id": {
+            "type": "string",
+            "enum": [
+              "day-1",
+              "day-2",
+              "day-3"
+            ]
+          },
+          "plan": {
+            "type": "string"
+          }
+        }
+      }
     },
     "evidence_ids": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "string",
+        "enum": [
+          "route-window",
+          "shuttle-timetable",
+          "park-rules"
+        ]
+      }
     },
     "required_bookings": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
     },
     "safety_gates": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "condition"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "weather",
+              "water",
+              "turnaround"
+            ]
+          },
+          "condition": {
+            "type": "string"
+          }
+        }
+      }
     },
     "transfer_plan": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "transfer_id",
+          "buffer_hours",
+          "status"
+        ],
+        "properties": {
+          "transfer_id": {
+            "type": "string",
+            "enum": [
+              "transfer-1",
+              "transfer-2"
+            ]
+          },
+          "buffer_hours": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

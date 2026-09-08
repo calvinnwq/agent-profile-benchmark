@@ -122,7 +122,7 @@ def _load_task_binding(
     if not isinstance(manifest, dict) or manifest.get("task_id") != task_id:
         raise InputError("task manifest identity is not bound to the requested task")
     if (
-        manifest.get("benchmark_version") != "0.2.0"
+        manifest.get("benchmark_version") != "0.4.0"
         or manifest.get("status") != "benchmark-ready"
         or manifest.get("benchmark_ready") is not True
     ):
@@ -355,7 +355,7 @@ def replay(
     record = {
         "run_id": run_id,
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.2.0",
+        "benchmark_version": "0.4.0",
         "release_lock_fingerprint": binding["release_lock_fingerprint"],
         "ledger_fingerprint": binding["ledger_fingerprint"],
         "task_id": task_id,
@@ -368,6 +368,7 @@ def replay(
         "resolution_status": resolution_status,
         "condition": condition,
         "evaluator_version": str(evaluation.get("evaluator_version", "unknown")),
+        "output_parse_status": evaluation.get("output_parse_status", "json-object"),
         "task_manifest_fingerprint": binding["manifest_fingerprint"],
         "oracle_fingerprint": binding["oracle_fingerprint"],
         "output_schema_fingerprint": binding["output_schema_fingerprint"],

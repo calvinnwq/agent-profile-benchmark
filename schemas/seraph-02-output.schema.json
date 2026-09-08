@@ -16,11 +16,48 @@
       "type": "array"
     },
     "read_only_boundary": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutations",
+        "note"
+      ],
+      "properties": {
+        "mutations": {
+          "const": "none",
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
     },
     "state_matrix": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "view"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "loading",
+              "ready",
+              "empty",
+              "stale",
+              "error"
+            ]
+          },
+          "view": {
+            "type": "string"
+          }
+        }
+      }
     },
     "transition_rules": {
       "minItems": 1,

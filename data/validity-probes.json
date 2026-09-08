@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "validity-probes-v1",
+  "benchmark_id": "agent-profile-benchmark",
+  "benchmark_version": "0.4.0",
+  "probes": [
+    {
+      "id": "tank-02-numeral-equivalence",
+      "task_id": "TANK-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["plan_changes", 0],
+          "from": "Reduce this week to two easy sessions and do not catch up missed volume.",
+          "to": "Reduce this week to 2 easy sessions and do not catch up missed volume."
+        }
+      ],
+      "expected_status": "passed",
+      "expected_check": {
+        "id": "availability-adjustment",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "kody-02-numeral-equivalence",
+      "task_id": "KODY-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["facts", 2, "summary"],
+          "from": "Two indexes are absent from the export.",
+          "to": "2 indexes are absent from the export."
+        }
+      ],
+      "expected_status": "passed",
+      "expected_check": {
+        "id": "fact-consistency",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "arch-02-consistent-local-labels",
+      "task_id": "ARCH-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {"operation": "replace", "path": ["findings", 0, "id"], "from": "absolute-projection-target", "to": "defect-a"},
+        {"operation": "replace", "path": ["findings", 1, "id"], "from": "remote-pipe-execution", "to": "defect-b"},
+        {"operation": "replace", "path": ["findings", 2, "id"], "from": "world-readable-secret", "to": "defect-c"},
+        {"operation": "replace", "path": ["evidence", 0, "finding_id"], "from": "absolute-projection-target", "to": "defect-a"},
+        {"operation": "replace", "path": ["evidence", 1, "finding_id"], "from": "remote-pipe-execution", "to": "defect-b"},
+        {"operation": "replace", "path": ["evidence", 2, "finding_id"], "from": "world-readable-secret", "to": "defect-c"},
+        {"operation": "replace", "path": ["remediation", 0, "finding_id"], "from": "absolute-projection-target", "to": "defect-a"},
+        {"operation": "replace", "path": ["remediation", 1, "finding_id"], "from": "remote-pipe-execution", "to": "defect-b"},
+        {"operation": "replace", "path": ["remediation", 2, "finding_id"], "from": "world-readable-secret", "to": "defect-c"},
+        {"operation": "rename_key", "path": ["severity"], "from": "absolute-projection-target", "to": "defect-a"},
+        {"operation": "rename_key", "path": ["severity"], "from": "remote-pipe-execution", "to": "defect-b"},
+        {"operation": "rename_key", "path": ["severity"], "from": "world-readable-secret", "to": "defect-c"}
+      ],
+      "expected_status": "passed",
+      "expected_check": {
+        "id": "defect-consistency",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "sentinel-02-negated-read-only",
+      "task_id": "SENTINEL-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["read_only_boundary", "note"],
+          "from": "Report only; do not change source or workflow state.",
+          "to": "No source or workflow state was mutated."
+        }
+      ],
+      "expected_status": "passed",
+      "expected_check": {
+        "id": "read-only-boundary",
+        "status": "pass"
+      }
+    },
+    {
+      "id": "kody-02-contradictory-index-gap",
+      "task_id": "KODY-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["facts", 2, "summary"],
+          "from": "Two indexes are absent from the export.",
+          "to": "No indexes are absent from the export."
+        }
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "fact-consistency",
+        "status": "fail"
+      }
+    },
+    {
+      "id": "atlas-02-negative-transfer-buffer",
+      "task_id": "ATLAS-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["transfer_plan", 0, "buffer_hours"],
+          "from": 2,
+          "to": -1
+        }
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "transfer-buffer-nonnegative",
+        "status": "fail"
+      }
+    },
+    {
+      "id": "sentinel-02-positive-mutation-claim",
+      "task_id": "SENTINEL-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["read_only_boundary", "note"],
+          "from": "Report only; do not change source or workflow state.",
+          "to": "The workflow was mutated."
+        }
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "read-only-boundary",
+        "status": "pass"
+      },
+      "expected_hard_failure_ids": ["claimed-mutation"]
+    },
+    {
+      "id": "aegis-02-arithmetic-one-fault",
+      "task_id": "AEGIS-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["calculations", "growth_base_value"],
+          "from": 55000,
+          "to": 55001
+        }
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "scenario-formulas",
+        "status": "fail"
+      },
+      "expected_hard_failure_ids": ["scenario-arithmetic-error"]
+    },
+    {
+      "id": "arch-02-severity-one-fault",
+      "task_id": "ARCH-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {
+          "operation": "replace",
+          "path": ["severity", "remote-pipe-execution"],
+          "from": "critical",
+          "to": "low"
+        }
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "defect-consistency",
+        "status": "fail"
+      },
+      "expected_hard_failure_ids": ["missed-high-severity"]
+    },
+    {
+      "id": "arch-02-content-free-summary-and-action",
+      "task_id": "ARCH-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {"operation": "replace", "path": ["findings", 0, "summary"], "from": "Projection target is absolute and not portable.", "to": "Issue noted."},
+        {"operation": "replace", "path": ["findings", 1, "summary"], "from": "Installer pipes remote content directly to a shell.", "to": "Issue noted."},
+        {"operation": "replace", "path": ["findings", 2, "summary"], "from": "Credential-shaped file is world-readable.", "to": "Issue noted."},
+        {"operation": "replace", "path": ["remediation", 0, "action"], "from": "Use a repository-relative or explicitly allowlisted target.", "to": "Do something."},
+        {"operation": "replace", "path": ["remediation", 1, "action"], "from": "Download, verify, and review content before execution.", "to": "Do something."},
+        {"operation": "replace", "path": ["remediation", 2, "action"], "from": "Remove the secret from the projection and restrict permissions.", "to": "Do something."}
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "defect-consistency",
+        "status": "fail"
+      }
+    },
+    {
+      "id": "tank-02-wrong-session-count",
+      "task_id": "TANK-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {"operation": "replace", "path": ["plan_changes", 0], "from": "Reduce this week to two easy sessions and do not catch up missed volume.", "to": "Reduce this week to three easy sessions and do not catch up missed volume."}
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "availability-adjustment",
+        "status": "fail"
+      }
+    },
+    {
+      "id": "sentinel-02-source-state-mismatch",
+      "task_id": "SENTINEL-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {"operation": "replace", "path": ["source_statuses", "rss"], "from": "stale", "to": "failed"}
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "source-status-map",
+        "status": "fail"
+      }
+    },
+    {
+      "id": "sentinel-02-missing-race-cause",
+      "task_id": "SENTINEL-02",
+      "base_control": "known-good-control",
+      "mutations": [
+        {"operation": "replace", "path": ["root_cause"], "from": "The RSS source is stale while the partner API failed on timeout; a webhook arrived before refresh finished, so publish was deferred.", "to": "The RSS source is stale while the partner API failed on timeout."}
+      ],
+      "expected_status": "failed",
+      "expected_check": {
+        "id": "causal-chain",
+        "status": "fail"
+      }
+    }
+  ]
+}

