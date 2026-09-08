@@ -5,3 +5,8 @@ Required top-level fields: source_statuses, workflow_state, root_cause, remediat
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- source_statuses must map partner-api to failed and rss to stale.
+- read_only_boundary has mutations set to none and a note explaining the reporting boundary.
+- An explicit statement that no source or workflow state was mutated describes the boundary and is not a claim that a mutation occurred.

@@ -8,11 +8,49 @@
       "type": "array"
     },
     "memory_calculations": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "q4_total_gb",
+        "q6_total_gb",
+        "q8_total_gb"
+      ],
+      "properties": {
+        "q4_total_gb": {
+          "type": "number"
+        },
+        "q6_total_gb": {
+          "type": "number"
+        },
+        "q8_total_gb": {
+          "type": "number"
+        }
+      }
     },
     "option_table": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "total_gb"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "q4",
+              "q6",
+              "q8"
+            ]
+          },
+          "total_gb": {
+            "type": "number"
+          }
+        }
+      }
     },
     "recommendation": {
       "minLength": 1,

@@ -5,7 +5,7 @@ The canonical task data lives in [`data/task-ledger.json`](../data/task-ledger.j
 This page is the human-readable index of the first 18 task contracts.
 The Primary evaluation column is an editorial summary; the canonical measurement contract remains in the JSON ledger.
 
-All 18 tasks are `benchmark-ready` in benchmark version `0.3.0`.
+All 18 tasks are `benchmark-ready` in benchmark version `0.4.0`.
 Each task has a frozen prompt, fixture, evaluator oracle, output schema, known-good control, and known-bad control under `fixtures/`, `oracles/`, and `schemas/`.
 
 | ID | Profile | Task | Provenance | Primary evaluation (editorial summary) |

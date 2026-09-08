@@ -22,7 +22,7 @@ except ImportError:  # pragma: no cover - package-style import
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ORACLE_VERSION = "task-oracle-v1"
+ORACLE_VERSION = "task-oracle-v2"
 CHECK_STATUSES = {"pass", "fail", "blocked"}
 
 
@@ -84,6 +84,106 @@ def _flatten_text(value: Any) -> str:
     if isinstance(value, list):
         return " ".join(_flatten_text(item) for item in value)
     return "" if value is None else str(value)
+
+
+def _term_pattern(term: str) -> str:
+    """Match a declared term without allowing it to cross word boundaries."""
+    escaped = re.escape(term.casefold())
+    variants = [escaped]
+    if term.casefold().endswith("e"):
+        stem = re.escape(term.casefold()[:-1])
+        variants.extend((stem + suffix for suffix in ("s", "es", "ed", "ing", "ion", "ions")))
+    else:
+        stem = re.escape(term.casefold())
+        variants.extend((stem + suffix for suffix in ("s", "ed", "ing")))
+    return r"(?<![a-z0-9])(?:" + "|".join(variants) + r")(?![a-z0-9])"
+
+
+def _term_matches(text: str, term: str) -> bool:
+    return bool(re.search(_term_pattern(term), text.casefold()))
+
+
+def _number_with_unit_matches(
+    text: str,
+    *,
+    value: int,
+    number_words: list[str],
+    unit_terms: list[str],
+) -> bool:
+    number_tokens = [str(value), *number_words]
+    number_pattern = "(?:" + "|".join(re.escape(item.casefold()) for item in number_tokens) + ")"
+    unit_pattern = "(?:" + "|".join(_term_pattern(item) for item in unit_terms) + ")"
+    pattern = (
+        r"(?<![a-z0-9])" + number_pattern + r"(?![a-z0-9])"
+        r"(?:\s+\w+){0,3}\s+" + unit_pattern
+    )
+    return bool(re.search(pattern, text.casefold()))
+
+
+_NEGATION_PATTERN = re.compile(
+    r"\b(?:did\s+not|didn't|do\s+not|don't|does\s+not|doesn't|"
+    r"was\s+not|wasn't|were\s+not|weren't|has\s+not|hasn't|"
+    r"have\s+not|haven't|no|never|without|neither|not)\b"
+)
+
+
+def _term_is_negated(text: str, position: int) -> bool:
+    clause = re.split(r"[.!?,;:()\[\]]", text[:position])[-1]
+    if re.search(
+        r"(?:^|\s)(?:did\s+not|didn't|do\s+not|don't|does\s+not|doesn't|"
+        r"was\s+not|wasn't|were\s+not|weren't)\s+"
+        r"(?:refrain|avoid|prevent|stop)\s+from(?:\s+\w+){0,8}\s*$",
+        clause,
+    ):
+        return False
+    negations = sum(1 for _ in _NEGATION_PATTERN.finditer(clause))
+    # Treat "none are/is ..." as a negator, but not an unrelated JSON value
+    # such as `mutations: "none"` from an adjacent flattened field.
+    if re.search(r"\bnone(?:\s+of(?:\s+\w+){0,6})?\s+(?:is|are|was|were)\b", clause):
+        negations += 1
+    return negations == 1
+
+
+def _fact_polarity_errors(text: str, polarity: Any) -> tuple[list[str], str | None]:
+    """Validate fixture-declared fact polarity without guessing task semantics."""
+    if not isinstance(polarity, dict):
+        return [], "fact polarity must be an object"
+    expected = polarity.get("expected")
+    anchors = polarity.get("anchors", [])
+    if expected not in {"affirmed", "negative"}:
+        return [], "fact polarity expected must be 'affirmed' or 'negative'"
+    if not isinstance(anchors, list) or any(not isinstance(item, str) or not item.strip() for item in anchors):
+        return [], "fact polarity anchors must be a non-empty string list"
+    lowered = text.casefold()
+    errors: list[str] = []
+    if expected == "affirmed":
+        for anchor in anchors:
+            matches = list(re.finditer(_term_pattern(anchor), lowered))
+            if matches and not any(not _term_is_negated(lowered, match.start()) for match in matches):
+                errors.append(f"affirmed fact anchor {anchor!r} is negated")
+    else:
+        negative_terms = polarity.get("negative_terms", [])
+        positive_terms = polarity.get("positive_terms", [])
+        if (
+            not isinstance(negative_terms, list)
+            or any(not isinstance(item, str) or not item.strip() for item in negative_terms)
+            or not isinstance(positive_terms, list)
+            or any(not isinstance(item, str) or not item.strip() for item in positive_terms)
+        ):
+            return [], "negative fact polarity requires negative_terms and positive_terms lists"
+        if not any(_term_matches(lowered, term) for term in negative_terms):
+            errors.append("fact does not state the fixture-declared negative polarity")
+        positive = [
+            term
+            for term in positive_terms
+            if any(
+                not _term_is_negated(lowered, match.start())
+                for match in re.finditer(_term_pattern(term), lowered)
+            )
+        ]
+        if positive:
+            errors.append(f"fact states positive terms contrary to fixture polarity: {', '.join(positive)}")
+    return errors, None
 
 
 def _is_nonempty(value: Any) -> bool:
@@ -208,6 +308,234 @@ def _list_membership(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[st
     return ("fail", errors) if errors else ("pass", [f"all {len(required)} required values are present"])
 
 
+def _fact_consistency(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
+    facts = _get_path(candidate, rule.get("path", ""))
+    contract = _get_path(fixture, rule.get("fixture_contract_path", ""))
+    id_key = rule.get("id_key", "id")
+    text_key = rule.get("text_key", "summary")
+    if not isinstance(facts, list) or not isinstance(contract, list):
+        return "blocked", ["fact consistency requires candidate facts and a fixture fact contract"]
+    by_id: dict[str, Any] = {}
+    for index, item in enumerate(facts):
+        item_id = item.get(id_key) if isinstance(item, dict) else None
+        if not isinstance(item_id, str) or not item_id.strip():
+            return "blocked", [f"{rule.get('path')}[{index}] has no string {id_key}"]
+        if item_id in by_id:
+            return "fail", [f"{rule.get('path')} contains duplicate fact ID {item_id!r}"]
+        by_id[item_id] = item
+    errors: list[str] = []
+    for index, expectation in enumerate(contract):
+        if not isinstance(expectation, dict):
+            return "blocked", [f"fixture fact contract item {index} must be an object"]
+        fact_id = expectation.get("id")
+        if not isinstance(fact_id, str) or not fact_id.strip():
+            return "blocked", [f"fixture fact contract item {index} has no string id"]
+        item = by_id.get(fact_id)
+        if item is None:
+            errors.append(f"missing fact {fact_id!r}")
+            continue
+        text = _flatten_text(item.get(text_key)).casefold()
+        required_any = expectation.get("required_any", [])
+        required_all = expectation.get("required_all", [])
+        forbidden = expectation.get("forbidden", [])
+        if not isinstance(required_any, list) or not isinstance(required_all, list) or not isinstance(forbidden, list):
+            return "blocked", [f"fact expectation {fact_id!r} has invalid term lists"]
+        required_terms = [term for term in required_any if isinstance(term, str) and term.strip()]
+        required_all_terms = [term for term in required_all if isinstance(term, str) and term.strip()]
+        forbidden_terms = [term for term in forbidden if isinstance(term, str) and term.strip()]
+        if required_terms and not any(_term_matches(text, term) for term in required_terms):
+            errors.append(f"fact {fact_id!r} is missing one of: {', '.join(required_terms)}")
+        missing_required = [term for term in required_all_terms if not _term_matches(text, term)]
+        if missing_required:
+            errors.append(f"fact {fact_id!r} is missing required terms: {', '.join(missing_required)}")
+        found_forbidden = [term for term in forbidden_terms if _term_matches(text, term)]
+        if found_forbidden:
+            errors.append(f"fact {fact_id!r} contradicts supplied evidence: {', '.join(found_forbidden)}")
+        count = expectation.get("count")
+        if count is not None:
+            if not isinstance(count, dict):
+                return "blocked", [f"fact expectation {fact_id!r} count must be an object"]
+            count_value = count.get("value")
+            number_words = count.get("number_words", [])
+            unit_terms = count.get("unit_terms", [])
+            if (
+                not isinstance(count_value, int)
+                or isinstance(count_value, bool)
+                or not isinstance(number_words, list)
+                or any(not isinstance(item, str) or not item.strip() for item in number_words)
+                or not isinstance(unit_terms, list)
+                or any(not isinstance(item, str) or not item.strip() for item in unit_terms)
+            ):
+                return "blocked", [f"fact expectation {fact_id!r} count contract is invalid"]
+            if not _number_with_unit_matches(
+                text,
+                value=count_value,
+                number_words=number_words,
+                unit_terms=unit_terms,
+            ):
+                errors.append(f"fact {fact_id!r} does not state the required count of {count_value}")
+        polarity_errors, polarity_error = (
+            _fact_polarity_errors(text, expectation["polarity"])
+            if "polarity" in expectation
+            else ([], None)
+        )
+        if polarity_error is not None:
+            return "blocked", [f"fact expectation {fact_id!r}: {polarity_error}"]
+        errors.extend(f"fact {fact_id!r}: {error}" for error in polarity_errors)
+    return ("fail", errors) if errors else ("pass", [f"{len(contract)} fact meanings match the fixture contract"])
+
+
+def _defect_consistency(
+    fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]
+) -> tuple[str, list[str]]:
+    """Match review records by supplied evidence, not oracle-only labels."""
+
+    artifacts = _get_path(fixture, rule.get("fixture_path", ""))
+    findings = _get_path(candidate, rule.get("findings_path", "findings"))
+    evidence = _get_path(candidate, rule.get("evidence_path", "evidence"))
+    remediation = _get_path(candidate, rule.get("remediation_path", "remediation"))
+    severity = _get_path(candidate, rule.get("severity_path", "severity"))
+    if not all(isinstance(value, list) for value in (artifacts, findings, evidence, remediation)):
+        return "blocked", ["defect consistency requires fixture and candidate item lists"]
+    if not isinstance(severity, dict):
+        return "blocked", ["defect consistency requires a severity object"]
+
+    finding_id_key = rule.get("finding_id_key", "id")
+    finding_summary_key = rule.get("finding_summary_key", "summary")
+    evidence_id_key = rule.get("evidence_id_key", "finding_id")
+    fixture_location_key = rule.get("fixture_location_key", "path")
+    evidence_location_key = rule.get("evidence_location_key", "location")
+    remediation_id_key = rule.get("remediation_id_key", "finding_id")
+    remediation_action_key = rule.get("remediation_action_key", "action")
+    if not all(
+        isinstance(value, str) and value.strip()
+        for value in (
+            finding_id_key,
+            finding_summary_key,
+            evidence_id_key,
+            fixture_location_key,
+            evidence_location_key,
+            remediation_id_key,
+            remediation_action_key,
+        )
+    ):
+        return "blocked", ["defect consistency has invalid candidate field keys"]
+
+    fixture_by_location: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    for index, artifact in enumerate(artifacts):
+        if not isinstance(artifact, dict):
+            return "blocked", [f"fixture artifact {index} must be an object"]
+        location = artifact.get(fixture_location_key)
+        expected_severity = artifact.get("severity")
+        if not isinstance(location, str) or not location.strip() or not isinstance(expected_severity, str):
+            return "blocked", ["fixture artifacts must expose a location and severity"]
+        if location in fixture_by_location:
+            return "blocked", [f"fixture contains duplicate artifact location {location!r}"]
+        fixture_by_location[location] = artifact
+
+    def item_id(item: Any, key: str, path: str) -> str | None:
+        value = item.get(key) if isinstance(item, dict) else None
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{path} has no non-empty {key}")
+            return None
+        return value
+
+    findings_by_id: dict[str, Any] = {}
+    for index, item in enumerate(findings):
+        identifier = item_id(item, finding_id_key, f"findings[{index}]")
+        if identifier is not None:
+            if identifier in findings_by_id:
+                errors.append(f"findings contains duplicate ID {identifier!r}")
+            findings_by_id[identifier] = item
+            summary = item.get(finding_summary_key) if isinstance(item, dict) else None
+            if not isinstance(summary, str) or not summary.strip():
+                errors.append(f"findings[{index}].{finding_summary_key} must be non-empty")
+
+    evidence_by_location: dict[str, Any] = {}
+    for index, item in enumerate(evidence):
+        identifier = item_id(item, evidence_id_key, f"evidence[{index}]")
+        location = item.get(evidence_location_key) if isinstance(item, dict) else None
+        if not isinstance(location, str) or not location.strip():
+            errors.append(f"evidence[{index}] has no non-empty {evidence_location_key}")
+            continue
+        if location in evidence_by_location:
+            errors.append(f"evidence contains duplicate location {location!r}")
+        evidence_by_location[location] = (identifier, item)
+
+    remediation_by_id: dict[str, Any] = {}
+    for index, item in enumerate(remediation):
+        identifier = item_id(item, remediation_id_key, f"remediation[{index}]")
+        if identifier is not None:
+            if identifier in remediation_by_id:
+                errors.append(f"remediation contains duplicate ID {identifier!r}")
+            remediation_by_id[identifier] = item
+            action = item.get(remediation_action_key) if isinstance(item, dict) else None
+            if not isinstance(action, str) or not action.strip():
+                errors.append(f"remediation[{index}].{remediation_action_key} must be non-empty")
+
+    expected_locations = set(fixture_by_location)
+    actual_locations = set(evidence_by_location)
+    if missing := sorted(expected_locations - actual_locations):
+        errors.append(f"evidence is missing supplied artifact locations: {', '.join(missing)}")
+    if unknown := sorted(actual_locations - expected_locations):
+        errors.append(f"evidence contains locations absent from the supplied packet: {', '.join(unknown)}")
+
+    expected_ids: set[str] = set()
+    for location, artifact in fixture_by_location.items():
+        evidence_record = evidence_by_location.get(location)
+        if evidence_record is None:
+            continue
+        identifier, _ = evidence_record
+        if identifier is None:
+            continue
+        expected_ids.add(identifier)
+        if identifier not in findings_by_id:
+            errors.append(f"evidence for {location!r} has no matching finding")
+        if identifier not in remediation_by_id:
+            errors.append(f"evidence for {location!r} has no matching remediation")
+        if severity.get(identifier) != artifact.get("severity"):
+            errors.append(
+                f"severity for evidence {location!r} must be {artifact.get('severity')!r}, got {severity.get(identifier)!r}"
+            )
+        summary_terms = artifact.get("summary_terms")
+        remediation_terms = artifact.get("remediation_terms")
+        if (
+            not isinstance(summary_terms, list)
+            or any(not isinstance(term, str) or not term.strip() for term in summary_terms)
+            or not isinstance(remediation_terms, list)
+            or any(not isinstance(term, str) or not term.strip() for term in remediation_terms)
+        ):
+            return "blocked", [f"fixture artifact {location!r} lacks semantic summary/remediation terms"]
+        finding = findings_by_id.get(identifier)
+        remediation_item = remediation_by_id.get(identifier)
+        summary = _flatten_text(finding.get(finding_summary_key) if isinstance(finding, dict) else "")
+        action = _flatten_text(remediation_item.get(remediation_action_key) if isinstance(remediation_item, dict) else "")
+        missing_summary = [term for term in summary_terms if not _term_matches(summary, term)]
+        missing_action = [term for term in remediation_terms if not _term_matches(action, term)]
+        if missing_summary:
+            errors.append(
+                f"finding for {location!r} does not identify supplied risk terms: {', '.join(missing_summary)}"
+            )
+        if missing_action:
+            errors.append(
+                f"remediation for {location!r} lacks bounded action terms: {', '.join(missing_action)}"
+            )
+    if set(findings_by_id) != expected_ids:
+        errors.append("finding IDs must map one-to-one to the supplied artifact evidence")
+    if set(remediation_by_id) != expected_ids:
+        errors.append("remediation IDs must map one-to-one to the supplied artifact evidence")
+    if set(severity) != expected_ids:
+        errors.append("severity keys must map one-to-one to the supplied artifact evidence")
+    if len(findings) != len(fixture_by_location):
+        errors.append("findings must contain exactly one item per supplied artifact")
+    if len(evidence) != len(fixture_by_location):
+        errors.append("evidence must contain exactly one item per supplied artifact")
+    if len(remediation) != len(fixture_by_location):
+        errors.append("remediation must contain exactly one item per supplied artifact")
+    return ("fail", errors) if errors else ("pass", [f"{len(expected_ids)} supplied defects have consistent local labels"])
+
+
 def _allocation_reconciliation(
     fixture: dict[str, Any],
     candidate: Any,
@@ -284,15 +612,61 @@ def _object_values(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]
     return ("fail", errors) if errors else ("pass", [f"all {len(expected)} expected values match"])
 
 
-def _text_contains(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
+def _text_contains(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
     paths = rule.get("paths")
     terms = rule.get("terms")
     if not isinstance(paths, list) or not isinstance(terms, list):
         return "blocked", ["text rule requires paths and terms lists"]
     text = " ".join(_flatten_text(_get_path(candidate, path)) for path in paths if isinstance(path, str))
     lowered = text.casefold()
-    missing = [term for term in terms if isinstance(term, str) and term.casefold() not in lowered]
-    return ("fail", [f"missing required text: {', '.join(missing)}"]) if missing else ("pass", [f"all {len(terms)} required text anchors are present"])
+    equivalent_terms = rule.get("equivalent_terms", {})
+    if equivalent_terms is not None and not isinstance(equivalent_terms, dict):
+        return "blocked", ["text rule equivalent_terms must be an object"]
+    missing = []
+    for term in terms:
+        if not isinstance(term, str):
+            continue
+        alternatives = [term]
+        declared = equivalent_terms.get(term) if isinstance(equivalent_terms, dict) else None
+        if isinstance(declared, list):
+            alternatives.extend(item for item in declared if isinstance(item, str))
+        if not any(_term_matches(lowered, alternative) for alternative in alternatives):
+            missing.append(term)
+    errors = [f"missing required text: {', '.join(missing)}"] if missing else []
+    fixture_requirements = rule.get("fixture_requirements", [])
+    if not isinstance(fixture_requirements, list):
+        return "blocked", ["text rule fixture_requirements must be a list"]
+    for requirement in fixture_requirements:
+        if not isinstance(requirement, dict):
+            return "blocked", ["text rule fixture requirement must be an object"]
+        fixture_path = requirement.get("fixture_path")
+        required_any = requirement.get("required_any")
+        required_all = requirement.get("required_all", [])
+        if (
+            not isinstance(fixture_path, str)
+            or not isinstance(required_any, list)
+            or not required_any
+            or not isinstance(required_all, list)
+        ):
+            return "blocked", ["text rule fixture requirement is malformed"]
+        fixture_text = _flatten_text(_get_path(fixture, fixture_path))
+        alternatives = [term for term in required_any if isinstance(term, str) and term.strip()]
+        if not alternatives:
+            return "blocked", ["text rule fixture requirement has no terms"]
+        required_terms = [term for term in required_all if isinstance(term, str) and term.strip()]
+        if not any(_term_matches(fixture_text, term) for term in alternatives):
+            return "blocked", [f"fixture evidence at {fixture_path!r} has no declared required terms"]
+        if required_terms and any(not _term_matches(fixture_text, term) for term in required_terms):
+            return "blocked", [f"fixture evidence at {fixture_path!r} is missing a declared required term"]
+        if required_terms and any(not _term_matches(text, term) for term in required_terms):
+            errors.append(
+                f"candidate does not preserve all fixture evidence at {fixture_path!r}: {', '.join(required_terms)}"
+            )
+        elif not any(_term_matches(text, term) for term in alternatives):
+            errors.append(
+                f"candidate does not preserve fixture evidence at {fixture_path!r}: {', '.join(alternatives)}"
+            )
+    return ("fail", errors) if errors else ("pass", [f"all {len(terms)} required text anchors are present"])
 
 
 def _strategy_recommendation(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
@@ -329,20 +703,21 @@ def _text_forbidden(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str
     text = " ".join(_flatten_text(_get_path(candidate, path)) for path in paths if isinstance(path, str))
     lowered = text.casefold()
     found = []
+
     for term in terms:
         if not isinstance(term, str) or not term.strip():
             continue
-        needle = term.casefold()
+        pattern = _term_pattern(term)
         start = 0
         while True:
-            position = lowered.find(needle, start)
-            if position < 0:
+            match = re.search(pattern, lowered[start:])
+            if match is None:
                 break
-            prefix = lowered[max(0, position - 20) : position]
-            if not any(marker in prefix for marker in ("do not ", "don't ", "without ", "no ", "not ")):
+            position = start + match.start()
+            if not _term_is_negated(lowered, position):
                 found.append(term)
                 break
-            start = position + len(needle)
+            start = position + max(1, match.end() - match.start())
     return ("fail", [f"forbidden text found: {', '.join(found)}"]) if found else ("pass", ["no forbidden text was found"])
 
 
@@ -357,6 +732,25 @@ def _number_bound(candidate: Any, rule: dict[str, Any], minimum: bool) -> tuple[
     if valid:
         return "pass", [f"{path}={value} satisfies {bound_key}={bound}"]
     return "fail", [f"{path}={value} violates {bound_key}={bound}"]
+
+
+def _list_number_bound(candidate: Any, rule: dict[str, Any], minimum: bool) -> tuple[str, list[str]]:
+    path = rule.get("path", "")
+    values = _get_path(candidate, path)
+    value_key = rule.get("value_key")
+    bound_key = "minimum" if minimum else "maximum"
+    bound = rule.get(bound_key)
+    if not isinstance(values, list) or not isinstance(value_key, str) or not isinstance(bound, (int, float)) or isinstance(bound, bool):
+        return "blocked", [f"{path} and {bound_key} must describe a numeric item list"]
+    errors: list[str] = []
+    for index, item in enumerate(values):
+        value = item.get(value_key) if isinstance(item, dict) else None
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            return "blocked", [f"{path}[{index}].{value_key} must be numeric"]
+        valid = value >= bound if minimum else value <= bound
+        if not valid:
+            errors.append(f"{path}[{index}].{value_key}={value} violates {bound_key}={bound}")
+    return ("fail", errors) if errors else ("pass", [f"all {len(values)} {value_key} values satisfy {bound_key}={bound}"])
 
 
 def _ratio_max(candidate: Any, rule: dict[str, Any]) -> tuple[str, list[str]]:
@@ -717,12 +1111,16 @@ def _run_check(
     kind = rule.get("kind")
     if kind == "list_ids": return _list_ids(candidate, rule)
     if kind == "list_membership": return _list_membership(candidate, rule)
+    if kind == "fact_consistency": return _fact_consistency(fixture, candidate, rule)
+    if kind == "defect_consistency": return _defect_consistency(fixture, candidate, rule)
     if kind == "object_values": return _object_values(fixture, candidate, rule)
-    if kind == "text_contains": return _text_contains(candidate, rule)
+    if kind == "text_contains": return _text_contains(fixture, candidate, rule)
     if kind == "strategy_recommendation": return _strategy_recommendation(candidate, rule)
     if kind == "text_forbidden": return _text_forbidden(candidate, rule)
     if kind == "number_min": return _number_bound(candidate, rule, True)
     if kind == "number_max": return _number_bound(candidate, rule, False)
+    if kind == "list_number_min": return _list_number_bound(candidate, rule, True)
+    if kind == "list_number_max": return _list_number_bound(candidate, rule, False)
     if kind == "ratio_max": return _ratio_max(candidate, rule)
     if kind == "exact_list": return _exact_list(candidate, rule)
     if kind == "list_count": return _list_count(candidate, rule)
@@ -797,10 +1195,28 @@ def _hard_rule(fixture: dict[str, Any], candidate: Any, rule: dict[str, Any], ch
     raise InputError(f"unsupported hard rule kind {kind!r}")
 
 
-def _invalid_candidate(reason: str, oracle: dict[str, Any]) -> dict[str, Any]:
+def _invalid_candidate(
+    reason: str,
+    oracle: dict[str, Any],
+    *,
+    output_parse_status: str = "invalid-json",
+) -> dict[str, Any]:
     checks = [_result("required-fields", "fail", [reason])]
     checks.extend(_blocked(rule.get("id", "unknown"), "candidate output could not be decoded") for rule in oracle.get("checks", []))
-    return {'evaluator_version':ORACLE_VERSION,'status':'failed','hard_failures':[{'id':'invalid-output','condition':'The model response is not a valid JSON object for this task.','evidence':[reason]}],'automatic_checks':checks,'human_review':{'status':'pending','dimensions':[]}}
+    return {
+        "evaluator_version": ORACLE_VERSION,
+        "output_parse_status": output_parse_status,
+        "status": "failed",
+        "hard_failures": [
+            {
+                "id": "invalid-output",
+                "condition": "The model response is not a valid JSON object for this task.",
+                "evidence": [reason],
+            }
+        ],
+        "automatic_checks": checks,
+        "human_review": {"status": "pending", "dimensions": []},
+    }
 
 
 def evaluate_task(
@@ -833,7 +1249,11 @@ def evaluate_task(
     ):
         raise InputError("fixture identity does not match the task oracle")
     if not isinstance(candidate, dict):
-        return _invalid_candidate("candidate output must be a JSON object", oracle)
+        return _invalid_candidate(
+            "candidate output must be a JSON object",
+            oracle,
+            output_parse_status="json-value",
+        )
     checks: list[dict[str, Any]] = []
     required = _required_fields(candidate, oracle, schema_path)
     checks.append(required)
@@ -857,7 +1277,15 @@ def evaluate_task(
             hard_failures.append({'id':rule['id'],'condition':'The candidate violates a frozen task boundary.','evidence':evidence})
     statuses = {check["status"] for check in checks}
     status = "failed" if hard_failures or "fail" in statuses else "blocked" if "blocked" in statuses else "passed"
-    return {'evaluator_version':ORACLE_VERSION,'task_id':task_id,'status':status,'hard_failures':hard_failures,'automatic_checks':checks,'human_review':{'status':'pending','dimensions':[]}}
+    return {
+        "evaluator_version": ORACLE_VERSION,
+        "task_id": task_id,
+        "output_parse_status": "json-object",
+        "status": status,
+        "hard_failures": hard_failures,
+        "automatic_checks": checks,
+        "human_review": {"status": "pending", "dimensions": []},
+    }
 
 
 def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, model_output: bool = True) -> dict[str, Any]:
@@ -875,7 +1303,7 @@ def evaluate_files(task_id: str, fixture_path: Path, candidate_path: Path, *, mo
     except InputError as exc:
         if model_output and task_id != "KODY-01":
             oracle = _load_json(ROOT / "oracles" / f"{task_id.lower()}.json", "task oracle")
-            return _invalid_candidate(str(exc), oracle)
+            return _invalid_candidate(str(exc), oracle, output_parse_status="invalid-json")
         raise
     return evaluate_task(task_id, fixture, candidate, model_output=model_output)
 

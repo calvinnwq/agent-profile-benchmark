@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "aegis-synthetic-portfolio-v1",
@@ -34,18 +34,18 @@
   },
   "output_schema": {
     "path": "../../schemas/aegis-01-output.schema.json",
-    "sha256": "sha256:e997d7cdfc99ca7d27a53cbd932332df864c731d98dc5b6134c3410b39569b5e"
+    "sha256": "sha256:a3b6af01e959648d36eddb96f90eb57864e5f972db96d4cadfb8094f6563a7b4"
   },
   "profile_id": "aegis",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:d512d203f5e0d6191a06dc88fbd3f990859ab9fe62521b1f0562e36910cfca22",
+    "sha256": "sha256:79d945b8b06f46f593dfbab9e49cc17b9cb417fefd2e81dbf6fccded36099828",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "AEGIS-01"

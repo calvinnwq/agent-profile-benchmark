@@ -31,7 +31,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
     def test_every_task_has_a_frozen_artifact_packet(self) -> None:
         self.assertEqual(self.ledger["status"], "benchmark-ready")
-        self.assertEqual(self.ledger["benchmark_version"], "0.3.0")
+        self.assertEqual(self.ledger["benchmark_version"], "0.4.0")
         for task in self.ledger["tasks"]:
             slug = task["id"].lower()
             with self.subTest(task=task["id"]):
@@ -65,8 +65,9 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
         self.assertEqual(hashlib.sha256(lock_path.read_bytes()).hexdigest(), EXPECTED_RELEASE_LOCK_FINGERPRINT)
         self.assertEqual(lock["benchmark_id"], "agent-profile-benchmark")
-        self.assertEqual(lock["benchmark_version"], "0.3.0")
+        self.assertEqual(lock["benchmark_version"], "0.4.0")
         self.assertEqual(len(lock["tasks"]), 18)
+        self.assertIn("historical_snapshot_manifest", lock["shared"])
 
     def test_kody02_prompt_and_schema_expose_nested_output_contract(self) -> None:
         package = ROOT / "fixtures" / "kody-02"

@@ -30,6 +30,18 @@
       "terms": [
         "refresh",
         "publish"
+      ],
+      "fixture_requirements": [
+        {
+          "fixture_path": "workflow.events",
+          "required_any": ["webhook", "refresh"],
+          "required_all": ["webhook", "refresh"]
+        },
+        {
+          "fixture_path": "workflow.events",
+          "required_any": ["publish", "deferred"],
+          "required_all": ["publish", "deferred"]
+        }
       ]
     },
     {

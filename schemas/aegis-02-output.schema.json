@@ -8,7 +8,28 @@
       "type": "array"
     },
     "calculations": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "growth_base_value",
+        "growth_stress_value",
+        "steady_base_value",
+        "steady_stress_value"
+      ],
+      "properties": {
+        "growth_base_value": {
+          "type": "number"
+        },
+        "growth_stress_value": {
+          "type": "number"
+        },
+        "steady_base_value": {
+          "type": "number"
+        },
+        "steady_stress_value": {
+          "type": "number"
+        }
+      }
     },
     "liquidity_comparison": {
       "minLength": 1,
@@ -23,8 +44,29 @@
       "type": "string"
     },
     "scenario_table": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scenario_id",
+          "steady_value",
+          "growth_value"
+        ],
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "enum": [
+              "base",
+              "stress",
+              "recovery"
+            ]
+          },
+          "steady_value": {},
+          "growth_value": {}
+        }
+      }
     }
   },
   "required": [

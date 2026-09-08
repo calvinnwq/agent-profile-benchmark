@@ -20,6 +20,7 @@
     "resolution_status",
     "condition",
     "evaluator_version",
+    "output_parse_status",
     "task_manifest_fingerprint",
     "oracle_fingerprint",
     "output_schema_fingerprint",
@@ -55,7 +56,7 @@
     },
     "benchmark_version": {
       "type": "string",
-      "const": "0.3.0"
+      "const": "0.4.0"
     },
     "release_lock_fingerprint": {
       "type": "string",
@@ -114,6 +115,13 @@
     "evaluator_version": {
       "type": "string",
       "const": "kody-01-oracle-v2"
+    },
+    "output_parse_status": {
+      "type": "string",
+      "enum": [
+        "json-object",
+        "invalid-json"
+      ]
     },
     "task_manifest_fingerprint": {
       "type": "string",

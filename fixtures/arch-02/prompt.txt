@@ -5,3 +5,6 @@ Required top-level fields: findings, severity, evidence, remediation, review_sum
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Each supplied artifact file is one seeded defect. Create one local, non-empty finding ID for each defect and reuse that same ID in the corresponding finding, evidence.finding_id, remediation.finding_id, and severity key. IDs are labels for this response, not hidden canonical values; do not rely on names that are absent from the supplied packet.
+Each finding must identify the supplied artifact path and explain its supplied risk. Evidence locations must match the supplied artifact paths, severity must match each artifact's supplied severity, and each finding must have one bounded remediation.

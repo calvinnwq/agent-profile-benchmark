@@ -208,7 +208,7 @@ def _validate_task_package(
         if manifest.get(key) != expected:
             errors.append(f"{task_id}: manifest.{key} must be {expected!r}")
     evaluator = manifest.get("evaluator")
-    expected_evaluator_version = "kody-01-oracle-v2" if task_id == "KODY-01" else "task-oracle-v1"
+    expected_evaluator_version = "kody-01-oracle-v2" if task_id == "KODY-01" else "task-oracle-v2"
     if not isinstance(evaluator, dict) or evaluator.get("version") != expected_evaluator_version:
         errors.append(f"{task_id}: manifest evaluator version must be {expected_evaluator_version}")
     required_manifest_keys = {

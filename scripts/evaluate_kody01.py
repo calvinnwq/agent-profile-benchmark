@@ -459,6 +459,7 @@ def evaluate(fixture: Any, candidate: Any) -> dict[str, Any]:
     return {
         "evaluator_version": EVALUATOR_VERSION,
         "task_id": "KODY-01",
+        "output_parse_status": "json-object",
         "status": status,
         "hard_failures": hard_failures,
         "automatic_checks": checks,
@@ -479,13 +480,18 @@ def evaluate_files(fixture_path: Path, candidate_path: Path) -> dict[str, Any]:
     return evaluate(fixture, candidate)
 
 
-def _invalid_candidate_evaluation(reason: str) -> dict[str, Any]:
+def _invalid_candidate_evaluation(
+    reason: str,
+    *,
+    output_parse_status: str = "invalid-json",
+) -> dict[str, Any]:
     """Return visible failed evidence for an undecodable model response."""
     checks = [_check("required-fields", "fail", [reason])]
     checks.extend(_blocked(check_id, "candidate output could not be decoded") for check_id in CHECK_IDS[1:])
     return {
         "evaluator_version": EVALUATOR_VERSION,
         "task_id": "KODY-01",
+        "output_parse_status": output_parse_status,
         "status": "failed",
         "hard_failures": [
             {
@@ -514,7 +520,10 @@ def evaluate_model_file(fixture_path: Path, candidate_path: Path) -> dict[str, A
     except InputError as exc:
         return _invalid_candidate_evaluation(str(exc))
     if not isinstance(candidate, dict):
-        return _invalid_candidate_evaluation("candidate output must be a JSON object")
+        return _invalid_candidate_evaluation(
+            "candidate output must be a JSON object",
+            output_parse_status="json-value",
+        )
     return evaluate(fixture, candidate)
 
 

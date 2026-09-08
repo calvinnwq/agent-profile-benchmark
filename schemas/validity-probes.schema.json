@@ -1,0 +1,132 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/validity-probes.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "benchmark_id": {
+      "const": "agent-profile-benchmark",
+      "type": "string"
+    },
+    "benchmark_version": {
+      "const": "0.4.0",
+      "type": "string"
+    },
+    "probes": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "base_control": {
+            "enum": [
+              "known-good-control"
+            ],
+            "type": "string"
+          },
+          "expected_check": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "status"
+            ],
+            "type": "object"
+          },
+          "expected_status": {
+            "enum": [
+              "passed",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "expected_hard_failure_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "id": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "type": "string"
+          },
+          "mutations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "from": {
+                },
+                "operation": {
+                  "enum": [
+                    "replace",
+                    "rename_key"
+                  ],
+                  "type": "string"
+                },
+                "path": {
+                  "items": {},
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "to": {
+                },
+                "value": {}
+              },
+              "required": [
+                "operation",
+                "path"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "task_id": {
+            "pattern": "^[A-Z]+-[0-9]{2}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "base_control",
+          "mutations",
+          "expected_status",
+          "expected_check"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "validity-probes-v1",
+      "type": "string"
+    }
+  },
+  "required": [
+    "$schema",
+    "schema_version",
+    "benchmark_id",
+    "benchmark_version",
+    "probes"
+  ],
+  "title": "Benchmark validity probes",
+  "type": "object"
+}

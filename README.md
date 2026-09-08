@@ -4,13 +4,13 @@ A reproducible benchmark for evaluating AI agent profiles on measurable, task-sp
 
 ## Status
 
-The repository is at `benchmark-ready` for benchmark version `0.3.0`.
+The repository is at `benchmark-ready` for benchmark version `0.4.0`.
 
 The first public slice freezes nine agent profiles, two task contracts per profile, an offline evaluation boundary, and the scoring order.
 
-The `0.3.0` task registry is intentionally exact.
+The `0.4.0` task registry is intentionally exact.
 The ledger's schema pointer and `benchmark_version` are frozen with that registry.
-The validator also pins the semantic fingerprint of the full v0.3.0 ledger, so task content cannot be repurposed under an existing ID.
+The validator also pins the semantic fingerprint of the full v0.4.0 ledger, so task content cannot be repurposed under an existing ID.
 All 18 tasks have frozen fixture bytes, prompt packets, evaluator oracles, output schemas, and known-good and known-bad controls.
 Every task remains offline-only with an empty `allowed_tools` list.
 `data/release-artifact-lock.json` independently pins every task package and shared runtime artifact; manifest hashes are checked against that lock rather than trusted as the sole source of truth.
@@ -68,7 +68,7 @@ Visual tasks use fixed artifacts and defect inventories rather than unverifiable
 
 ## Validate the contracts
 
-The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.3.0 registry.
+The CLI enforces the checked-in JSON Schema and the cross-record invariants required by the v0.4.0 registry.
 No third-party packages are required.
 
 GitHub Actions runs the dependency-free tests and validation gates on pushes to `main` and `feat/**`, and on pull requests.
@@ -130,7 +130,7 @@ The release gate and sealed artifact lock must pass before any model matrix run.
 
 ## Versioned model leaderboard
 
-`data/leaderboard-policy.json` defines `leaderboard-v1` for benchmark version `0.3.0`.
+`data/leaderboard-policy.json` defines `leaderboard-v1` for benchmark version `0.4.0`.
 The policy ranks models only on this frozen suite and must not be described as a universal intelligence ranking.
 
 A roster snapshot uses [`schemas/model-roster.schema.json`](schemas/model-roster.schema.json) and preserves the requested model ID, resolved model ID, provider identity, availability, and any exclusion reason.
@@ -178,12 +178,31 @@ The matrix runner validates the roster, checks the benchmark-ready release gate 
 It never overwrites a non-empty evidence root.
 A failed or blocked cell remains visible when its single-cell runner writes a run record; a launch failure is reported separately and leaves the input manifest incomplete rather than fabricating a result.
 
+Run the separate validity diagnostic only from an explicitly committed 24-cell manifest:
+
+```bash
+python3 scripts/run_diagnostic_matrix.py \
+  --manifest <diagnostic-manifest.json> \
+  --roster .model-evidence/<roster-snapshot>/diagnostic-roster.json \
+  --output-root .model-evidence/<diagnostic-snapshot> \
+  --reasoning medium \
+  --timeout-seconds 600
+```
+
+The manifest schema requires exactly 24 unique model/task cells and explicitly declares the forbidden decision surfaces: ranking, promotion, suitability, and routing. The diagnostic runner emits only cell run records and a diagnostic evidence summary; it does not write leaderboard inputs or make those decisions.
+
+The v0.3.0 historical validity replay is pinned by `data/historical-v03-snapshot-manifest.json` in `reproducibility-backed` mode.
+The gate regenerates the tar with the manifest's exact `git archive` inputs, verifies the pinned source commit and Git tree ID, and checks the complete supplied audit and archive bytes against their manifest digests.
+The audit must still prove zero model calls, no historical snapshot mutation, no expensive matrix rerun, and no repository file changes.
+This establishes reproducibility of the locally reconstructed evidence, not custody or recovery of the original external delivery artifact.
+The manifest records `original_external_artifact_recovered: false` so the distinction remains explicit.
+
 Future free-model onboarding is append-only:
 
 1. Capture a new provider roster snapshot.
 2. Resolve and freeze the exact requested and resolved model identities.
 3. Add each new entity to the new roster snapshot without changing old snapshots.
-4. Run the unchanged `0.3.0` suite and harness conditions.
+4. Run the unchanged `0.4.0` suite and harness conditions.
 5. Build a new leaderboard snapshot from the preserved run records.
 6. Keep incomplete models unranked and promote only after the policy's coverage and repeat-confirmation gates pass.
 

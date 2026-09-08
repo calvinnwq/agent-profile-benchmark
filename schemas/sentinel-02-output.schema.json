@@ -4,11 +4,28 @@
   "additionalProperties": false,
   "properties": {
     "evidence_ids": {
+      "type": "array",
       "minItems": 1,
-      "type": "array"
+      "items": {
+        "type": "string"
+      }
     },
     "read_only_boundary": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutations",
+        "note"
+      ],
+      "properties": {
+        "mutations": {
+          "const": "none",
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
     },
     "remediation_order": {
       "minItems": 1,
@@ -19,7 +36,26 @@
       "type": "string"
     },
     "source_statuses": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "partner-api",
+        "rss"
+      ],
+      "properties": {
+        "partner-api": {
+          "type": "string",
+          "enum": [
+            "failed"
+          ]
+        },
+        "rss": {
+          "type": "string",
+          "enum": [
+            "stale"
+          ]
+        }
+      }
     },
     "workflow_state": {
       "minLength": 1,

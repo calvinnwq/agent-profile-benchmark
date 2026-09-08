@@ -5,3 +5,7 @@ Required top-level fields: portfolio_totals, allocation, constraint_gaps, recomm
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- portfolio_totals is an object with numeric bonds, cash, equities, and total keys.
+- Each allocation item has an id and numeric share; use the supplied position IDs.

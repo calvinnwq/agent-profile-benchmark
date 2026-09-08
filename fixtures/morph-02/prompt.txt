@@ -5,3 +5,6 @@ Required top-level fields: message_hierarchy, page_sections, proof_points, claim
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Use these required page section IDs: hero, how-it-works, proof, and cta.
+Use these claim IDs where applicable: consolidates-supplied-sources and daily-review.

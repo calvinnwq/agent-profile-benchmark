@@ -60,7 +60,7 @@ Reviewers should not reward a response for matching the historical solution when
 
 `benchmark-ready` means the prompt, fixture, evaluator oracle, and known-good and known-bad controls have passed validation.
 
-For benchmark version `0.3.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
+For benchmark version `0.4.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
 `python3 scripts/validate_benchmark.py` validates the frozen ledger contract, while `python3 scripts/validate_benchmark_ready.py` validates artifact bindings and both controls for all 18 tasks.
 
 No result should be used for model routing while a task remains `contract-draft`.
@@ -150,7 +150,7 @@ The command does not publish scores or create a model matrix.
 
 ## Re-runnable leaderboard workflow
 
-`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.3.0`.
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.4.0`.
 It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
 
 Roster snapshots must conform to `schemas/model-roster.schema.json`.
@@ -274,3 +274,11 @@ Treat latency and usage as secondary to correctness, scope, safety, and evidence
 Do not present a single average as a universal measure of intelligence.
 
 A routing recommendation requires repeated evidence across varied tasks and an explicit safe-use boundary.
+
+## Historical v0.3 evidence
+
+The v0.3.0 historical validity replay uses the checked-in `data/historical-v03-snapshot-manifest.json` in `reproducibility-backed` mode.
+The validity gate regenerates the deterministic archive from the pinned source commit, verifies its Git tree ID, and checks the supplied archive and complete audit bytes against manifest digests.
+The audit must report zero model calls, an unchanged historical snapshot, no expensive matrix rerun, and no repository file modifications.
+This evidence mode proves that the supplied local reconstruction is reproducible from the pinned source and audit inputs.
+It does not prove that the original external v0.3 delivery artifact was recovered, and the manifest records that fact explicitly.

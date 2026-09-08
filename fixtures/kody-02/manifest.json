@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,19 +18,19 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "kody-conflicting-handoffs-v1",
     "path": "input.json",
-    "sha256": "sha256:20f68b7b5f1a2932d463cee461a39d8327d03d62c98e8c972186751063bcce27",
+    "sha256": "sha256:db884fc347f072ab17222f51839a367137b40cf028d5c9cb1d0d21127e130955",
     "status": "frozen",
     "version": "1.0.0"
   },
   "oracle": {
     "path": "../../oracles/kody-02.json",
-    "sha256": "sha256:a650432b577c58c83836f09432d30ab9328e2a31620a63b9449780ce96ad2721"
+    "sha256": "sha256:cc913e14c19953d9ae4c0cf0c214b73ed3ed22c7f07e903e5fbb78cbcf306b8a"
   },
   "output_schema": {
     "path": "../../schemas/kody-02-output.schema.json",
@@ -45,7 +45,7 @@
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "KODY-02"

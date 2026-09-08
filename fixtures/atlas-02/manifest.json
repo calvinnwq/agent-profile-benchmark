@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "atlas-route-logistics-v1",
@@ -30,22 +30,22 @@
   },
   "oracle": {
     "path": "../../oracles/atlas-02.json",
-    "sha256": "sha256:80a400b4958358198fd24fff4fa02196ff280468ef81a154cf8591eb48297e23"
+    "sha256": "sha256:23a7ae83ac9f0883f0f52e187aaa640cb3e1001d32f8efbb1c2831c2e9512f18"
   },
   "output_schema": {
     "path": "../../schemas/atlas-02-output.schema.json",
-    "sha256": "sha256:80eed5a17e29c8e22870dadfd0347f1a49886e309a6547cd4b00e125ae45a7b9"
+    "sha256": "sha256:db2f0b5a5f6044173d96861c46d2984b4ee78b9eff6f82b4319d91a6a71121a6"
   },
   "profile_id": "atlas",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:64a186ec6290869fe196aea6eacfe73aa01e810f5d998131f5fca45b4458011d",
+    "sha256": "sha256:6058a2cd9697a160fe27432e2e1837178b4ca2e49422f841086d16ad6937230e",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "ATLAS-02"

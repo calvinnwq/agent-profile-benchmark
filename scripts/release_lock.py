@@ -5,13 +5,14 @@ from __future__ import annotations
 import hashlib
 import json
 import posixpath
+import re
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "data" / "release-artifact-lock.json"
-EXPECTED_RELEASE_LOCK_FINGERPRINT = "a93fc8f6a536c23f19dc72e3c1901434fa8194f5c77bf52d87c4ae30833533ca"
+EXPECTED_RELEASE_LOCK_FINGERPRINT = "a87d4a4942295eed4b53dfc47eb64422ab16ef973756f6d08d07e6cbeddacdff"
 LOCK_VERSION = "1"
 TASK_ARTIFACT_KEYS = (
     "manifest",
@@ -40,7 +41,57 @@ SHARED_ARTIFACT_KEYS = (
     "hermes_adapter",
     "release_validator",
     "kody_validator",
+    "leaderboard_builder",
+    "leaderboard_output_schema",
+    "leaderboard_renderer",
+    "validity_gate",
+    "validity_probe_schema",
+    "validity_probes",
+    "release_lock",
+    "benchmark_validator",
+    "matrix_runner",
+    "leaderboard_input_schema",
+    "model_roster_schema",
+    "leaderboard_policy_schema",
+    "leaderboard_policy",
+    "aggregate_validator",
+    "diagnostic_runner",
+    "diagnostic_manifest_schema",
+    "historical_snapshot_manifest",
 )
+SHARED_ARTIFACT_PATHS = {
+    "ledger": "data/task-ledger.json",
+    "release_lock_schema": "schemas/release-artifact-lock.schema.json",
+    "contract_schema": "schemas/task-contract.schema.json",
+    "evaluator_task": "scripts/evaluate_task.py",
+    "evaluator_kody01": "scripts/evaluate_kody01.py",
+    "run_record_schema": "schemas/task-run-record.schema.json",
+    "kody_run_schema": "schemas/kody-01-run-record.schema.json",
+    "replay_task": "scripts/replay_task.py",
+    "replay_kody01": "scripts/replay_kody01.py",
+    "model_runner": "scripts/run_task_model.py",
+    "kody_model_runner": "scripts/run_kody01_model.py",
+    "hermes_adapter": "scripts/hermes_no_tools.py",
+    "release_validator": "scripts/validate_benchmark_ready.py",
+    "kody_validator": "scripts/validate_kody01.py",
+    "leaderboard_builder": "scripts/build_leaderboard.py",
+    "leaderboard_output_schema": "schemas/leaderboard-output.schema.json",
+    "leaderboard_renderer": "scripts/render_leaderboard_html.py",
+    "validity_gate": "scripts/validate_validity_probes.py",
+    "validity_probe_schema": "schemas/validity-probes.schema.json",
+    "validity_probes": "data/validity-probes.json",
+    "release_lock": "scripts/release_lock.py",
+    "benchmark_validator": "scripts/validate_benchmark.py",
+    "matrix_runner": "scripts/run_leaderboard_matrix.py",
+    "leaderboard_input_schema": "schemas/leaderboard-input.schema.json",
+    "model_roster_schema": "schemas/model-roster.schema.json",
+    "leaderboard_policy_schema": "schemas/leaderboard-policy.schema.json",
+    "leaderboard_policy": "data/leaderboard-policy.json",
+    "aggregate_validator": "scripts/leaderboard_aggregate.py",
+    "diagnostic_runner": "scripts/run_diagnostic_matrix.py",
+    "diagnostic_manifest_schema": "schemas/diagnostic-manifest.schema.json",
+    "historical_snapshot_manifest": "data/historical-v03-snapshot-manifest.json",
+}
 
 
 class ReleaseLockError(ValueError):
@@ -75,7 +126,14 @@ def _load_json(path: Path) -> Any:
 
 def _sha256(path: Path) -> str:
     try:
-        return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        content = path.read_bytes()
+        if path.resolve() == Path(__file__).resolve():
+            content = re.sub(
+                rb'(EXPECTED_RELEASE_LOCK_FINGERPRINT\s*=\s*)"[0-9a-f_]+"',
+                rb'\1"__sealed__"',
+                content,
+            )
+        return "sha256:" + hashlib.sha256(content).hexdigest()
     except OSError as exc:
         raise ReleaseLockError(f"unable to read locked artifact {path.name} ({type(exc).__name__})") from exc
 
@@ -109,7 +167,7 @@ def load_release_lock() -> dict[str, Any]:
         raise ReleaseLockError("release lock schema pointer is invalid")
     if lock.get("benchmark_id") != "agent-profile-benchmark":
         raise ReleaseLockError("release lock benchmark identity is invalid")
-    if lock.get("benchmark_version") != "0.3.0":
+    if lock.get("benchmark_version") != "0.4.0":
         raise ReleaseLockError("release lock benchmark version is invalid")
     if lock.get("lock_version") != LOCK_VERSION:
         raise ReleaseLockError("release lock version is invalid")
@@ -125,7 +183,7 @@ def load_release_lock() -> dict[str, Any]:
     for key in SHARED_ARTIFACT_KEYS:
         if key not in shared:
             raise ReleaseLockError(f"release lock is missing shared artifact {key!r}")
-        _verify_entry(shared[key])
+        _verify_entry(shared[key], SHARED_ARTIFACT_PATHS[key])
     return lock
 
 
@@ -178,6 +236,17 @@ def verify_task_release_artifacts(task_id: str, harness: str) -> dict[str, str]:
     fingerprints: dict[str, str] = {}
     for key in TASK_ARTIFACT_KEYS:
         fingerprints[key] = _verify_entry(artifacts.get(key), expected_paths[key])
+    manifest = _load_json(ROOT / expected_paths["manifest"])
+    if not isinstance(manifest, dict):
+        raise ReleaseLockError(f"release lock task {task_id!r} manifest must be an object")
+    if manifest.get("task_id") != task_id or manifest.get("benchmark_version") != "0.4.0":
+        raise ReleaseLockError(f"release lock task {task_id!r} manifest identity is invalid")
+    evaluator = manifest.get("evaluator")
+    expected_evaluator_version = "kody-01-oracle-v2" if task_id == "KODY-01" else "task-oracle-v2"
+    if not isinstance(evaluator, dict) or evaluator.get("version") != expected_evaluator_version:
+        raise ReleaseLockError(f"release lock task {task_id!r} evaluator version is not sealed")
+    if evaluator.get("path") != expected_manifest_paths(task_id)["evaluator"]:
+        raise ReleaseLockError(f"release lock task {task_id!r} evaluator path is not canonical")
     fixture_id = task.get("fixture_id")
     fixture_version = task.get("fixture_version")
     if not isinstance(fixture_id, str) or not fixture_id or not isinstance(fixture_version, str) or not fixture_version:
@@ -196,4 +265,5 @@ def verify_task_release_artifacts(task_id: str, harness: str) -> dict[str, str]:
         "harness_fingerprint": harness_fingerprint,
         "fixture_id": fixture_id,
         "fixture_version": fixture_version,
+        "evaluator_version": expected_evaluator_version,
     }

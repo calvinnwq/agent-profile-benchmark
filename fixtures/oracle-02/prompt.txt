@@ -5,3 +5,7 @@ Required top-level fields: memory_calculations, option_table, requirement_match,
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- memory_calculations includes numeric q4_total_gb, q6_total_gb, and q8_total_gb.
+- option_table uses option IDs q4, q6, and q8 with total_gb values; label computed values as estimates.

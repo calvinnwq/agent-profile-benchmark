@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "tank-training-adaptation-v1",
@@ -30,7 +30,7 @@
   },
   "oracle": {
     "path": "../../oracles/tank-02.json",
-    "sha256": "sha256:3e3cc7099a21df7e9e15dd6a2f01dd5e8bca332d7173d848155cd731074f6701"
+    "sha256": "sha256:dc64f52123596918abfac6d40f78f35e38452ae02b606d0fb7e0cfb7a79739d6"
   },
   "output_schema": {
     "path": "../../schemas/tank-02-output.schema.json",
@@ -39,13 +39,13 @@
   "profile_id": "tank",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:fc83ddfa4a6a330db6428ddfba77a37981b9456c3a4cbb33f1184cca0fc27da3",
+    "sha256": "sha256:c627e9754db5a3f85484d9c1ce82056fd2b8341ea02a9899392df22be0656abd",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "TANK-02"

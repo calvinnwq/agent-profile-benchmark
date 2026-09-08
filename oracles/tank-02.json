@@ -10,7 +10,10 @@
       "terms": [
         "reduce",
         "two"
-      ]
+      ],
+      "equivalent_terms": {
+        "two": ["two", "2"]
+      }
     },
     {
       "id": "load-adjustment",

@@ -5,3 +5,7 @@ Required top-level fields: scenario_table, calculations, liquidity_comparison, r
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- calculations is an object with numeric steady_base_value, steady_stress_value, growth_base_value, and growth_stress_value keys.
+- scenario_table includes scenario_id values base, stress, and recovery, with steady_value and growth_value for each row; recovery values may be qualitative.

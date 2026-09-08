@@ -49,7 +49,7 @@ def _leaderboard() -> dict[str, Any]:
     return {
         "schema_version": "leaderboard-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.3.0",
+        "benchmark_version": "0.4.0",
         "policy_id": "leaderboard-v1",
         "policy_version": "1.0.0",
         "input_snapshot_id": "repeat-001",
@@ -65,10 +65,32 @@ def _leaderboard() -> dict[str, Any]:
                 "task_cells": [{
                     "task_id": "ALPHA-01",
                     "attempted_runs": 4,
+                    "completed_execution_records": 4,
+                    "execution_blocked_runs": 0,
+                    "all_attempt_process_or_timeout_failures": 0,
+                    "resolved_identity_runs": 3,
+                    "parseable_output_runs": 4,
+                    "non_json_output_runs": 0,
+                    "all_attempt_hard_failure_runs": 1,
+                    "all_attempt_hard_failure_entries": 1,
+                    "all_attempt_invalid_output_runs": 0,
+                    "all_attempt_automatic_check_pass_runs": 1,
+                    "evaluator_blocked_runs": 0,
                     "comparable_runs": 3,
+                    "comparable_resolved_runs": 3,
                     "excluded_runs": 1,
                     "excluded_provider_or_identity_runs": 1,
                     "blocked_or_unverified_runs": 0,
+                    "comparable_full_contract_pass_runs": 1,
+                    "full_contract_pass_runs": 1,
+                    "comparable_automatic_check_pass_runs": 1,
+                    "all_automatic_checks_pass_runs": 1,
+                    "comparable_process_or_timeout_failures": 0,
+                    "comparable_hard_failure_runs": 1,
+                    "hard_failure_runs": 1,
+                    "comparable_invalid_output_runs": 0,
+                    "invalid_output_runs": 0,
+                    "process_or_timeout_failures": 0,
                 }],
             },
             {
@@ -79,14 +101,32 @@ def _leaderboard() -> dict[str, Any]:
             },
         ],
         "aggregate": {
+            "planned_cells": 4,
+            "launch_failures": 3,
             "attempted_runs": 4,
+            "completed_execution_records": 4,
+            "execution_blocked_runs": 0,
+            "all_attempt_process_or_timeout_failures": 0,
+            "resolved_identity_runs": 3,
+            "parseable_output_runs": 4,
+            "non_json_output_runs": 0,
+            "all_attempt_hard_failure_runs": 1,
+            "all_attempt_hard_failure_entries": 1,
+            "all_attempt_invalid_output_runs": 0,
+            "all_attempt_automatic_check_pass_runs": 1,
+            "evaluator_blocked_runs": 0,
             "comparable_resolved_runs": 3,
             "excluded_provider_or_identity_runs": 1,
             "blocked_or_unverified_runs": 0,
+            "comparable_full_contract_pass_runs": 1,
             "full_contract_pass_runs": 1,
+            "comparable_automatic_check_pass_runs": 1,
             "all_automatic_checks_pass_runs": 1,
+            "comparable_process_or_timeout_failures": 0,
             "hard_failure_runs": 1,
+            "comparable_hard_failure_runs": 1,
             "invalid_output_runs": 0,
+            "comparable_invalid_output_runs": 0,
             "process_or_timeout_failures": 0,
             "human_scores_assigned": False,
         },
@@ -167,6 +207,21 @@ class LeaderboardHtmlTests(unittest.TestCase):
         with self.assertRaises(RenderError):
             render_html(data)
 
+    def test_render_rejects_reviewed_impossible_aggregate_counts(self) -> None:
+        render_html(_leaderboard())
+        mutations = {
+            "all_attempt_hard_failure_entries": 999,
+            "comparable_full_contract_pass_runs": 99,
+            "resolved_identity_runs": 0,
+            "hard_failure_runs": 99,
+        }
+        for field, value in mutations.items():
+            with self.subTest(field=field, value=value):
+                data = _leaderboard()
+                data["aggregate"][field] = value
+                with self.assertRaises(RenderError):
+                    render_html(data)
+
     def test_render_rejects_duplicate_task_cells(self) -> None:
         data = _leaderboard()
         data["models"][0]["task_cells"].append(deepcopy(data["models"][0]["task_cells"][0]))
@@ -182,6 +237,17 @@ class LeaderboardHtmlTests(unittest.TestCase):
     def test_render_rejects_inconsistent_coverage_rate(self) -> None:
         data = _leaderboard()
         data["overall"]["ranked"][0]["coverage"]["tasks_covered"] = 1
+        with self.assertRaises(RenderError):
+            render_html(data)
+
+    def test_render_rejects_aggregate_scope_count_drift(self) -> None:
+        data = _leaderboard()
+        data["aggregate"]["planned_cells"] = 1
+        with self.assertRaises(RenderError):
+            render_html(data)
+
+        data = _leaderboard()
+        data["aggregate"]["launch_failures"] = 0
         with self.assertRaises(RenderError):
             render_html(data)
 

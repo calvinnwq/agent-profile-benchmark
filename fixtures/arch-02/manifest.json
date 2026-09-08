@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,34 +18,34 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:688b9087ca092bd9369feee49725d8c493873849cc6d107dd3389aa42becf308",
-    "version": "task-oracle-v1"
+    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
+    "version": "task-oracle-v2"
   },
   "fixture": {
     "id": "arch-projection-review-v1",
     "path": "input.json",
-    "sha256": "sha256:a6cc8a8185a07285620bc0eee55c0e713a3d039ff91a7b360a2637ea086687e4",
+    "sha256": "sha256:b32507329bd45b51f914ed6ae2d3ccfc4d61334cb31f2db273a290d3a476d36d",
     "status": "frozen",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "oracle": {
     "path": "../../oracles/arch-02.json",
-    "sha256": "sha256:d228dbee25f86842ac581c7e60dc202210f01f18f2edd7e9efddf024148d1a53"
+    "sha256": "sha256:7fb56751954c9bf3143f18d7fe4190090a84fd2c32f531c2ab73bc6768aa03a7"
   },
   "output_schema": {
     "path": "../../schemas/arch-02-output.schema.json",
-    "sha256": "sha256:611064a96434efba8f71835ebf58ef9a7c5b0d3fb0ab6b8c2079b98d0f13ad09"
+    "sha256": "sha256:012542030c9c7dfa3a9f65c95e87e53638b0b52d7a4549a43324dda6efd5108e"
   },
   "profile_id": "arch",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:d894a2a1c2687da94e49ba930437382ea362c469a9c7a84109cc84ebe75ffcb6",
+    "sha256": "sha256:9b1f362a636a2af97f917b519892758694a944afedab71194573de4e568ef54c",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:4655455af9de4c9f252fbe6354a6132b60b8067bba5ab9d0a34d55384234a468"
+    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
   },
   "status": "benchmark-ready",
   "task_id": "ARCH-02"

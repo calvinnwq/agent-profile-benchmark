@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Any
 
 
-EXPECTED_BENCHMARK_VERSION = "0.3.0"
+EXPECTED_BENCHMARK_VERSION = "0.4.0"
 EXPECTED_LEDGER_SCHEMA = "../schemas/task-contract.schema.json"
-EXPECTED_LEDGER_FINGERPRINT = "0b3693b0945e036f304b61b1ae2442f3505d8adcf991926ad0ca2e83d7a54e5a"
+EXPECTED_LEDGER_FINGERPRINT = "ce1262095f2fea7b8e7747955ba533d43055b52ed61f2cf2055a55c532c403b1"
 EXPECTED_PROFILES = {
     "kody",
     "aegis",
@@ -73,6 +73,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "items",
     "maxItems",
     "maximum",
+    "minimum",
     "minItems",
     "minLength",
     "pattern",
@@ -227,7 +228,7 @@ def _validate_schema_shape(
     for key in ("minItems", "maxItems", "minLength"):
         if key in schema and (not isinstance(schema[key], int) or isinstance(schema[key], bool)):
             errors.append(f"schema is malformed or unsupported: {path}.{key} must be an integer")
-    for key in ("exclusiveMinimum", "maximum"):
+    for key in ("minimum", "exclusiveMinimum", "maximum"):
         if key in schema and (
             not isinstance(schema[key], (int, float)) or isinstance(schema[key], bool)
         ):
@@ -319,6 +320,9 @@ def _validate_schema_node(
                 errors.append(f"{path} does not match the declared pattern")
 
     if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            errors.append(f"{path} must be at least {minimum}")
         exclusive_minimum = schema.get("exclusiveMinimum")
         if isinstance(exclusive_minimum, (int, float)) and value <= exclusive_minimum:
             errors.append(f"{path} must be greater than {exclusive_minimum}")
@@ -496,7 +500,7 @@ def _validate_task(task: Any, profile_ids: set[str], errors: list[str]) -> None:
     fixture_path = f"{path}.fixture"
     _require_keys(
         fixture,
-        {"id", "status", "source_policy", "live_web", "allowed_tools", "notes"},
+        {"id", "version", "status", "source_policy", "live_web", "allowed_tools", "notes"},
         fixture_path,
         errors,
     )
@@ -506,6 +510,10 @@ def _validate_task(task: Any, profile_ids: set[str], errors: list[str]) -> None:
             r"^[a-z0-9][a-z0-9-]*-v[0-9]+$", fixture_id
         ):
             errors.append(f"{fixture_path}.id must be a string ending with a numeric version")
+        if not isinstance(fixture.get("version"), str) or not re.fullmatch(
+            r"^[0-9]+\.[0-9]+\.[0-9]+$", fixture.get("version", "")
+        ):
+            errors.append(f"{fixture_path}.version must be a semantic version string")
         if not _is_allowed_string(fixture.get("status"), {"to_be_frozen", "frozen"}):
             errors.append(f"{fixture_path}.status is not an allowed value")
         if not _is_allowed_string(
@@ -667,7 +675,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if fingerprint is None:
         errors.append("ledger cannot be fingerprinted as strict JSON")
     elif fingerprint != EXPECTED_LEDGER_FINGERPRINT:
-        errors.append("ledger content does not match the frozen v0.3.0 contract fingerprint")
+        errors.append("ledger content does not match the frozen v0.4.0 contract fingerprint")
     _scan_public_text(ledger, "ledger", errors)
 
     if ledger.get("$schema") != EXPECTED_LEDGER_SCHEMA:
@@ -785,7 +793,7 @@ def validate_ledger(ledger: Any) -> list[str]:
             and isinstance(task_ids_value, list)
             and task_ids_value != list(expected_task_ids)
         ):
-            errors.append(f"{profile_path}.task_ids must match the frozen v0.3.0 task registry")
+            errors.append(f"{profile_path}.task_ids must match the frozen v0.4.0 task registry")
         _validate_string_list(profile.get("primary_dimensions"), f"{profile_path}.primary_dimensions", errors)
 
     tasks = ledger.get("tasks")
@@ -810,7 +818,7 @@ def validate_ledger(ledger: Any) -> list[str]:
     if len(task_ids) != len(set(task_ids)):
         errors.append("ledger.tasks contains duplicate ids")
     if set(task_ids) != EXPECTED_TASK_IDS:
-        errors.append("ledger.tasks must match the frozen v0.3.0 task registry")
+        errors.append("ledger.tasks must match the frozen v0.4.0 task registry")
     for profile_id, profile_tasks in tasks_by_profile.items():
         if len(profile_tasks) != 2:
             errors.append(f"profile {profile_id} must have exactly two tasks")

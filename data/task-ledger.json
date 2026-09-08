@@ -2,7 +2,7 @@
   "$schema": "../schemas/task-contract.schema.json",
   "schema_version": "0.1.0",
   "benchmark_id": "agent-profile-benchmark",
-  "benchmark_version": "0.3.0",
+  "benchmark_version": "0.4.0",
   "status": "benchmark-ready",
   "evaluation_policy": {
     "execution_boundary": "offline_replay",
@@ -186,7 +186,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The packet will contain fixed requirements, named owners, dependencies, one approval boundary, and deliberately unresolved questions."
+        "notes": "The packet will contain fixed requirements, named owners, dependencies, one approval boundary, and deliberately unresolved questions.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -312,7 +313,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "Reports will use stable source identifiers, contradictory claims, one stale observation, and actions with different owners."
+        "notes": "Reports will use stable source identifiers, contradictory claims, one stale observation, and actions with different owners.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -433,7 +435,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will define generated holdings, balances, target reserve, horizon, risk limit, and a small set of permitted recommendations."
+        "notes": "The fixture will define generated holdings, balances, target reserve, horizon, risk limit, and a small set of permitted recommendations.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -551,7 +554,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "Both strategies will use the same starting amount and scenario assumptions, with one deliberate downside and liquidity trade-off."
+        "notes": "Both strategies will use the same starting amount and scenario assumptions, with one deliberate downside and liquidity trade-off.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -669,7 +673,8 @@
         "source_policy": "sanitized_or_synthetic_reconstruction",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The evaluator will supply a small pre-fix repository and hidden behavioral tests without later history, remotes, credentials, or production configuration."
+        "notes": "The evaluator will supply a small pre-fix repository and hidden behavioral tests without later history, remotes, credentials, or production configuration.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -789,7 +794,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will contain a small manifest and projection tree with labelled high, medium, and low severity defects plus legitimate patterns that must not be flagged."
+        "notes": "The fixture will contain a small manifest and projection tree with labelled high, medium, and low severity defects plus legitimate patterns that must not be flagged.",
+        "version": "1.1.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -906,7 +912,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The catalogue will include item identifiers, weight, price, fuel type, capacity, availability, and deliberately incompatible combinations."
+        "notes": "The catalogue will include item identifiers, weight, price, fuel type, capacity, availability, and deliberately incompatible combinations.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1030,7 +1037,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will define route segments, transfer times, booking requirements, weather states, daylight windows, and a transport disruption."
+        "notes": "The fixture will define route segments, transfer times, booking requirements, weather states, daylight windows, and a transport disruption.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1148,7 +1156,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will define a non-diagnostic baseline, target date, available sessions, current workload, recovery limits, and explicit stop or escalation signals."
+        "notes": "The fixture will define a non-diagnostic baseline, target date, available sessions, current workload, recovery limits, and explicit stop or escalation signals.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1266,7 +1275,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The check-in will include both ordinary setbacks and one signal that requires a conservative pause or escalation rather than progression."
+        "notes": "The check-in will include both ordinary setbacks and one signal that requires a conservative pause or escalation rather than progression.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1384,7 +1394,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The bundle will contain dated source records with stable identifiers, relevant excerpts, one conflict in scope, and unrelated distractor material."
+        "notes": "The bundle will contain dated source records with stable identifiers, relevant excerpts, one conflict in scope, and unrelated distractor material.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1502,7 +1513,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will provide option sizes, context requirements, runtime overhead, estimated speed bands, and a 24 GB memory ceiling."
+        "notes": "The fixture will provide option sizes, context requirements, runtime overhead, estimated speed bands, and a 24 GB memory ceiling.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1620,7 +1632,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will include timestamps, freshness, process state, error counts, restart history, and a seeded distinction between stale, degraded, and failed."
+        "notes": "The fixture will include timestamps, freshness, process state, error counts, restart history, and a seeded distinction between stale, degraded, and failed.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1738,7 +1751,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will include multiple source statuses, workflow timing, one freshness gap, one harmless empty source, and one seeded ordering issue."
+        "notes": "The fixture will include multiple source statuses, workflow timing, one freshness gap, one harmless empty source, and one seeded ordering issue.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1856,7 +1870,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The brief will include must-have outcomes, optional ideas, a non-goal, an audience constraint, and measurable success signals."
+        "notes": "The brief will include must-have outcomes, optional ideas, a non-goal, an audience constraint, and measurable success signals.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -1976,7 +1991,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The brief will include approved claims, unsupported claims to avoid, proof points, objections, and one desired conversion action."
+        "notes": "The brief will include approved claims, unsupported claims to avoid, proof points, objections, and one desired conversion action.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -2094,7 +2110,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will provide deterministic HTML, CSS, viewport notes, and a hidden defect inventory with benign near-miss controls."
+        "notes": "The fixture will provide deterministic HTML, CSS, viewport notes, and a hidden defect inventory with benign near-miss controls.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
@@ -2212,7 +2229,8 @@
         "source_policy": "public_synthetic",
         "live_web": false,
         "allowed_tools": [],
-        "notes": "The fixture will define data fields, refresh semantics, state transitions, keyboard expectations, and a prohibition on mutating the data source."
+        "notes": "The fixture will define data fields, refresh semantics, state transitions, keyboard expectations, and a prohibition on mutating the data source.",
+        "version": "1.0.0"
       },
       "prompt_contract": {
         "status": "frozen",
