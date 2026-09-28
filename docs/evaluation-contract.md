@@ -148,6 +148,23 @@ python3 scripts/run_task_model.py \
 
 The command does not publish scores or create a model matrix.
 
+## Tolerant objective diagnostic
+
+The strict JSON contract remains the authoritative machine-interface metric for the benchmark release.
+It must not be overwritten or silently normalised when a tolerant analysis is run.
+
+`scripts/analyze_tolerant_outputs.py` re-reads a frozen `leaderboard-input.json` manifest and the preserved raw responses without making new model calls.
+It writes a separately labelled `tolerant-analysis-v1` report and can render a Markdown handoff.
+
+The recovery policy accepts a bare JSON object, one isolated JSON Markdown fence, or one JSON object with limited unambiguous surrounding prose.
+It never repairs truncated JSON, chooses between multiple objects, resolves duplicate keys, converts a non-object value, or invents missing fields.
+
+The report keeps strict contract validity, tolerant recoverability, evaluator judgeability, automatic-check results, hard failures, and tolerant objective success as separate values.
+A tolerant recovery never counts as a clean strict run and does not change the five-clean strict gate.
+
+`scripts/compare_tolerant_analyses.py` produces a diagnostic-only high-versus-medium comparison from two tolerant reports.
+Neither diagnostic script changes run records, frozen task inputs, strict leaderboard artifacts, routing, promotion, deployment, or publication.
+
 ## Re-runnable leaderboard workflow
 
 `data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.4.1`.
