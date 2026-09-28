@@ -265,7 +265,7 @@ class BenchmarkContractTests(unittest.TestCase):
 
         errors = validate_ledger(broken)
 
-        self.assertIn("ledger content does not match the frozen v0.4.0 contract fingerprint", errors)
+        self.assertIn("ledger content does not match the frozen v0.4.1 contract fingerprint", errors)
 
     def test_validator_rejects_replacement_of_the_frozen_task_registry(self) -> None:
         broken = json.loads(json.dumps(self.ledger))
@@ -419,7 +419,7 @@ class BenchmarkContractTests(unittest.TestCase):
             self.schema["properties"]["$schema"]["const"],
             "../schemas/task-contract.schema.json",
         )
-        self.assertEqual(self.schema["properties"]["benchmark_version"]["const"], "0.4.0")
+        self.assertEqual(self.schema["properties"]["benchmark_version"]["const"], "0.4.1")
         self.assertIn("profiles", self.schema["required"])
         self.assertIn("tasks", self.schema["required"])
         self.assertEqual(self.schema["properties"]["profiles"]["minItems"], 9)
@@ -590,7 +590,7 @@ class BenchmarkContractTests(unittest.TestCase):
             self.assertEqual([task_one, task_two], [task["title"] for task in profile_tasks])
 
         evaluation_contract = (ROOT / "docs" / "evaluation-contract.md").read_text(encoding="utf-8")
-        self.assertIn("benchmark version `0.4.0`", evaluation_contract)
+        self.assertIn("benchmark version `0.4.1`", evaluation_contract)
         self.assertIn("validate_benchmark_ready.py", evaluation_contract)
         self.assertIn("all 18 tasks", evaluation_contract)
 

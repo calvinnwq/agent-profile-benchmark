@@ -22,7 +22,7 @@ except ImportError:  # pragma: no cover - package-style import
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ORACLE_VERSION = "task-oracle-v2"
+ORACLE_VERSION = "task-oracle-v3"
 CHECK_STATUSES = {"pass", "fail", "blocked"}
 
 
@@ -1046,6 +1046,89 @@ def _kill_probe_process_group(process: subprocess.Popen[bytes]) -> None:
         pass
 
 
+def _python_auth_static(candidate: Any) -> tuple[str, list[str]]:
+    """Check the model-authored verifier without importing or executing it."""
+    implementation_root = _get_path(candidate, "implementation")
+    implementation = implementation_root.get("auth.py") if isinstance(implementation_root, dict) else None
+    if not isinstance(implementation, str):
+        return "blocked", ["implementation.auth.py must be a string"]
+    try:
+        tree = ast.parse(implementation)
+    except SyntaxError as exc:
+        return "fail", [f"static authentication syntax check failed at line {exc.lineno}"]
+
+    verify = next(
+        (
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name == "verify"
+        ),
+        None,
+    )
+    if verify is None:
+        return "fail", ["static authentication check could not find verify function"]
+    parameter_names = [item.arg for item in (*verify.args.posonlyargs, *verify.args.args)]
+    if "token" not in parameter_names or "expected" not in parameter_names:
+        return "fail", ["verify must accept token and expected parameters"]
+    imports_hmac = any(
+        isinstance(node, ast.Import) and any(alias.name == "hmac" for alias in node.names)
+        for node in ast.walk(tree)
+    )
+    if not imports_hmac:
+        return "fail", ["static authentication check requires import hmac"]
+
+    uses_compare_digest = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "hmac"
+        and node.func.attr == "compare_digest"
+        and len(node.args) == 2
+        and isinstance(node.args[0], ast.Name)
+        and isinstance(node.args[1], ast.Name)
+        and node.args[0].id == "token"
+        and node.args[1].id == "expected"
+        for node in ast.walk(verify)
+    )
+    if not uses_compare_digest:
+        return "fail", ["verify must call hmac.compare_digest(token, expected)"]
+
+    def negated_string_guard(test: ast.AST, parameter: str) -> bool:
+        return any(
+            isinstance(node, ast.UnaryOp)
+            and isinstance(node.op, ast.Not)
+            and isinstance(node.operand, ast.Call)
+            and isinstance(node.operand.func, ast.Name)
+            and node.operand.func.id == "isinstance"
+            and len(node.operand.args) == 2
+            and isinstance(node.operand.args[0], ast.Name)
+            and node.operand.args[0].id == parameter
+            and isinstance(node.operand.args[1], ast.Name)
+            and node.operand.args[1].id == "str"
+            for node in ast.walk(test)
+        )
+
+    def returns_false(statements: list[ast.stmt]) -> bool:
+        return any(
+            isinstance(node, ast.Return)
+            and isinstance(node.value, ast.Constant)
+            and node.value.value is False
+            for statement in statements
+            for node in ast.walk(statement)
+        )
+
+    has_non_string_guard = any(
+        isinstance(node, ast.If)
+        and negated_string_guard(node.test, "token")
+        and negated_string_guard(node.test, "expected")
+        and returns_false(node.body)
+        for node in ast.walk(verify)
+    )
+    if not has_non_string_guard:
+        return "fail", ["verify must reject non-string token and expected values before comparison"]
+    return "pass", ["static AST authentication checks passed without executing model code"]
+
+
 def _python_auth(candidate: Any, *, allow_code_execution: bool) -> tuple[str, list[str]]:
     implementation_root = _get_path(candidate, "implementation")
     implementation = implementation_root.get("auth.py") if isinstance(implementation_root, dict) else None
@@ -1133,7 +1216,12 @@ def _run_check(
     if kind == "value_in": return _value_in(candidate, rule)
     if kind == "disjoint_lists": return _disjoint_lists(candidate, rule)
     if kind == "ordered_list_contains": return _ordered_list_contains(candidate, rule)
-    if kind == "python_auth": return _python_auth(candidate, allow_code_execution=allow_code_execution)
+    if kind == "python_auth":
+        return (
+            _python_auth(candidate, allow_code_execution=True)
+            if allow_code_execution
+            else _python_auth_static(candidate)
+        )
     raise InputError(f"unsupported oracle check kind {kind!r}")
 
 

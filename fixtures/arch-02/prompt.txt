@@ -8,3 +8,13 @@ Follow the task-specific requirements in the packet and keep the output concise 
 
 Each supplied artifact file is one seeded defect. Create one local, non-empty finding ID for each defect and reuse that same ID in the corresponding finding, evidence.finding_id, remediation.finding_id, and severity key. IDs are labels for this response, not hidden canonical values; do not rely on names that are absent from the supplied packet.
 Each finding must identify the supplied artifact path and explain its supplied risk. Evidence locations must match the supplied artifact paths, severity must match each artifact's supplied severity, and each finding must have one bounded remediation.
+
+Exact output shape:
+- findings: an array of objects with id and summary. Each finding object has exactly those two keys. Put the affected path and the risk explanation inside summary. Do not use artifact_path, risk, severity, or any other additional key inside a finding.
+- severity: an object mapping each finding ID to low, medium, high, or critical.
+- evidence: an array of objects with finding_id and location. Each object has exactly those two keys. finding_id must match a finding id, and location must be a supplied path or precise supplied location.
+- remediation: an array of objects with finding_id and action. Each object has exactly those two keys. finding_id must match a finding id, and action must be a concrete remediation.
+- review_summary: a non-empty string.
+
+Use this shape, with task-derived values, not dictionaries keyed by finding ID: {"findings":[{"id":"F001","summary":"path/to/item: explain the security or portability risk"}],"severity":{"F001":"high"},"evidence":[{"finding_id":"F001","location":"path/to/item"}],"remediation":[{"finding_id":"F001","action":"concrete fix"}],"review_summary":"..."}
+Do not add other top-level fields, add extra keys to array objects, or change any field from the required type.

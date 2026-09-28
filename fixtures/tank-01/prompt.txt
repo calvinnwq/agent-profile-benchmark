@@ -5,3 +5,7 @@ Required top-level fields: weekly_schedule, progression, recovery_rules, stop_ru
 Use only the supplied synthetic packet; do not browse or perform external actions.
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
+
+Nested contract:
+- weekly_schedule is an array of exactly seven objects, each with a numeric distance_km field.
+- progression is an array of objects, each with a numeric total_km field.

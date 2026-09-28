@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.4.0",
+  "benchmark_version": "0.4.1",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
-    "version": "task-oracle-v2"
+    "sha256": "sha256:bc34e22ecde2119e862e4e76178848f0fb9da1a560eeff898b5f5c7067c26c9a",
+    "version": "task-oracle-v3"
   },
   "fixture": {
     "id": "sentinel-collector-incident-v1",
@@ -45,7 +45,7 @@
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
+    "sha256": "sha256:2fed9f04fdf6706af521385465c8e2882554f2760373b08a3fde35baa529a221"
   },
   "status": "benchmark-ready",
   "task_id": "SENTINEL-01"

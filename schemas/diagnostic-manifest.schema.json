@@ -18,7 +18,7 @@
     "$id": {"type": "string"},
     "schema_version": {"const": "diagnostic-manifest-v1"},
     "benchmark_id": {"const": "agent-profile-benchmark"},
-    "benchmark_version": {"const": "0.4.0"},
+    "benchmark_version": {"const": "0.4.1"},
     "diagnostic_id": {"type": "string", "minLength": 1},
     "purpose": {"const": "validity-diagnostic"},
     "decision_surfaces": {

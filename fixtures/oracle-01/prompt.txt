@@ -6,5 +6,9 @@ Use only the supplied synthetic packet; do not browse or perform external action
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
 
+Nested contract:
+- Each claim_register item is an object with claim_id, claim, and source_id.
+- Each source_links item is an object with claim_id and source_id.
+
 Use only the supplied source IDs rulebook-2026 and park-alert-2026-06 when linking claims.
 The supplied claim IDs are booking-window, fire-ban, and north-track-closure; preserve their dates and scope.

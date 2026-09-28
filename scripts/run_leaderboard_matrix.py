@@ -325,7 +325,7 @@ def _validate_cell_record(record: Any, cell: dict[str, str]) -> None:
     expected = {
         "run_id": cell["run_id"],
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "task_id": cell["task_id"],
         "profile_id": cell["profile_id"],
         "harness": "hermes-oneshot",
