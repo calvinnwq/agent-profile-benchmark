@@ -87,6 +87,33 @@ class LeaderboardMatrixTests(unittest.TestCase):
         self.assertEqual(plan[0]["fixture_path"], "fixtures/zeta/custom-fixture.json")
         self.assertEqual(plan[0]["prompt_path"], "fixtures/zeta/custom-prompt.txt")
 
+    def test_replicate_labels_make_run_ids_disjoint(self) -> None:
+        from scripts.run_leaderboard_matrix import build_matrix_plan
+
+        roster = {
+            "provider": "nous",
+            "models": [
+                {
+                    "model_id": "alpha/model:free",
+                    "requested_model_id": "alpha/model:free",
+                    "resolved_model_id": "alpha/model:free",
+                    "provider_requested": "nous",
+                    "provider_resolved": "nous",
+                    "availability": "eligible",
+                }
+            ],
+        }
+        ledger = {
+            "profiles": [{"id": "alpha", "task_ids": ["ALPHA-01"]}],
+            "tasks": [{"id": "ALPHA-01", "profile_id": "alpha"}],
+        }
+        first = build_matrix_plan(roster, ledger, "snapshot", Path("out"), replicate_id="r1")
+        second = build_matrix_plan(roster, ledger, "snapshot", Path("out"), replicate_id="r2")
+
+        self.assertEqual(first[0]["run_id"], "snapshot-r1-alpha-model-free-29d7552477-alpha-01")
+        self.assertEqual(second[0]["run_id"], "snapshot-r2-alpha-model-free-29d7552477-alpha-01")
+        self.assertTrue({cell["run_id"] for cell in first}.isdisjoint(cell["run_id"] for cell in second))
+
     def test_frozen_manifests_supply_nonstandard_task_input_paths(self) -> None:
         from scripts.run_leaderboard_matrix import _task_input_paths
 

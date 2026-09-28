@@ -82,7 +82,7 @@
     },
     "matrix_runner": {
       "path": "scripts/run_leaderboard_matrix.py",
-      "sha256": "sha256:c367386ebae18034bdab24de981e86fa8224259d40e65759c260d5dd2ae89106"
+      "sha256": "sha256:ab5ee07371241dab572a6e81d7e00579da37190466640077144cd07a11bfc3b8"
     },
     "model_roster_schema": {
       "path": "schemas/model-roster.schema.json",
