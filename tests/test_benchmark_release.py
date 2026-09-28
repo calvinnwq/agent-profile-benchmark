@@ -1207,12 +1207,13 @@ class BenchmarkReleaseTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-        self.assertEqual(result.returncode, 0)
+        # The module-level side effect is never run, and the static check rejects code it cannot verify.
+        self.assertNotEqual(result.returncode, 0)
         self.assertFalse(marker.exists())
         evaluation = json.loads(result.stdout)
-        self.assertEqual(evaluation["status"], "passed")
+        self.assertEqual(evaluation["status"], "failed")
         checks = {item["id"]: item for item in evaluation["automatic_checks"]}
-        self.assertEqual(checks["hidden-behavioral-tests"]["status"], "pass")
+        self.assertEqual(checks["hidden-behavioral-tests"]["status"], "fail")
 
     def test_malformed_numeric_and_deep_json_output_is_visible_failed_evidence(self) -> None:
         package = ROOT / "fixtures" / "tank-01"

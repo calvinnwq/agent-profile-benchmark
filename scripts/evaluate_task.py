@@ -1056,77 +1056,237 @@ def _python_auth_static(candidate: Any) -> tuple[str, list[str]]:
         tree = ast.parse(implementation)
     except SyntaxError as exc:
         return "fail", [f"static authentication syntax check failed at line {exc.lineno}"]
+    except Exception as exc:  # e.g. ValueError for NUL bytes; never let model text crash the evaluator
+        return "fail", [f"static authentication parse failed ({type(exc).__name__})"]
+    try:
+        return _check_auth_module(tree)
+    except RecursionError:
+        return "fail", ["static authentication check could not analyse deeply nested code"]
 
-    verify = next(
-        (
-            node
-            for node in ast.walk(tree)
-            if isinstance(node, ast.FunctionDef) and node.name == "verify"
-        ),
-        None,
-    )
-    if verify is None:
-        return "fail", ["static authentication check could not find verify function"]
-    parameter_names = [item.arg for item in (*verify.args.posonlyargs, *verify.args.args)]
-    if "token" not in parameter_names or "expected" not in parameter_names:
-        return "fail", ["verify must accept token and expected parameters"]
-    imports_hmac = any(
-        isinstance(node, ast.Import) and any(alias.name == "hmac" for alias in node.names)
-        for node in ast.walk(tree)
-    )
-    if not imports_hmac:
-        return "fail", ["static authentication check requires import hmac"]
 
-    uses_compare_digest = any(
+_AUTH_PARAMETERS = frozenset({"token", "expected"})
+# Names the verifier's meaning depends on; auth.py may bind them only through the accepted imports.
+_AUTH_RESERVED_NAMES = frozenset({"verify", "hmac", "compare_digest", "isinstance", "type", "str"})
+_UTF8_ENCODINGS = frozenset({"utf-8", "utf8", "utf_8"})
+_AUTH_PASS = ("pass", ["static AST authentication checks passed without executing model code"])
+_AUTH_UNGUARDED = ("fail", ["verify must reject non-string token and expected values before comparison"])
+_AUTH_NO_COMPARE = ("fail", ["verify must return the constant-time comparison of token and expected"])
+
+
+def _is_return_false(statement: ast.stmt) -> bool:
+    return (
+        isinstance(statement, ast.Return)
+        and isinstance(statement.value, ast.Constant)
+        and statement.value.value is False
+    )
+
+
+def _is_docstring(statement: ast.stmt) -> bool:
+    return isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Constant) and isinstance(
+        statement.value.value, str
+    )
+
+
+def _is_literal(node: ast.AST) -> bool:
+    try:
+        ast.literal_eval(node)
+    except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
+        return False
+    return True
+
+
+def _is_plain_annotation(node: ast.AST | None) -> bool:
+    allowed = (ast.Name, ast.Attribute, ast.Constant, ast.Subscript, ast.Tuple, ast.BinOp, ast.BitOr, ast.Load)
+    return node is None or all(isinstance(item, allowed) for item in ast.walk(node))
+
+
+_AUTH_TYPE_CASES = frozenset(
+    (token_is_str, expected_is_str) for token_is_str in (True, False) for expected_is_str in (True, False)
+)
+_AUTH_BOTH_STRINGS = (True, True)
+
+
+def _string_test_cases(test: ast.expr) -> frozenset[tuple[bool, bool]] | None:
+    """Return the (token is str, expected is str) cases where a type test is true.
+
+    Only side-effect-free tests built from isinstance(x, str) or type(x) is/is not/==/!= str
+    over token and expected, combined with not/and/or, are recognised; anything else is None.
+    """
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        inner = _string_test_cases(test.operand)
+        return None if inner is None else _AUTH_TYPE_CASES - inner
+    if isinstance(test, ast.BoolOp):
+        parts = [_string_test_cases(value) for value in test.values]
+        if any(part is None for part in parts):
+            return None
+        if isinstance(test.op, ast.And):
+            return frozenset.intersection(*parts)  # type: ignore[arg-type]
+        return frozenset().union(*parts)  # type: ignore[arg-type]
+    name: str | None = None
+    positive = True
+    if (  # isinstance(name, str)
+        isinstance(test, ast.Call)
+        and isinstance(test.func, ast.Name)
+        and test.func.id == "isinstance"
+        and not test.keywords
+        and len(test.args) == 2
+        and isinstance(test.args[0], ast.Name)
+        and isinstance(test.args[1], ast.Name)
+        and test.args[1].id == "str"
+    ):
+        name = test.args[0].id
+    elif (  # type(name) is str / is not str / == str / != str
+        isinstance(test, ast.Compare)
+        and len(test.ops) == 1
+        and isinstance(test.ops[0], (ast.Is, ast.Eq, ast.IsNot, ast.NotEq))
+        and isinstance(test.left, ast.Call)
+        and isinstance(test.left.func, ast.Name)
+        and test.left.func.id == "type"
+        and not test.left.keywords
+        and len(test.left.args) == 1
+        and isinstance(test.left.args[0], ast.Name)
+        and isinstance(test.comparators[0], ast.Name)
+        and test.comparators[0].id == "str"
+    ):
+        name = test.left.args[0].id
+        positive = isinstance(test.ops[0], (ast.Is, ast.Eq))
+    if name not in _AUTH_PARAMETERS:
+        return None
+    index = 0 if name == "token" else 1
+    return frozenset(case for case in _AUTH_TYPE_CASES if case[index] == positive)
+
+
+def _compare_argument(node: ast.expr) -> tuple[str, bool] | None:
+    """Return (parameter, encoded) for `name` or `name.encode(<utf-8>)`."""
+    if isinstance(node, ast.Name) and node.id in _AUTH_PARAMETERS:
+        return node.id, False
+    if not (
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "encode"
         and isinstance(node.func.value, ast.Name)
-        and node.func.value.id == "hmac"
-        and node.func.attr == "compare_digest"
-        and len(node.args) == 2
-        and isinstance(node.args[0], ast.Name)
-        and isinstance(node.args[1], ast.Name)
-        and node.args[0].id == "token"
-        and node.args[1].id == "expected"
-        for node in ast.walk(verify)
-    )
-    if not uses_compare_digest:
-        return "fail", ["verify must call hmac.compare_digest(token, expected)"]
+        and node.func.value.id in _AUTH_PARAMETERS
+    ):
+        return None
+    values = [*node.args, *(keyword.value for keyword in node.keywords)]
+    if len(values) > 1 or any(keyword.arg != "encoding" for keyword in node.keywords):
+        return None
+    if values and not (
+        isinstance(values[0], ast.Constant)
+        and isinstance(values[0].value, str)
+        and values[0].value.lower() in _UTF8_ENCODINGS
+    ):
+        return None
+    return node.func.value.id, True
 
-    def negated_string_guard(test: ast.AST, parameter: str) -> bool:
-        return any(
-            isinstance(node, ast.UnaryOp)
-            and isinstance(node.op, ast.Not)
-            and isinstance(node.operand, ast.Call)
-            and isinstance(node.operand.func, ast.Name)
-            and node.operand.func.id == "isinstance"
-            and len(node.operand.args) == 2
-            and isinstance(node.operand.args[0], ast.Name)
-            and node.operand.args[0].id == parameter
-            and isinstance(node.operand.args[1], ast.Name)
-            and node.operand.args[1].id == "str"
-            for node in ast.walk(test)
-        )
 
-    def returns_false(statements: list[ast.stmt]) -> bool:
-        return any(
-            isinstance(node, ast.Return)
-            and isinstance(node.value, ast.Constant)
-            and node.value.value is False
-            for statement in statements
-            for node in ast.walk(statement)
-        )
+def _is_compare_digest(node: ast.expr | None, compare_names: set[str]) -> bool:
+    # compare_digest is positional-only, so any keyword argument would raise TypeError.
+    if not isinstance(node, ast.Call) or node.keywords or len(node.args) != 2:
+        return False
+    func = node.func
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name) and func.value.id == "hmac":
+        name = "hmac.compare_digest" if func.attr == "compare_digest" else None
+    else:
+        name = func.id if isinstance(func, ast.Name) else None
+    if name not in compare_names:
+        return False
+    arguments = [_compare_argument(argument) for argument in node.args]
+    if any(argument is None for argument in arguments):
+        return False
+    parameters = {argument[0] for argument in arguments}  # type: ignore[index]
+    encodings = {argument[1] for argument in arguments}  # type: ignore[index]
+    return parameters == _AUTH_PARAMETERS and len(encodings) == 1
 
-    has_non_string_guard = any(
-        isinstance(node, ast.If)
-        and negated_string_guard(node.test, "token")
-        and negated_string_guard(node.test, "expected")
-        and returns_false(node.body)
-        for node in ast.walk(verify)
-    )
-    if not has_non_string_guard:
-        return "fail", ["verify must reject non-string token and expected values before comparison"]
-    return "pass", ["static AST authentication checks passed without executing model code"]
+
+def _check_auth_module(tree: ast.Module) -> tuple[str, list[str]]:
+    """Accept only a module whose single verify provably guards types, then returns compare_digest."""
+    compare_names: set[str] = set()
+    verify_defs: list[ast.FunctionDef] = []
+    for statement in tree.body:
+        if isinstance(statement, ast.FunctionDef) and statement.name == "verify":
+            verify_defs.append(statement)
+        elif isinstance(statement, (ast.Import, ast.ImportFrom)):
+            module = statement.module if isinstance(statement, ast.ImportFrom) else None
+            for alias in statement.names:
+                bound = alias.asname or alias.name.split(".")[0]
+                if module is None and alias.name == "hmac" and bound == "hmac":
+                    compare_names.add("hmac.compare_digest")
+                elif module == "hmac" and statement.level == 0 and alias.name == bound == "compare_digest":
+                    compare_names.add("compare_digest")
+                elif alias.name == "*" or bound in _AUTH_RESERVED_NAMES:
+                    return "fail", [f"auth.py must not rebind {bound!r}"]
+        elif _is_docstring(statement):
+            continue
+        elif (
+            isinstance(statement, (ast.Assign, ast.AnnAssign))
+            and statement.value is not None
+            and _is_literal(statement.value)
+            and all(
+                isinstance(target, ast.Name) and target.id not in _AUTH_RESERVED_NAMES
+                for target in (statement.targets if isinstance(statement, ast.Assign) else [statement.target])
+            )
+        ):
+            continue
+        else:
+            return "fail", [f"auth.py has a top-level {type(statement).__name__} the static check cannot verify"]
+    if len(verify_defs) != 1:
+        return "fail", [f"auth.py must define exactly one top-level verify function, found {len(verify_defs)}"]
+    if not compare_names:
+        return "fail", ["auth.py must import hmac.compare_digest"]
+
+    verify = verify_defs[0]
+    arguments = verify.args
+    parameters = [*arguments.posonlyargs, *arguments.args]
+    if (
+        sorted(item.arg for item in parameters) != sorted(_AUTH_PARAMETERS)
+        or arguments.vararg
+        or arguments.kwarg
+        or arguments.kwonlyargs
+        or arguments.defaults
+    ):
+        return "fail", ["verify must take exactly the parameters token and expected"]
+    if verify.decorator_list or getattr(verify, "type_params", None):
+        return "fail", ["verify must not be decorated or generic"]
+    if not all(_is_plain_annotation(node) for node in (verify.returns, *(item.annotation for item in parameters))):
+        return "fail", ["verify annotations must be plain type expressions"]
+
+    # Walk the straight-line body. Only type guards and the final return are allowed, so every
+    # statement is reachable and nothing can rebind the names the comparison depends on.
+    # `live` holds the (token is str, expected is str) cases that can still reach the next statement.
+    statements = list(verify.body)
+    live = _AUTH_TYPE_CASES
+    while statements:
+        statement = statements.pop(0)
+        if _is_docstring(statement) or isinstance(statement, ast.Pass):
+            continue
+        if isinstance(statement, ast.Return):
+            if not _is_compare_digest(statement.value, compare_names):
+                return _AUTH_NO_COMPARE
+            return _AUTH_PASS if live == {_AUTH_BOTH_STRINGS} else _AUTH_UNGUARDED
+        if not isinstance(statement, ast.If):
+            return "fail", [f"verify has a {type(statement).__name__} statement the static check cannot verify"]
+        true_cases = _string_test_cases(statement.test)
+        body = [item for item in statement.body if not (_is_docstring(item) or isinstance(item, ast.Pass))]
+        if true_cases is None or len(body) != 1:
+            return "fail", ["verify has a branch the static check cannot verify"]
+        taken = live & true_cases
+        statements = [*statement.orelse, *statements]
+        if _is_return_false(body[0]):  # if <some input is not a str>: return False
+            if _AUTH_BOTH_STRINGS in taken:
+                return "fail", ["verify must not reject string token and expected values"]
+            live -= taken
+            continue
+        if isinstance(body[0], ast.Return) and _is_compare_digest(body[0].value, compare_names):
+            # if <both inputs are str>: return compare_digest(...)  followed by  return False
+            if taken != {_AUTH_BOTH_STRINGS}:
+                return _AUTH_UNGUARDED
+            remaining = [item for item in statements if not (_is_docstring(item) or isinstance(item, ast.Pass))]
+            if not remaining or not _is_return_false(remaining[0]):
+                return "fail", ["verify must return False when the string check fails"]
+            return _AUTH_PASS
+        return "fail", ["verify has a branch the static check cannot verify"]
+    return _AUTH_NO_COMPARE
 
 
 def _python_auth(candidate: Any, *, allow_code_execution: bool) -> tuple[str, list[str]]:

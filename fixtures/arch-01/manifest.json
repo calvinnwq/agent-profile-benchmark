@@ -18,7 +18,7 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:bc34e22ecde2119e862e4e76178848f0fb9da1a560eeff898b5f5c7067c26c9a",
+    "sha256": "sha256:5250dc30c292c88f5c23f0250a46edc6f1711099c047291517747f94e8660c99",
     "version": "task-oracle-v3"
   },
   "fixture": {
