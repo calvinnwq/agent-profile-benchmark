@@ -88,16 +88,13 @@ def _safe_component(value: str) -> str:
     return component
 
 
-def _run_id(snapshot_id: str, model_id: str, task_id: str) -> str:
+def _run_id(snapshot_id: str, model_id: str, task_id: str, replicate_id: str | None = None) -> str:
     model_digest = hashlib.sha256(model_id.encode("utf-8")).hexdigest()[:10]
-    value = "-".join(
-        (
-            _safe_component(snapshot_id),
-            _safe_component(model_id),
-            model_digest,
-            _safe_component(task_id.lower()),
-        )
-    )
+    components = [_safe_component(snapshot_id)]
+    if replicate_id is not None:
+        components.append(_safe_component(replicate_id))
+    components.extend((_safe_component(model_id), model_digest, _safe_component(task_id.lower())))
+    value = "-".join(components)
     return value if value[0].isalnum() else f"run-{value}"
 
 
@@ -185,9 +182,12 @@ def build_matrix_plan(
     output_root: Path,
     *,
     task_inputs: dict[str, dict[str, str]] | None = None,
+    replicate_id: str | None = None,
 ) -> list[dict[str, str]]:
     """Return eligible model/task cells in stable roster-then-ledger order."""
     snapshot_id = _required_string(snapshot_id, "snapshot_id")
+    if replicate_id is not None:
+        replicate_id = _required_string(replicate_id, "replicate_id")
     _required_string(roster.get("provider"), "roster.provider")
     tasks = _ordered_tasks(ledger)
     task_inputs = task_inputs or {}
@@ -218,7 +218,7 @@ def build_matrix_plan(
                 "fixture_path": fixture_path,
                 "prompt_path": prompt_path,
                 "output_root": output_root.as_posix(),
-                "run_id": _run_id(snapshot_id, model["model_id"], task["id"]),
+                "run_id": _run_id(snapshot_id, model["model_id"], task["id"], replicate_id),
             }
             if cell["run_id"] in seen_run_ids:
                 raise MatrixInputError(f"matrix plan generated a duplicate run ID {cell['run_id']!r}")
@@ -358,6 +358,7 @@ def run_matrix(
     reasoning: str = "medium",
     timeout_seconds: int = 600,
     dry_run: bool = False,
+    replicate_id: str | None = None,
 ) -> dict[str, Any]:
     """Run all eligible cells sequentially and emit a self-contained input manifest."""
     if timeout_seconds <= 0:
@@ -388,6 +389,7 @@ def run_matrix(
         snapshot_id,
         Path(relative_output_root),
         task_inputs=task_inputs,
+        replicate_id=replicate_id,
     )
     if dry_run:
         return {
@@ -473,6 +475,7 @@ def run_matrix(
             "snapshot_id": snapshot_id,
             "reasoning": reasoning,
             "timeout_seconds": timeout_seconds,
+            "replicate_id": replicate_id,
             "planned_cells": len(plan),
             "completed_cells": len(completed_cells),
             "failed_launches": summary["failed_launches"],
@@ -492,6 +495,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--snapshot-id", required=True)
     parser.add_argument("--reasoning", default="medium")
     parser.add_argument("--timeout-seconds", type=int, default=600)
+    parser.add_argument("--replicate-id", help="stable label included in every run ID for repeated matrices")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -503,6 +507,7 @@ def main(argv: list[str] | None = None) -> int:
             reasoning=args.reasoning,
             timeout_seconds=args.timeout_seconds,
             dry_run=args.dry_run,
+            replicate_id=args.replicate_id,
         )
     except (MatrixInputError, OSError, ValueError) as exc:
         print(f"model matrix failed: {exc}", file=sys.stderr)
