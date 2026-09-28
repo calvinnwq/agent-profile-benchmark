@@ -6,5 +6,9 @@ Use only the supplied synthetic packet; do not browse or perform external action
 Preserve uncertainty, cite supplied evidence IDs where relevant, and do not invent facts or confirmations.
 Follow the task-specific requirements in the packet and keep the output concise but complete.
 
+Nested contract:
+- Each page_sections item is an object with id and purpose.
+- Each claims_register item is an object with claim_id, claim, and evidence_id.
+
 Use these required page section IDs: hero, how-it-works, proof, and cta.
 Use these claim IDs where applicable: consolidates-supplied-sources and daily-review.

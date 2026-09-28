@@ -8,3 +8,4 @@ Follow the task-specific requirements in the packet and keep the output concise 
 
 Canonical finding IDs are nav-contrast, submit-focus, and table-overflow.
 Use those IDs consistently in findings, locations, severity, user_impact, and recommended_fixes.
+Each findings item has id and summary; locations, severity, and user_impact are objects keyed by those finding IDs; each recommended_fixes item has id and fix.

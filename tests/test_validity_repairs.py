@@ -1,4 +1,4 @@
-"""Regression tests for the v0.4.0 benchmark validity repair."""
+"""Regression tests for the v0.4.1 benchmark validity repair."""
 
 from __future__ import annotations
 
@@ -282,8 +282,8 @@ class ContractDisclosureTests(unittest.TestCase):
         ledger = _json("data/task-ledger.json")
         schema = _json("schemas/task-contract.schema.json")
 
-        self.assertEqual(ledger["benchmark_version"], "0.4.0")
-        self.assertEqual(schema["properties"]["benchmark_version"]["const"], "0.4.0")
+        self.assertEqual(ledger["benchmark_version"], "0.4.1")
+        self.assertEqual(schema["properties"]["benchmark_version"]["const"], "0.4.1")
 
     def test_historical_manifest_declares_reproducibility_without_false_provenance(self) -> None:
         manifest = _json("data/historical-v03-snapshot-manifest.json")

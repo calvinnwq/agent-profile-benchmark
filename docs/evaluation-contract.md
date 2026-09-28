@@ -60,7 +60,7 @@ Reviewers should not reward a response for matching the historical solution when
 
 `benchmark-ready` means the prompt, fixture, evaluator oracle, and known-good and known-bad controls have passed validation.
 
-For benchmark version `0.4.0`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
+For benchmark version `0.4.1`, the checked-in ledger is `benchmark-ready` only after the release gate validates every task package.
 `python3 scripts/validate_benchmark.py` validates the frozen ledger contract, while `python3 scripts/validate_benchmark_ready.py` validates artifact bindings and both controls for all 18 tasks.
 
 No result should be used for model routing while a task remains `contract-draft`.
@@ -129,8 +129,8 @@ It preserves the exact composed input, stdout, stderr, usage report, process sta
 A custom `--agent-command` is supported for test doubles and diagnostics, but its tool, memory, and fallback isolation is unverified, so the runner records the cell as `blocked` rather than scoreable evidence.
 Malformed model output, non-zero exits, and timeouts remain visible as failed evidence.
 Missing or contradictory model/provider resolution remains visible as blocked evidence.
-Model-authored Python in `ARCH-01` is not executed without an OS sandbox, so that cell is blocked until a sandboxed evaluator is available.
-Direct `scripts/evaluate_task.py` calls also treat candidate output as untrusted by default and do not execute `ARCH-01` code.
+Model-authored Python in `ARCH-01` is never executed for model output; the evaluator uses static AST checks for the declared verifier behavior.
+Trusted controls retain the isolated subprocess probe, while direct `scripts/evaluate_task.py` calls treat candidate output as untrusted by default.
 The `--trusted-control` flag is reserved for exact release-locked controls after integrity validation; never use it for model output.
 The runner verifies the sealed release-artifact lock before launching a model process.
 
@@ -150,7 +150,7 @@ The command does not publish scores or create a model matrix.
 
 ## Re-runnable leaderboard workflow
 
-`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.4.0`.
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.4.1`.
 It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
 
 Roster snapshots must conform to `schemas/model-roster.schema.json`.

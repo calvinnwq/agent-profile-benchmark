@@ -8,3 +8,4 @@ Follow the task-specific requirements in the packet and keep the output concise 
 
 The state_matrix uses the supplied state IDs loading, ready, empty, stale, and error.
 read_only_boundary has mutations set to none; refresh and filter are read-only interactions.
+Each state_matrix item has id and view; read_only_boundary is an object with mutations and note.

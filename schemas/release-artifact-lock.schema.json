@@ -8,7 +8,7 @@
   "properties": {
     "$schema": {"type": "string"},
     "benchmark_id": {"const": "agent-profile-benchmark"},
-    "benchmark_version": {"const": "0.4.0"},
+    "benchmark_version": {"const": "0.4.1"},
     "lock_version": {"const": "1"},
     "shared": {
       "type": "object",

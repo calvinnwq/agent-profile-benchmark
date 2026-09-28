@@ -37,7 +37,7 @@ class DiagnosticMatrixTests(unittest.TestCase):
         manifest = {
             "schema_version": "diagnostic-manifest-v1",
             "benchmark_id": "agent-profile-benchmark",
-            "benchmark_version": "0.4.0",
+            "benchmark_version": "0.4.1",
             "diagnostic_id": "validity-diagnostic-2026-09-07",
             "purpose": "validity-diagnostic",
             "decision_surfaces": ["ranking", "promotion", "suitability", "routing"],
@@ -116,7 +116,7 @@ class DiagnosticMatrixTests(unittest.TestCase):
             {
                 "schema_version": "model-roster-v1",
                 "benchmark_id": "agent-profile-benchmark",
-                "benchmark_version": "0.4.0",
+                "benchmark_version": "0.4.1",
                 "snapshot_id": "test-roster",
                 "provider": "provider-a",
                 "captured_at": "2026-09-28T00:00:00Z",
@@ -168,7 +168,7 @@ class DiagnosticMatrixTests(unittest.TestCase):
             {
                 "schema_version": "model-roster-v1",
                 "benchmark_id": "agent-profile-benchmark",
-                "benchmark_version": "0.4.0",
+                "benchmark_version": "0.4.1",
                 "snapshot_id": "test-roster",
                 "provider": "provider-a",
                 "captured_at": "2026-09-28T00:00:00Z",

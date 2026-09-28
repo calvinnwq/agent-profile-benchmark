@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.4.0",
+  "benchmark_version": "0.4.1",
   "controls": [
     {
       "condition": "known-good-control",
@@ -45,7 +45,7 @@
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
+    "sha256": "sha256:2fed9f04fdf6706af521385465c8e2882554f2760373b08a3fde35baa529a221"
   },
   "slice_status": "benchmark-ready",
   "status": "benchmark-ready",

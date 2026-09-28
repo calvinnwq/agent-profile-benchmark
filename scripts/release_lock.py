@@ -12,7 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "data" / "release-artifact-lock.json"
-EXPECTED_RELEASE_LOCK_FINGERPRINT = "79f0e1224d85c43735e4ca2ac0baca7535814cde3774eca58dc0343e7e240339"
+EXPECTED_RELEASE_LOCK_FINGERPRINT = "339138b35a69492d13b9410c19d7ccfe8b0f2846ef9308226a288adfe4c9d789"
 LOCK_VERSION = "1"
 TASK_ARTIFACT_KEYS = (
     "manifest",
@@ -167,7 +167,7 @@ def load_release_lock() -> dict[str, Any]:
         raise ReleaseLockError("release lock schema pointer is invalid")
     if lock.get("benchmark_id") != "agent-profile-benchmark":
         raise ReleaseLockError("release lock benchmark identity is invalid")
-    if lock.get("benchmark_version") != "0.4.0":
+    if lock.get("benchmark_version") != "0.4.1":
         raise ReleaseLockError("release lock benchmark version is invalid")
     if lock.get("lock_version") != LOCK_VERSION:
         raise ReleaseLockError("release lock version is invalid")
@@ -239,10 +239,10 @@ def verify_task_release_artifacts(task_id: str, harness: str) -> dict[str, str]:
     manifest = _load_json(ROOT / expected_paths["manifest"])
     if not isinstance(manifest, dict):
         raise ReleaseLockError(f"release lock task {task_id!r} manifest must be an object")
-    if manifest.get("task_id") != task_id or manifest.get("benchmark_version") != "0.4.0":
+    if manifest.get("task_id") != task_id or manifest.get("benchmark_version") != "0.4.1":
         raise ReleaseLockError(f"release lock task {task_id!r} manifest identity is invalid")
     evaluator = manifest.get("evaluator")
-    expected_evaluator_version = "kody-01-oracle-v2" if task_id == "KODY-01" else "task-oracle-v2"
+    expected_evaluator_version = "kody-01-oracle-v2" if task_id == "KODY-01" else "task-oracle-v3"
     if not isinstance(evaluator, dict) or evaluator.get("version") != expected_evaluator_version:
         raise ReleaseLockError(f"release lock task {task_id!r} evaluator version is not sealed")
     if evaluator.get("path") != expected_manifest_paths(task_id)["evaluator"]:

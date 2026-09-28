@@ -8,3 +8,4 @@ Follow the task-specific requirements in the packet and keep the output concise 
 
 Task identifiers are day-1, day-2, day-3; transfer-1 and transfer-2; safety gates weather, water, and turnaround; and evidence IDs route-window, shuttle-timetable, and park-rules.
 Each transfer_plan item includes a non-negative numeric buffer_hours; required bookings are plans, not confirmations, so do not claim booked, confirmed, or paid status without supplied evidence.
+Each day_plan item has day_id and plan; each transfer_plan item has transfer_id, buffer_hours, and status; each required_bookings item has id and status; each safety_gates item has id and condition.

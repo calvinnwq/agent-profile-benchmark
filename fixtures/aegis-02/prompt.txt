@@ -8,4 +8,11 @@ Follow the task-specific requirements in the packet and keep the output concise 
 
 Nested contract:
 - calculations is an object with numeric steady_base_value, steady_stress_value, growth_base_value, and growth_stress_value keys.
-- scenario_table includes scenario_id values base, stress, and recovery, with steady_value and growth_value for each row; recovery values may be qualitative.
+- scenario_table: an array of exactly 3 objects with scenario_id, steady_value, and growth_value. The scenario_id values must be base, stress, and recovery; recovery values may be qualitative.
+- liquidity_comparison: a non-empty string.
+- risk_comparison: a non-empty string.
+- recommendation: a non-empty string.
+- assumptions: an array with at least one item.
+
+Use this shape, with task-derived values, not a dictionary keyed by scenario ID: {"scenario_table":[{"scenario_id":"base","steady_value":0,"growth_value":0}],"calculations":{"steady_base_value":0,"steady_stress_value":0,"growth_base_value":0,"growth_stress_value":0},"liquidity_comparison":"...","risk_comparison":"...","recommendation":"...","assumptions":["..."]}
+Do not add other top-level fields or change any field from the required type.

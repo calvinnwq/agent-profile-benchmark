@@ -40,7 +40,7 @@ def _run_record(model_id: str, task_id: str, passed: bool, sequence: int) -> dic
     return {
         "run_id": f"{safe_model_id}-{task_id}-{sequence}",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "release_lock_fingerprint": FINGERPRINT,
         "ledger_fingerprint": FINGERPRINT,
         "task_id": task_id,
@@ -89,7 +89,7 @@ def _run_record(model_id: str, task_id: str, passed: bool, sequence: int) -> dic
 def _base_ledger() -> dict[str, Any]:
     return {
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "profiles": [
             {"id": "alpha", "task_ids": ["ALPHA-01", "ALPHA-02"]},
             {"id": "beta", "task_ids": ["BETA-01", "BETA-02", "BETA-03", "BETA-04"]},
@@ -111,7 +111,7 @@ def _base_policy() -> dict[str, Any]:
         "policy_id": "leaderboard-v1",
         "policy_version": "1.0.0",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "scope": "benchmark-specific model leaderboard and routing aid",
         "status": "active",
         "coverage": {
@@ -139,7 +139,7 @@ def _base_roster(model_ids: tuple[str, ...] = ("model-a:free", "model-b:free")) 
     return {
         "schema_version": "model-roster-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "snapshot_id": "synthetic-roster-1",
         "provider": "nous",
         "captured_at": "2026-01-01T00:00:00Z",
@@ -171,7 +171,7 @@ def _build_synthetic_input(
     input_manifest = {
         "schema_version": "leaderboard-input-v1",
         "benchmark_id": "agent-profile-benchmark",
-        "benchmark_version": "0.4.0",
+        "benchmark_version": "0.4.1",
         "snapshot_id": "synthetic-input-1",
         "roster_path": "roster.json",
         "runs": [],
@@ -405,7 +405,7 @@ class LeaderboardTests(unittest.TestCase):
             _write_json(record_path, record)
             manifest = {
                 "benchmark_id": "agent-profile-benchmark",
-                "benchmark_version": "0.4.0",
+                "benchmark_version": "0.4.1",
                 "runs": [{"run_id": record["run_id"], "record_path": "record.json"}],
             }
 

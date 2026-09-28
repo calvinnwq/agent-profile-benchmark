@@ -1,7 +1,7 @@
 {
   "allowed_tools": [],
   "benchmark_ready": true,
-  "benchmark_version": "0.4.0",
+  "benchmark_version": "0.4.1",
   "controls": [
     {
       "condition": "known-good-control",
@@ -18,8 +18,8 @@
   ],
   "evaluator": {
     "path": "../../scripts/evaluate_task.py",
-    "sha256": "sha256:6d9704a64aaa74146602e3bbfa87b9b83503728d639c6d080c5f2bb154596f8e",
-    "version": "task-oracle-v2"
+    "sha256": "sha256:5250dc30c292c88f5c23f0250a46edc6f1711099c047291517747f94e8660c99",
+    "version": "task-oracle-v3"
   },
   "fixture": {
     "id": "seraph-html-critique-v1",
@@ -39,13 +39,13 @@
   "profile_id": "seraph",
   "prompt": {
     "path": "prompt.txt",
-    "sha256": "sha256:be8a683040d81118272f4e9bd0823a6df7476cd684dabc330fb07eb7df8df173",
+    "sha256": "sha256:8f54189dc4473822f768d245289cdfdbb5a985f7ac29536ce4bed7e88e0dc0d4",
     "status": "frozen"
   },
   "release_gate": "../../scripts/validate_benchmark_ready.py",
   "run_record_schema": {
     "path": "../../schemas/task-run-record.schema.json",
-    "sha256": "sha256:50e5d5c341b3d7ddbab72d97404261166432800ce5ab1451618ceccd1fc1a1ce"
+    "sha256": "sha256:2fed9f04fdf6706af521385465c8e2882554f2760373b08a3fde35baa529a221"
   },
   "status": "benchmark-ready",
   "task_id": "SERAPH-01"

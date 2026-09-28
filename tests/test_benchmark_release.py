@@ -31,7 +31,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
     def test_every_task_has_a_frozen_artifact_packet(self) -> None:
         self.assertEqual(self.ledger["status"], "benchmark-ready")
-        self.assertEqual(self.ledger["benchmark_version"], "0.4.0")
+        self.assertEqual(self.ledger["benchmark_version"], "0.4.1")
         for task in self.ledger["tasks"]:
             slug = task["id"].lower()
             with self.subTest(task=task["id"]):
@@ -65,7 +65,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
 
         self.assertEqual(hashlib.sha256(lock_path.read_bytes()).hexdigest(), EXPECTED_RELEASE_LOCK_FINGERPRINT)
         self.assertEqual(lock["benchmark_id"], "agent-profile-benchmark")
-        self.assertEqual(lock["benchmark_version"], "0.4.0")
+        self.assertEqual(lock["benchmark_version"], "0.4.1")
         self.assertEqual(len(lock["tasks"]), 18)
         self.assertIn("historical_snapshot_manifest", lock["shared"])
 
@@ -108,6 +108,29 @@ class BenchmarkReleaseTests(unittest.TestCase):
             malformed[path][0] = replacement
             with self.subTest(path=path):
                 self.assertTrue(validate_schema_instance(malformed, schema))
+
+    def test_task_prompts_expose_exact_nested_json_shapes_for_repeated_blocks(self) -> None:
+        expected_fragments = {
+            "aegis-02": (
+                "scenario_table: an array of exactly 3 objects with scenario_id, steady_value, and growth_value.",
+                "liquidity_comparison: a non-empty string.",
+                "risk_comparison: a non-empty string.",
+                "recommendation: a non-empty string.",
+                "assumptions: an array with at least one item.",
+            ),
+            "arch-02": (
+                "findings: an array of objects with id and summary.",
+                "severity: an object mapping each finding ID to low, medium, high, or critical.",
+                "evidence: an array of objects with finding_id and location.",
+                "remediation: an array of objects with finding_id and action.",
+                "review_summary: a non-empty string.",
+            ),
+        }
+        for task_slug, fragments in expected_fragments.items():
+            prompt = (ROOT / "fixtures" / task_slug / "prompt.txt").read_text(encoding="utf-8")
+            for fragment in fragments:
+                with self.subTest(task=task_slug, fragment=fragment):
+                    self.assertIn(fragment, prompt)
 
     def test_release_lock_rejects_repinned_prompt_in_disposable_copy(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -1151,7 +1174,7 @@ class BenchmarkReleaseTests(unittest.TestCase):
         self.assertEqual(evaluation["status"], "failed")
         self.assertIn("hidden-test-failure", {item["id"] for item in evaluation["hard_failures"]})
 
-    def test_evaluator_blocks_auth_code_without_explicit_trusted_control(self) -> None:
+    def test_evaluator_static_checks_auth_code_without_executing_model_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             temp_dir = Path(directory)
             marker = temp_dir / "auth-code-ran"
@@ -1160,8 +1183,11 @@ class BenchmarkReleaseTests(unittest.TestCase):
             candidate["implementation"]["auth.py"] = (
                 "from pathlib import Path\n"
                 f"Path({str(marker)!r}).write_text('ran', encoding='utf-8')\n"
+                "import hmac\n"
                 "def verify(token, expected):\n"
-                "    return False\n"
+                "    if not isinstance(token, str) or not isinstance(expected, str):\n"
+                "        return False\n"
+                "    return hmac.compare_digest(token, expected)\n"
             )
             candidate_path = temp_dir / "untrusted-auth.json"
             candidate_path.write_text(json.dumps(candidate), encoding="utf-8")
@@ -1181,12 +1207,13 @@ class BenchmarkReleaseTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
+        # The module-level side effect is never run, and the static check rejects code it cannot verify.
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(marker.exists())
         evaluation = json.loads(result.stdout)
-        self.assertEqual(evaluation["status"], "blocked")
+        self.assertEqual(evaluation["status"], "failed")
         checks = {item["id"]: item for item in evaluation["automatic_checks"]}
-        self.assertEqual(checks["hidden-behavioral-tests"]["status"], "blocked")
+        self.assertEqual(checks["hidden-behavioral-tests"]["status"], "fail")
 
     def test_malformed_numeric_and_deep_json_output_is_visible_failed_evidence(self) -> None:
         package = ROOT / "fixtures" / "tank-01"
