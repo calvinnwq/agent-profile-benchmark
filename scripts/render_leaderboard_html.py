@@ -435,6 +435,41 @@ footer p {
   font-size: .9rem;
 }
 
+.chart {
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.chart .axis { stroke: #8d988f; stroke-width: 1; }
+.chart .grid-line { stroke: #e3e7e0; stroke-width: 1; }
+.chart .tick { fill: #4f5d56; font-size: 12px; }
+.chart .axis-title { fill: var(--ink); font-size: 13px; font-weight: 700; }
+.chart .frontier { fill: none; stroke: #b36f1c; stroke-width: 2.5; stroke-dasharray: 7 4; }
+.chart .leader { stroke: #aab3ad; stroke-width: 1; }
+.chart .point-label { fill: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
+.chart .point-label.unranked { fill: var(--red); }
+.chart .point.confirmed { fill: var(--accent-deep); stroke: var(--accent-deep); stroke-width: 1.5; }
+.chart .point.provisional { fill: var(--paper); stroke: var(--accent); stroke-width: 2.5; }
+.chart .point.unranked { fill: var(--red-soft); stroke: var(--red); stroke-width: 2; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+.chart .chart-legend svg { display: inline-block; width: 18px; height: 18px; vertical-align: -4px; }
+
 @media (max-width: 880px) {
   .hero-grid,
   .grid,
@@ -670,6 +705,384 @@ def _profile_card(profile_id: str, view: dict[str, Any]) -> str:
 </div>"""
 
 
+CHART_CAPTION = "scoped to this frozen suite, not a general ranking"
+CHART_STATUSES = ("confirmed", "provisional", "unranked")
+CHART_WIDTH = 960
+CHART_HEIGHT = 440
+CHART_MARGIN = {"left": 70, "right": 24, "top": 20, "bottom": 56}
+LABEL_CHAR_WIDTH = 6.6
+LABEL_HEIGHT = 13
+LABEL_SUFFIX = ":free"
+LABEL_OFFSETS = tuple(
+    (dx, dy)
+    for dy in (0, -16, 16, -32, 32, -48, 48, -64, 64)
+    for dx in (12, -12, 40, -40)
+)
+
+
+def _round(value: float) -> float:
+    return round(value + 0.0, 2)
+
+
+def _fmt(value: float) -> str:
+    text = f"{_round(value):.2f}".rstrip("0").rstrip(".")
+    return "0" if text in {"-0", ""} else text
+
+
+def chart_points(
+    leaderboard: dict[str, Any],
+    x_metric: str,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Return plottable eligible-model points for one x metric, plus omitted model IDs.
+
+    ``x_metric`` is ``median_latency_ms`` (from overall metrics) or
+    ``mean_output_tokens`` (from the model usage summary). Excluded models are
+    never returned. Points without a positive x value or a pass rate are omitted
+    because they cannot be placed on a log axis.
+    """
+    overall = _required_mapping(leaderboard.get("overall"), "leaderboard.overall")
+    usage_by_model: dict[str, Any] = {}
+    for model in _list(leaderboard.get("models", []), "leaderboard.models"):
+        if isinstance(model.get("model_id"), str):
+            usage_by_model[model["model_id"]] = model.get("usage")
+    points: list[dict[str, Any]] = []
+    omitted: list[str] = []
+    for key in ("ranked", "unranked"):
+        for row in _list(overall.get(key, []), f"leaderboard.overall.{key}"):
+            status = row.get("status")
+            model_id = row.get("model_id")
+            if status not in CHART_STATUSES or not isinstance(model_id, str):
+                continue
+            y = _metric(row, "full_contract_pass_rate")
+            if x_metric == "median_latency_ms":
+                x = _metric(row, "median_latency_ms")
+            else:
+                usage = usage_by_model.get(model_id)
+                x = usage.get(x_metric) if isinstance(usage, dict) else None
+            if not _finite_number(x) or float(x) <= 0 or not _finite_number(y):
+                omitted.append(model_id)
+                continue
+            points.append({"model_id": model_id, "status": status, "x": float(x), "y": float(y)})
+    points.sort(key=lambda item: (item["x"], -item["y"], item["model_id"]))
+    return points, sorted(omitted)
+
+
+def pareto_frontier(points: list[dict[str, Any]]) -> list[str]:
+    """Return model IDs on the efficiency frontier, ordered by increasing x.
+
+    A point is on the frontier when no other ranked point has an x value at or
+    below it with a strictly higher pass rate. Only ranked (provisional or
+    confirmed) points are eligible: an unranked model's pass rate covers an
+    incomplete task set and is not comparable, so it is plotted but never
+    drawn as efficient.
+    """
+    frontier: list[str] = []
+    best_y = -math.inf
+    ranked = [point for point in points if point["status"] in {"confirmed", "provisional"}]
+    for point in sorted(ranked, key=lambda item: (item["x"], -item["y"], item["model_id"])):
+        if point["y"] > best_y:
+            frontier.append(point["model_id"])
+            best_y = point["y"]
+    return frontier
+
+
+def _nice_log_bounds(values: list[float]) -> tuple[float, float]:
+    """Return the nearest 1-2-5 steps at or outside the data range."""
+    def steps(value: float) -> list[float]:
+        decade = 10 ** math.floor(math.log10(value))
+        return [decade * multiple for multiple in (1, 2, 5, 10)]
+
+    low_value, high_value = min(values), max(values)
+    low = max(step for step in steps(low_value) if step <= low_value * 1.0000001)
+    high = min(step for step in steps(high_value) + [10 * steps(high_value)[-1]] if step >= high_value * 0.9999999)
+    if high <= low:
+        high = low * 2
+    return float(low), float(high)
+
+
+def _linear_bounds(values: list[float]) -> tuple[float, float]:
+    """Return a 0.1-aligned pass-rate range with room above and below the data."""
+    low = max(0.0, math.floor((min(values) - 0.05) * 10) / 10)
+    high = min(1.0, math.ceil((max(values) + 0.05) * 10) / 10)
+    if high <= low:
+        high = min(1.0, low + 0.1)
+        low = high - 0.1
+    return round(low, 1), round(high, 1)
+
+
+def _log_ticks(low: float, high: float) -> list[float]:
+    ticks: list[float] = []
+    decade = 10 ** math.floor(math.log10(low))
+    while decade <= high * 1.0000001:
+        for multiple in (1, 2, 5):
+            value = decade * multiple
+            if low * 0.9999999 <= value <= high * 1.0000001:
+                ticks.append(value)
+        decade *= 10
+    return ticks
+
+
+def _tick_label(value: float, unit: str) -> str:
+    if unit == "ms":
+        if value >= 1000:
+            return f"{value / 1000:g}s"
+        return f"{value:g}ms"
+    if value >= 1000:
+        return f"{value / 1000:g}k"
+    return f"{value:g}"
+
+
+def _value_label(value: float, unit: str) -> str:
+    if unit == "ms":
+        return _latency(value)
+    return f"{value:,.0f} tokens"
+
+
+def layout_chart(points: list[dict[str, Any]]) -> dict[str, Any]:
+    """Map points to deterministic SVG coordinates on a log-x, linear-y plane."""
+    plot_left = CHART_MARGIN["left"]
+    plot_right = CHART_WIDTH - CHART_MARGIN["right"]
+    plot_top = CHART_MARGIN["top"]
+    plot_bottom = CHART_HEIGHT - CHART_MARGIN["bottom"]
+    x_low, x_high = _nice_log_bounds([point["x"] for point in points])
+    y_low, y_high = _linear_bounds([point["y"] for point in points])
+    log_low, log_high = math.log10(x_low), math.log10(x_high)
+
+    def x_pos(value: float) -> float:
+        return _round(plot_left + (math.log10(value) - log_low) / (log_high - log_low) * (plot_right - plot_left))
+
+    def y_pos(value: float) -> float:
+        return _round(plot_bottom - (value - y_low) / (y_high - y_low) * (plot_bottom - plot_top))
+
+    step = 0.05 if y_high - y_low <= 0.3 else 0.1
+    y_ticks = []
+    tick = y_low
+    while tick <= y_high + 1e-9:
+        y_ticks.append((round(tick, 2), y_pos(tick)))
+        tick += step
+    ordered = sorted(points, key=lambda item: (item["x"], -item["y"], item["model_id"]))
+    placed = [dict(point, cx=x_pos(point["x"]), cy=y_pos(point["y"])) for point in ordered]
+    return {
+        "points": placed,
+        "x_domain": (x_low, x_high),
+        "y_domain": (y_low, y_high),
+        "x_ticks": [(value, x_pos(value)) for value in _log_ticks(x_low, x_high)],
+        "y_ticks": y_ticks,
+        "plot": (plot_left, plot_top, plot_right, plot_bottom),
+    }
+
+
+def _point_label(model_id: str) -> str:
+    return model_id[: -len(LABEL_SUFFIX)] if model_id.endswith(LABEL_SUFFIX) else model_id
+
+
+def _overlaps(box: tuple[float, float, float, float], other: tuple[float, float, float, float]) -> bool:
+    return not (box[2] <= other[0] or box[0] >= other[2] or box[3] <= other[1] or box[1] >= other[3])
+
+
+def _segment_boxes(path: list[tuple[float, float]]) -> list[tuple[float, float, float, float]]:
+    """Approximate a polyline with small boxes so labels can avoid it."""
+    boxes: list[tuple[float, float, float, float]] = []
+    for (x1, y1), (x2, y2) in zip(path, path[1:]):
+        steps = max(1, int(math.hypot(x2 - x1, y2 - y1) // 6))
+        for index in range(steps + 1):
+            x = x1 + (x2 - x1) * index / steps
+            y = y1 + (y2 - y1) * index / steps
+            boxes.append((x - 3, y - 3, x + 3, y + 3))
+    return boxes
+
+
+def _label_positions(
+    points: list[dict[str, Any]],
+    plot: tuple[float, float, float, float],
+    obstacles: list[tuple[float, float, float, float]] | None = None,
+) -> dict[str, tuple[float, float, str]]:
+    """Place each label in the first free slot of a fixed search order.
+
+    Slots avoid every marker, every earlier label, and the plot edges, so labels
+    are never clipped. Placement order is highest pass rate first, then x, then
+    model ID, which keeps the output deterministic.
+    """
+    left, top, right, bottom = plot
+    boxes = [(point["cx"] - 8, point["cy"] - 8, point["cx"] + 8, point["cy"] + 8) for point in points]
+    boxes.extend(obstacles or [])
+    positions: dict[str, tuple[float, float, str]] = {}
+    for point in sorted(points, key=lambda item: (-item["y"], item["x"], item["model_id"])):
+        width = len(_point_label(point["model_id"])) * LABEL_CHAR_WIDTH
+        fallback: tuple[float, float, str] | None = None
+        chosen: tuple[float, float, str] | None = None
+        for dx, dy in LABEL_OFFSETS:
+            anchor = "start" if dx > 0 else "end"
+            x = point["cx"] + dx
+            baseline = point["cy"] + dy + 4
+            x0 = x if anchor == "start" else x - width
+            box = (x0 - 2, baseline - LABEL_HEIGHT + 2, x0 + width + 2, baseline + 3)
+            if box[0] < left + 4 or box[2] > right - 8 or box[1] < top or box[3] > bottom - 2:
+                continue
+            if fallback is None:
+                fallback = (x, baseline, anchor)
+            if any(_overlaps(box, other) for other in boxes):
+                continue
+            chosen = (x, baseline, anchor)
+            boxes.append(box)
+            break
+        if chosen is None:
+            chosen = fallback or (point["cx"] + 12, point["cy"] + 4, "start")
+        positions[point["model_id"]] = (_round(chosen[0]), _round(chosen[1]), chosen[2])
+    return positions
+
+
+def _marker(status: str, cx: float, cy: float, title: str) -> str:
+    label = f"<title>{_esc(title)}</title>"
+    if status == "unranked":
+        points = f"{_fmt(cx)},{_fmt(cy - 7)} {_fmt(cx + 7)},{_fmt(cy)} {_fmt(cx)},{_fmt(cy + 7)} {_fmt(cx - 7)},{_fmt(cy)}"
+        return f'<polygon class="point unranked" data-status="unranked" points="{points}">{label}</polygon>'
+    radius = "6" if status == "confirmed" else "5.5"
+    return (
+        f'<circle class="point {status}" data-status="{status}" cx="{_fmt(cx)}" cy="{_fmt(cy)}" r="{radius}">'
+        f"{label}</circle>"
+    )
+
+
+def render_scatter_svg(
+    points: list[dict[str, Any]],
+    *,
+    chart_id: str,
+    x_title: str,
+    x_unit: str,
+) -> str:
+    """Return a deterministic inline SVG scatter with the Pareto frontier drawn."""
+    layout = layout_chart(points)
+    left, top, right, bottom = layout["plot"]
+    frontier_ids = pareto_frontier(points)
+    by_id = {point["model_id"]: point for point in layout["points"]}
+    frontier_path = [(by_id[m]["cx"], by_id[m]["cy"]) for m in frontier_ids]
+    labels = _label_positions(layout["points"], layout["plot"], _segment_boxes(frontier_path))
+    parts: list[str] = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {CHART_WIDTH} {CHART_HEIGHT}" '
+        f'role="img" aria-labelledby="{chart_id}-title" id="{chart_id}">',
+        f'<title id="{chart_id}-title">Full-contract pass rate against {_esc(x_title)}</title>',
+    ]
+    for value, y in layout["y_ticks"]:
+        parts.append(f'<line class="grid-line" x1="{left}" y1="{_fmt(y)}" x2="{right}" y2="{_fmt(y)}"/>')
+        parts.append(
+            f'<text class="tick" x="{left - 8}" y="{_fmt(y + 4)}" text-anchor="end">{value * 100:.0f}%</text>'
+        )
+    for value, x in layout["x_ticks"]:
+        parts.append(f'<line class="grid-line" x1="{_fmt(x)}" y1="{top}" x2="{_fmt(x)}" y2="{bottom}"/>')
+        parts.append(
+            f'<text class="tick" x="{_fmt(x)}" y="{bottom + 18}" text-anchor="middle">{_esc(_tick_label(value, x_unit))}</text>'
+        )
+    parts.append(f'<line class="axis" x1="{left}" y1="{bottom}" x2="{right}" y2="{bottom}"/>')
+    parts.append(f'<line class="axis" x1="{left}" y1="{top}" x2="{left}" y2="{bottom}"/>')
+    parts.append(
+        f'<text class="axis-title" x="{_fmt((left + right) / 2)}" y="{CHART_HEIGHT - 14}" text-anchor="middle">'
+        f"{_esc(x_title)} (log scale)</text>"
+    )
+    parts.append(
+        f'<text class="axis-title" x="18" y="{_fmt((top + bottom) / 2)}" text-anchor="middle" '
+        f'transform="rotate(-90 18 {_fmt((top + bottom) / 2)})">Full-contract pass rate</text>'
+    )
+    if frontier_ids:
+        coordinates = " ".join(f"{_fmt(by_id[m]['cx'])},{_fmt(by_id[m]['cy'])}" for m in frontier_ids)
+        parts.append(
+            f'<polyline class="frontier" data-frontier="{_esc(" ".join(frontier_ids))}" points="{coordinates}"/>'
+        )
+    for point in layout["points"]:
+        x, y, anchor = labels[point["model_id"]]
+        parts.append(
+            f'<line class="leader" x1="{_fmt(point["cx"])}" y1="{_fmt(point["cy"])}" '
+            f'x2="{_fmt(x)}" y2="{_fmt(y - 4)}"/>'
+        )
+    for point in layout["points"]:
+        title = (
+            f"{point['model_id']} ({point['status']}): {point['y'] * 100:.1f}% full contract, "
+            f"{_value_label(point['x'], x_unit)}"
+        )
+        frontier_attr = ' data-frontier="true"' if point["model_id"] in frontier_ids else ""
+        parts.append(
+            f'<g class="model-point" data-model="{_esc(point["model_id"])}" '
+            f'data-status="{point["status"]}"{frontier_attr}>'
+        )
+        parts.append(_marker(point["status"], point["cx"], point["cy"], title))
+        x, y, anchor = labels[point["model_id"]]
+        parts.append(
+            f'<text class="point-label {point["status"]}" x="{_fmt(x)}" y="{_fmt(y)}" text-anchor="{anchor}">'
+            f"{_esc(_point_label(point['model_id']))}</text>"
+        )
+        parts.append("</g>")
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def _chart_legend() -> str:
+    items = (
+        ('<circle class="point confirmed" cx="9" cy="9" r="6"/>', "confirmed"),
+        ('<circle class="point provisional" cx="9" cy="9" r="5.5"/>', "provisional (one sweep, not confirmed)"),
+        ('<polygon class="point unranked" points="9,2 16,9 9,16 2,9"/>', "unranked (incomplete coverage, never on the frontier)"),
+        ('<line class="frontier" x1="0" y1="9" x2="18" y2="9"/>', "efficiency frontier (ranked models)"),
+    )
+    return '<ul class="chart-legend">' + "".join(
+        f'<li><svg viewBox="0 0 18 18" aria-hidden="true">{shape}</svg> {_esc(text)}</li>'
+        for shape, text in items
+    ) + "</ul>"
+
+
+def _scatter_figure(
+    leaderboard: dict[str, Any],
+    *,
+    x_metric: str,
+    chart_id: str,
+    x_title: str,
+    x_unit: str,
+) -> str:
+    points, omitted = chart_points(leaderboard, x_metric)
+    if not points:
+        return ""
+    svg = render_scatter_svg(points, chart_id=chart_id, x_title=x_title, x_unit=x_unit)
+    notes = []
+    if any(point["model_id"].endswith(LABEL_SUFFIX) for point in points):
+        notes.append(f"Labels omit the {LABEL_SUFFIX} suffix.")
+    if omitted:
+        notes.append("Not plotted (no value): " + ", ".join(omitted) + ".")
+    note = (" " + " ".join(notes)) if notes else ""
+    return (
+        f'<figure class="chart">{svg}{_chart_legend()}<figcaption>Full-contract pass rate against '
+        f"{_esc(x_title)}, {_esc(CHART_CAPTION)}.{_esc(note)}</figcaption></figure>"
+    )
+
+
+def _validate_usage(models: list[dict[str, Any]]) -> None:
+    for index, model in enumerate(models):
+        if "usage" not in model:
+            continue
+        usage = _required_mapping(model["usage"], f"leaderboard.models[{index}].usage")
+        value = usage.get("mean_output_tokens")
+        if value is not None and (not _finite_number(value) or float(value) < 0):
+            raise RenderError(f"leaderboard.models[{index}].usage.mean_output_tokens must be a non-negative number or null")
+
+
+def render_charts(leaderboard: dict[str, Any]) -> str:
+    """Return the chart section body, or an empty string when nothing can be plotted."""
+    figures = [
+        _scatter_figure(
+            leaderboard,
+            x_metric="median_latency_ms",
+            chart_id="chart-latency",
+            x_title="median latency per task",
+            x_unit="ms",
+        ),
+        _scatter_figure(
+            leaderboard,
+            x_metric="mean_output_tokens",
+            chart_id="chart-output-tokens",
+            x_title="mean output tokens per task",
+            x_unit="tokens",
+        ),
+    ]
+    return "".join(figure for figure in figures if figure)
+
+
 def _policy_value(policy: dict[str, Any] | None, path: tuple[str, ...], default: Any) -> Any:
     value: Any = policy
     for key in path:
@@ -824,7 +1237,13 @@ def _validate_leaderboard_structure(
     if len(task_totals) != 1:
         raise RenderError("leaderboard.overall rows must declare one common tasks_total")
     declared_task_total = task_totals.pop()
-    expected_planned_cells = len(models) * declared_task_total
+    # Excluded roster models are planned-but-not-launched by design, so the
+    # planned scope covers eligible models only. A launch failure is an
+    # eligible model/task cell with no attempted run.
+    eligible_models = [
+        model for model in models if isinstance(model, dict) and model.get("availability") == "eligible"
+    ]
+    expected_planned_cells = len(eligible_models) * declared_task_total
     observed_cells = 0
     model_ids: set[str] = set()
     model_metadata: dict[str, tuple[str, str]] = {}
@@ -881,8 +1300,9 @@ def _validate_leaderboard_structure(
             if task_id in seen_task_ids:
                 raise RenderError(f"{cell_name}.task_id is duplicated")
             seen_task_ids.add(task_id)
-            observed_cells += 1
             attempted_count = _nonnegative_int(cell.get("attempted_runs"), f"{cell_name}.attempted_runs")
+            if availability == "eligible" and attempted_count > 0:
+                observed_cells += 1
             comparable_count = _nonnegative_int(cell.get("comparable_runs"), f"{cell_name}.comparable_runs")
             excluded_count = _nonnegative_int(cell.get("excluded_runs"), f"{cell_name}.excluded_runs")
             provider_count = _nonnegative_int(
@@ -1114,6 +1534,7 @@ def render_html(
         raise RenderError("leaderboard.scope is not supported")
 
     _validate_leaderboard_structure(data, policy)
+    _validate_usage(_list(data.get("models", []), "leaderboard.models"))
 
     aggregate = _required_mapping(data["aggregate"], "leaderboard.aggregate")
     overall = _required_mapping(data["overall"], "leaderboard.overall")
@@ -1209,6 +1630,18 @@ def render_html(
     if not profiles_html:
         profiles_html = '<div class="card"><p>No profile views were generated.</p></div>'
 
+    charts_html = render_charts(data)
+    chart_section = (
+        f"""<section id="efficiency">
+        <p class="eyebrow">Efficiency view</p>
+        <h2>Pass rate against time and output</h2>
+        <p>Each point is one eligible model. Excluded models are left off. The dashed line joins ranked models that no faster or leaner ranked model beats on full-contract pass rate. These charts are {_esc(CHART_CAPTION)}.</p>
+        {charts_html}
+      </section>
+"""
+        if charts_html
+        else ""
+    )
     reason = _required_text(publication.get("reason"), "publication.reason")
     scope = _required_text(data["scope"], "leaderboard.scope")
     source_roster = _required_text(input_info.get("roster_path"), "input.roster_path")
@@ -1267,6 +1700,7 @@ def render_html(
         </div>
       </section>
 
+      {chart_section}
       <section>
         <p class="eyebrow">Profile signal</p>
         <h2>Where each model looks strongest</h2>

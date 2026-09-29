@@ -54,7 +54,7 @@
     },
     "leaderboard_builder": {
       "path": "scripts/build_leaderboard.py",
-      "sha256": "sha256:cb700bb47ebda9c22b3b1e99a0db73722f62414a918a96905d2830ff8f85fe68"
+      "sha256": "sha256:415cccece357a93b86d5f322ae354b2ea2da3b32a6619c7b6775486447211cb3"
     },
     "leaderboard_input_schema": {
       "path": "schemas/leaderboard-input.schema.json",
@@ -74,7 +74,7 @@
     },
     "leaderboard_renderer": {
       "path": "scripts/render_leaderboard_html.py",
-      "sha256": "sha256:0f894adbde4d402100c57c84cf5d0f5e48085e954d10879be07e4f3dac8d6151"
+      "sha256": "sha256:a155d89470c89ef37ae01b82cdf27c37ce06f257fce01b1891eeabd42a85270e"
     },
     "ledger": {
       "path": "data/task-ledger.json",
