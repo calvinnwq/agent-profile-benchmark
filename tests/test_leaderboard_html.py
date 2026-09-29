@@ -5,6 +5,8 @@ from __future__ import annotations
 from copy import deepcopy
 
 import json
+import math
+import re
 import subprocess
 import sys
 import tempfile
@@ -12,7 +14,15 @@ import unittest
 from pathlib import Path
 from typing import Any
 
-from scripts.render_leaderboard_html import RenderError, render_html
+from scripts.render_leaderboard_html import (
+    CHART_CAPTION,
+    RenderError,
+    chart_points,
+    layout_chart,
+    pareto_frontier,
+    render_html,
+    render_scatter_svg,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -294,6 +304,25 @@ class LeaderboardHtmlTests(unittest.TestCase):
         self.assertIn("may inform routing recommendations for ranked candidates", rendered)
         self.assertNotIn("enabled for confirmed profiles", rendered)
 
+    def test_render_accepts_excluded_roster_models_without_launch_failures(self) -> None:
+        """Regression: excluded models must not count as planned cells or launch failures."""
+        data = _leaderboard()
+        excluded = _entry("gone:free", "excluded")
+        excluded["reason_codes"] = ["roster-excluded"]
+        excluded["coverage"].update(tasks_covered=0, task_coverage_rate=0.0)
+        data["models"].append(
+            {"model_id": "gone:free", "status": "excluded", "availability": "excluded", "task_cells": []}
+        )
+        data["overall"]["excluded"] = [excluded]
+        data["profiles"]["alpha"]["excluded"] = [deepcopy(excluded)]
+        rendered = render_html(data)
+        self.assertIn("gone:free", rendered)
+
+        data["aggregate"]["planned_cells"] = 6
+        data["aggregate"]["launch_failures"] = 5
+        with self.assertRaises(RenderError):
+            render_html(data)
+
     def test_cli_writes_a_complete_html_document(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -355,6 +384,146 @@ class LeaderboardHtmlTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertIn("contains a non-finite number", result.stderr)
             self.assertFalse(output_path.exists())
+
+
+def _chart_row(model_id: str, status: str, pass_rate: float, latency: float, rank: int | None = None) -> dict[str, Any]:
+    return {
+        "model_id": model_id,
+        "status": status,
+        **({"rank": rank} if rank is not None else {}),
+        "metrics": {"full_contract_pass_rate": pass_rate, "median_latency_ms": latency},
+    }
+
+
+def _chart_leaderboard() -> dict[str, Any]:
+    return {
+        "overall": {
+            "ranked": [
+                _chart_row("slow-best:free", "confirmed", 0.40, 100000, 1),
+                _chart_row("mid:free", "provisional", 0.30, 10000, 2),
+                _chart_row("dominated:free", "confirmed", 0.20, 20000, 3),
+                _chart_row("fast:free", "provisional", 0.10, 1000, 4),
+            ],
+            "unranked": [_chart_row("partial:free", "unranked", 0.90, 500)],
+            "excluded": [_chart_row("gone:free", "excluded", 0.95, 100)],
+        },
+        "models": [
+            {"model_id": "slow-best:free", "usage": {"mean_output_tokens": 4000.0}},
+            {"model_id": "mid:free", "usage": {"mean_output_tokens": 400.0}},
+            {"model_id": "dominated:free", "usage": {"mean_output_tokens": None}},
+            {"model_id": "fast:free", "usage": {"mean_output_tokens": 40.0}},
+            {"model_id": "partial:free", "usage": {"mean_output_tokens": 10.0}},
+            {"model_id": "gone:free", "usage": {"mean_output_tokens": 1.0}},
+        ],
+    }
+
+
+class LeaderboardChartTests(unittest.TestCase):
+    def test_points_exclude_excluded_models_and_omit_missing_values(self) -> None:
+        points, omitted = chart_points(_chart_leaderboard(), "median_latency_ms")
+        self.assertEqual(
+            [(point["model_id"], point["status"]) for point in points],
+            [
+                ("partial:free", "unranked"),
+                ("fast:free", "provisional"),
+                ("mid:free", "provisional"),
+                ("dominated:free", "confirmed"),
+                ("slow-best:free", "confirmed"),
+            ],
+        )
+        self.assertEqual(omitted, [])
+        token_points, token_omitted = chart_points(_chart_leaderboard(), "mean_output_tokens")
+        self.assertNotIn("gone:free", [point["model_id"] for point in token_points])
+        self.assertEqual(token_omitted, ["dominated:free"])
+
+    def test_point_placement_uses_log_x_and_linear_y(self) -> None:
+        points, _ = chart_points(_chart_leaderboard(), "median_latency_ms")
+        layout = layout_chart(points)
+        # Domains snap outward to 1-2-5 steps (x) and 0.1 steps (y).
+        self.assertEqual(layout["x_domain"], (500.0, 100000.0))
+        self.assertEqual(layout["y_domain"], (0.0, 1.0))
+        placed = {point["model_id"]: (point["cx"], point["cy"]) for point in layout["points"]}
+        left, top, right, bottom = layout["plot"]
+        span = math.log10(100000) - math.log10(500)
+
+        def expected_x(value: float) -> float:
+            return left + (math.log10(value) - math.log10(500)) / span * (right - left)
+
+        self.assertAlmostEqual(placed["partial:free"][0], left, places=1)
+        self.assertAlmostEqual(placed["slow-best:free"][0], right, places=1)
+        for model_id, latency in (("fast:free", 1000), ("mid:free", 10000), ("dominated:free", 20000)):
+            self.assertAlmostEqual(placed[model_id][0], expected_x(latency), places=1)
+        # Ten times the latency is the same horizontal distance anywhere on the axis.
+        self.assertAlmostEqual(
+            placed["mid:free"][0] - placed["fast:free"][0],
+            placed["slow-best:free"][0] - placed["mid:free"][0],
+            places=1,
+        )
+        self.assertAlmostEqual(placed["slow-best:free"][1], bottom - 0.4 * (bottom - top), places=1)
+        self.assertAlmostEqual(placed["fast:free"][1], bottom - 0.1 * (bottom - top), places=1)
+        # Labels stay inside the plot area.
+        svg = render_scatter_svg(points, chart_id="c", x_title="median latency per task", x_unit="ms")
+        for x_value in re.findall(r'class="point-label [a-z]+" x="([0-9.]+)"', svg):
+            self.assertTrue(left <= float(x_value) <= right)
+
+    def test_frontier_uses_ranked_models_only_and_skips_dominated_points(self) -> None:
+        points, _ = chart_points(_chart_leaderboard(), "median_latency_ms")
+        self.assertEqual(pareto_frontier(points), ["fast:free", "mid:free", "slow-best:free"])
+        token_points, _ = chart_points(_chart_leaderboard(), "mean_output_tokens")
+        self.assertEqual(pareto_frontier(token_points), ["fast:free", "mid:free", "slow-best:free"])
+
+    def test_frontier_breaks_equal_x_ties_by_higher_pass_rate(self) -> None:
+        points = [
+            {"model_id": "b:free", "status": "confirmed", "x": 10.0, "y": 0.2},
+            {"model_id": "a:free", "status": "confirmed", "x": 10.0, "y": 0.5},
+            {"model_id": "c:free", "status": "provisional", "x": 20.0, "y": 0.5},
+        ]
+        self.assertEqual(pareto_frontier(points), ["a:free"])
+
+    def test_svg_marks_status_and_frontier_deterministically(self) -> None:
+        points, _ = chart_points(_chart_leaderboard(), "median_latency_ms")
+        first = render_scatter_svg(points, chart_id="c", x_title="median latency per task", x_unit="ms")
+        second = render_scatter_svg(
+            list(reversed(points)), chart_id="c", x_title="median latency per task", x_unit="ms"
+        )
+        self.assertEqual(first, second)
+        self.assertIn('data-frontier="fast:free mid:free slow-best:free"', first)
+        self.assertIn('class="point confirmed" data-status="confirmed"', first)
+        self.assertIn('class="point provisional" data-status="provisional"', first)
+        self.assertIn('<polygon class="point unranked" data-status="unranked"', first)
+        self.assertIn('class="point-label unranked"', first)
+        self.assertIn('class="point-label provisional"', first)
+        self.assertIn('data-model="partial:free" data-status="unranked"', first)
+        self.assertIn('data-model="mid:free" data-status="provisional" data-frontier="true"', first)
+        self.assertIn('data-model="slow-best:free" data-status="confirmed" data-frontier="true"', first)
+        self.assertIn('data-model="dominated:free" data-status="confirmed">', first)
+        self.assertNotIn("gone:free", first)
+        self.assertEqual(first.count('class="model-point"'), 5)
+        self.assertEqual(first.count('data-frontier="true"'), 3)
+        self.assertNotIn('data-model="partial:free" data-status="unranked" data-frontier', first)
+
+    def test_report_embeds_both_charts_with_caption_and_no_script(self) -> None:
+        data = _leaderboard()
+        data["models"][0]["usage"] = {"mean_output_tokens": 812.5, "output_token_runs": 3, "comparable_runs": 3}
+        rendered = render_html(data)
+        self.assertEqual(CHART_CAPTION, "scoped to this frozen suite, not a general ranking")
+        self.assertIn('id="chart-latency"', rendered)
+        self.assertIn('id="chart-output-tokens"', rendered)
+        self.assertIn(CHART_CAPTION, rendered)
+        self.assertNotIn("<script", rendered.lower())
+        self.assertNotIn("href=\"http", rendered.split('id="efficiency"', 1)[1].split("</section>", 1)[0])
+        self.assertEqual(rendered, render_html(deepcopy(data)))
+
+    def test_report_omits_token_chart_without_usage_data(self) -> None:
+        rendered = render_html(_leaderboard())
+        self.assertIn('id="chart-latency"', rendered)
+        self.assertNotIn('id="chart-output-tokens"', rendered)
+
+    def test_report_rejects_malformed_usage_summary(self) -> None:
+        data = _leaderboard()
+        data["models"][0]["usage"] = {"mean_output_tokens": -1}
+        with self.assertRaises(RenderError):
+            render_html(data)
 
 
 if __name__ == "__main__":

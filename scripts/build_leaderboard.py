@@ -600,6 +600,28 @@ def _scope_metrics(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _output_tokens(record: dict[str, Any]) -> int | None:
+    """Return the recorded output-token count, or None when usage is absent."""
+    usage = record.get("usage")
+    if not isinstance(usage, dict):
+        return None
+    value = usage.get("output_tokens")
+    if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+        return value
+    return None
+
+
+def _usage_summary(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarise output tokens over comparable runs; reporting only, never ranked."""
+    comparable = [record for record in records if record["_comparable"]]
+    tokens = [value for value in (_output_tokens(record) for record in comparable) if value is not None]
+    return {
+        "mean_output_tokens": _mean(tokens),
+        "output_token_runs": len(tokens),
+        "comparable_runs": len(comparable),
+    }
+
+
 def _run_trace(record: dict[str, Any]) -> dict[str, Any]:
     metrics = _run_metrics(record)
     return {
@@ -618,6 +640,7 @@ def _run_trace(record: dict[str, Any]) -> dict[str, Any]:
         "automatic_check_statuses": metrics["automatic_check_statuses"],
         "hard_failure_ids": metrics["hard_failure_ids"],
         "latency_ms": metrics["latency_ms"],
+        "output_tokens": _output_tokens(record),
         "human_quality_score": metrics["human_quality_score"],
     }
 
@@ -855,6 +878,7 @@ def _model_entry(
             "excluded_runs": sum(cell["excluded_runs"] for cell in task_cells),
         },
         "metrics": overall_view["metrics"],
+        "usage": _usage_summary(records),
         "profiles": profile_views,
         "task_cells": task_cells,
     }
@@ -990,9 +1014,20 @@ def build_leaderboard(
         for record, metrics in zip(records, all_run_metrics)
         if record["_comparable"]
     ]
-    planned_cells = len(roster["models"]) * len(ordered_tasks)
-    observed_cells = {(record["_model_id"], record["task_id"]) for record in records}
-    launch_failures = max(0, planned_cells - len(observed_cells))
+    # Excluded roster models are planned-but-not-launched by design: the matrix
+    # runner never schedules them, so they contribute no planned cells and no
+    # launch failures. A launch failure is an eligible model/task cell with no
+    # run record at all.
+    eligible_model_ids = {
+        model["model_id"] for model in roster["models"] if model["availability"] == "eligible"
+    }
+    planned_cells = len(eligible_model_ids) * len(ordered_tasks)
+    observed_cells = {
+        (record["_model_id"], record["task_id"])
+        for record in records
+        if record["_model_id"] in eligible_model_ids
+    }
+    launch_failures = planned_cells - len(observed_cells)
     all_hard_failure_runs = sum(item["hard_failure"] for item in all_run_metrics)
     all_invalid_output_runs = sum(item["invalid_output"] for item in all_run_metrics)
     all_automatic_check_pass_runs = sum(

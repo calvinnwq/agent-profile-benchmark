@@ -154,6 +154,8 @@ python3 scripts/render_leaderboard_html.py \
 ```
 
 The renderer preserves the benchmark scope, status gates, metrics, exclusions, and evidence lineage without adding external assets or JavaScript.
+It also draws inline SVG efficiency charts: full-contract pass rate against median latency, and against mean output tokens per task when run usage records them. Each chart has one labelled point per eligible model and draws the Pareto frontier through ranked models. Provisional and unranked points are marked differently from confirmed ones, and excluded models are left off. The charts are scoped to the frozen suite and are not a general ranking.
+Planned cells and launch failures count eligible roster models only. Excluded roster models are planned-but-not-launched by design, so they are never counted as launch failures.
 The builder seals the default ledger, `leaderboard-v1` policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
 
 Overall ranking requires complete task coverage.

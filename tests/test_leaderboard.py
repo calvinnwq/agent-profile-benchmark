@@ -551,6 +551,95 @@ class LeaderboardTests(unittest.TestCase):
             self.assertEqual(output["aggregate"]["excluded_provider_or_identity_runs"], 1)
             self.assertIsNone(output["models"][0]["metrics"]["full_contract_pass_rate"])
 
+    def test_excluded_roster_models_are_not_planned_or_counted_as_launch_failures(self) -> None:
+        """Regression: excluded models were counted as planned cells and launch failures.
+
+        The matrix runner never launches excluded roster models, so a roster of
+        two eligible models and two excluded models over six tasks plans 12
+        cells, not 24. The renderer must accept the builder's counts.
+        """
+        from scripts.render_leaderboard_html import render_html
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model_ids = ("model-a:free", "model-b:free", "gone-a:free", "gone-b:free")
+            roster = _base_roster(model_ids)
+            for model in roster["models"][2:]:
+                model.update(availability="excluded", exclusion_reason="free period ended")
+            task_ids = [task["id"] for task in _base_ledger()["tasks"]]
+            records = [
+                _run_record(model_id, task_id, True, sequence)
+                for sequence, (model_id, task_id) in enumerate(
+                    ((model_id, task_id) for model_id in model_ids[:2] for task_id in task_ids),
+                    start=1,
+                )
+            ]
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={model_id: set() for model_id in model_ids},
+                roster=roster,
+                records_override=records,
+            )
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(output["aggregate"]["planned_cells"], 12)
+            self.assertEqual(output["aggregate"]["launch_failures"], 0)
+            self.assertEqual(output["aggregate"]["attempted_runs"], 12)
+            self.assertEqual(
+                [row["model_id"] for row in output["overall"]["excluded"]],
+                ["gone-a:free", "gone-b:free"],
+            )
+            policy = json.loads((root / "policy.json").read_text(encoding="utf-8"))
+            self.assertIn("<!doctype html>", render_html(output, policy=policy))
+
+            # A genuinely missing eligible cell is still a launch failure, and
+            # the renderer still agrees with the builder.
+            (root / "leaderboard.json").unlink()
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={model_id: set() for model_id in model_ids},
+                roster=roster,
+                records_override=records[:-1],
+            )
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(output["aggregate"]["planned_cells"], 12)
+            self.assertEqual(output["aggregate"]["launch_failures"], 1)
+            self.assertIn("<!doctype html>", render_html(output, policy=policy))
+
+    def test_usage_summary_reports_mean_output_tokens_over_comparable_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            records = [
+                _run_record("model-a:free", task_id, True, sequence)
+                for sequence, task_id in enumerate(("ALPHA-01", "ALPHA-02", "BETA-01"), start=1)
+            ]
+            records[0]["usage"]["output_tokens"] = 100
+            records[1]["usage"]["output_tokens"] = 300
+            records[2]["status"] = "blocked"
+            records[2]["execution_status"] = "blocked"
+            records[2]["usage"]["output_tokens"] = 9000
+            _build_synthetic_input(
+                root,
+                passed_tasks_by_model={"model-a:free": set()},
+                records_override=records,
+            )
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+            self.assertEqual(
+                output["models"][0]["usage"],
+                {"mean_output_tokens": 200.0, "output_token_runs": 2, "comparable_runs": 2},
+            )
+            traces = {
+                run["run_id"]: run["output_tokens"]
+                for cell in output["models"][0]["task_cells"]
+                for run in cell["runs"]
+            }
+            self.assertEqual(sorted(traces.values()), [100, 300, 9000])
+
     def test_unresolved_runtime_identity_is_excluded_without_aborting_build(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
