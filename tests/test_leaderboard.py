@@ -107,9 +107,9 @@ def _base_ledger() -> dict[str, Any]:
 
 def _base_policy() -> dict[str, Any]:
     return {
-        "schema_version": "leaderboard-policy-v1",
-        "policy_id": "leaderboard-v1",
-        "policy_version": "1.0.0",
+        "schema_version": "leaderboard-policy-v2",
+        "policy_id": "leaderboard-v2",
+        "policy_version": "2.0.0",
         "benchmark_id": "agent-profile-benchmark",
         "benchmark_version": "0.4.1",
         "scope": "benchmark-specific model leaderboard and routing aid",
@@ -127,6 +127,14 @@ def _base_policy() -> dict[str, Any]:
                 "invalid_output_rate",
                 "median_latency_ms",
             ],
+        },
+        "output_scoring": {
+            "parser_version": "tolerant-json-v1",
+            "recovered_classifications": ["markdown-fenced-json", "surrounded-json"],
+            "recovered_output": "evaluate-with-frozen-evaluator",
+            "unrecoverable_completed_output": "count-as-fail",
+            "unrecoverable_failed_execution_output": "exclude-as-infrastructure",
+            "format_compliance_metric": "strict_json_valid_rate",
         },
         "publication": {
             "score_publishable_requires_complete_overall_coverage": True,
@@ -249,8 +257,8 @@ class LeaderboardTests(unittest.TestCase):
         policy = json.loads(POLICY.read_text(encoding="utf-8"))
         schema = json.loads(POLICY_SCHEMA.read_text(encoding="utf-8"))
         self.assertEqual(validate_schema_instance(policy, schema), [])
-        self.assertEqual(policy["policy_id"], "leaderboard-v1")
-        self.assertEqual(policy["policy_version"], "1.0.0")
+        self.assertEqual(policy["policy_id"], "leaderboard-v2")
+        self.assertEqual(policy["policy_version"], "2.0.0")
         self.assertEqual(_canonical_fingerprint(policy), EXPECTED_POLICY_FINGERPRINT)
 
     def test_policy_gates_are_applied_to_coverage_and_publication(self) -> None:
@@ -285,7 +293,7 @@ class LeaderboardTests(unittest.TestCase):
             self.assertTrue(output["publication"]["score_publishable"])
             self.assertTrue(output["publication"]["routing_recommendation_allowed"])
 
-    def test_policy_version_is_pinned_for_leaderboard_v1(self) -> None:
+    def test_policy_version_is_pinned_for_leaderboard_v2(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             _build_synthetic_input(root, passed_tasks_by_model={"model-a:free": set()})
@@ -992,6 +1000,204 @@ class LeaderboardTests(unittest.TestCase):
             self.assertEqual(second.returncode, 0, second.stderr)
             self.assertEqual(first_bytes, (root / "leaderboard.json").read_bytes())
 
+
+
+ATLAS_TASKS = ("ATLAS-01", "ATLAS-02")
+
+
+def _atlas_control(task_id: str, kind: str = "known-good") -> str:
+    path = ROOT / "fixtures" / task_id.lower() / "controls" / f"{kind}.json"
+    return json.dumps(json.loads(path.read_text(encoding="utf-8")), sort_keys=True)
+
+
+def _build_atlas_input(root: Path, raw_by_task: dict[str, tuple[str, dict[str, Any]]]) -> None:
+    """Write a real-task (ATLAS) input where each run carries its own raw bytes.
+
+    ``raw_by_task`` maps task ID to (raw response text, run-record overrides).
+    Strict-JSON runs are scored from the recorded evaluation; every other run
+    is re-read from its raw bytes under leaderboard-v2.
+    """
+    ledger = {
+        "benchmark_id": "agent-profile-benchmark",
+        "benchmark_version": "0.4.1",
+        "profiles": [{"id": "atlas", "task_ids": list(ATLAS_TASKS)}],
+        "tasks": [{"id": task_id, "profile_id": "atlas"} for task_id in ATLAS_TASKS],
+    }
+    _write_json(root / "ledger.json", ledger)
+    _write_json(root / "policy.json", _base_policy())
+    _write_json(root / "roster.json", _base_roster(("model-a:free",)))
+    manifest = {
+        "schema_version": "leaderboard-input-v1",
+        "benchmark_id": "agent-profile-benchmark",
+        "benchmark_version": "0.4.1",
+        "snapshot_id": "synthetic-atlas-1",
+        "roster_path": "roster.json",
+        "runs": [],
+    }
+    for sequence, task_id in enumerate(ATLAS_TASKS, start=1):
+        raw, overrides = raw_by_task[task_id]
+        record = _run_record("model-a:free", task_id, True, sequence)
+        record["profile_id"] = "atlas"
+        record.update(overrides)
+        raw_bytes = raw.encode("utf-8")
+        raw_path = root / record["raw_output_reference"]
+        raw_path.parent.mkdir(parents=True, exist_ok=True)
+        raw_path.write_bytes(raw_bytes)
+        record["raw_output_fingerprint"] = "sha256:" + hashlib.sha256(raw_bytes).hexdigest()
+        record_path = root / "records" / f"{record['run_id']}.json"
+        _write_json(record_path, record)
+        manifest["runs"].append({"run_id": record["run_id"], "record_path": record_path.relative_to(root).as_posix()})
+    _write_json(root / "input.json", manifest)
+
+
+def _strict_failure_overrides() -> dict[str, Any]:
+    """What the strict runner records for any output that is not one bare object."""
+    return {
+        "status": "failed",
+        "output_parse_status": "invalid-json",
+        "automatic_checks": [
+            {"id": "required-fields", "status": "fail", "evidence": ["unable to read candidate output"]},
+            {"id": "budget", "status": "blocked", "evidence": ["candidate output could not be decoded"]},
+        ],
+        "hard_failures": [
+            {"id": "invalid-output", "condition": "not a JSON object", "evidence": ["JSONDecodeError"]}
+        ],
+    }
+
+
+class LeaderboardV2OutputScoringTests(unittest.TestCase):
+    def _build(self, raw_by_task: dict[str, tuple[str, dict[str, Any]]]) -> dict[str, Any]:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _build_atlas_input(root, raw_by_task)
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return json.loads((root / "leaderboard.json").read_text(encoding="utf-8"))
+
+    @staticmethod
+    def _runs(output: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        model = output["models"][0]
+        return {cell["task_id"]: cell["runs"][0] for cell in model["task_cells"]}
+
+    def test_fenced_json_is_scored_on_its_content(self) -> None:
+        good = _atlas_control("ATLAS-01")
+        bad = _atlas_control("ATLAS-02", "known-bad")
+        output = self._build({
+            # The strict record says fail/blocked; v2 must re-score the content.
+            "ATLAS-01": (f"```json\n{good}\n```\n", _strict_failure_overrides()),
+            "ATLAS-02": (f"Here is the plan:\n\n```json\n{bad}\n```", _strict_failure_overrides()),
+        })
+        runs = self._runs(output)
+        self.assertEqual(runs["ATLAS-01"]["scoring_basis"], "format-recovered")
+        self.assertEqual(runs["ATLAS-01"]["output_format"], "markdown-fenced-json")
+        self.assertTrue(runs["ATLAS-01"]["full_contract_pass"])
+        self.assertEqual(runs["ATLAS-01"]["hard_failure_ids"], [])
+        self.assertFalse(runs["ATLAS-01"]["strict_json_valid"])
+        # A fence with a prose lead-in is not isolated, so it is not recovered.
+        self.assertEqual(runs["ATLAS-02"]["scoring_basis"], "unrecoverable-output")
+        self.assertFalse(runs["ATLAS-02"]["full_contract_pass"])
+        overall = output["overall"]["ranked"][0]
+        self.assertEqual(overall["metrics"]["full_contract_pass_rate"], 0.5)
+        self.assertEqual(output["aggregate"]["comparable_format_recovered_runs"], 1)
+        self.assertEqual(output["aggregate"]["comparable_unrecoverable_output_runs"], 1)
+
+    def test_recovered_wrong_answer_still_fails_on_content(self) -> None:
+        bad = _atlas_control("ATLAS-01", "known-bad")
+        good = _atlas_control("ATLAS-02")
+        output = self._build({
+            "ATLAS-01": (f"```json\n{bad}\n```", _strict_failure_overrides()),
+            "ATLAS-02": (good + "\n", {}),
+        })
+        runs = self._runs(output)
+        self.assertEqual(runs["ATLAS-01"]["scoring_basis"], "format-recovered")
+        self.assertFalse(runs["ATLAS-01"]["full_contract_pass"])
+        self.assertIn("incompatible-fuel", runs["ATLAS-01"]["hard_failure_ids"])
+        self.assertEqual(runs["ATLAS-02"]["scoring_basis"], "strict-json")
+        self.assertTrue(runs["ATLAS-02"]["full_contract_pass"])
+
+    def test_ambiguous_answer_counts_as_a_fail_rather_than_being_dropped(self) -> None:
+        good = _atlas_control("ATLAS-01")
+        output = self._build({
+            "ATLAS-01": (f"Draft: {good}\nFinal: {good}", _strict_failure_overrides()),
+            "ATLAS-02": ('{"day_plan": [{"day_id": "day-1", "plan": "Reach', _strict_failure_overrides()),
+        })
+        runs = self._runs(output)
+        self.assertEqual(runs["ATLAS-01"]["output_format"], "ambiguous-json")
+        self.assertEqual(runs["ATLAS-02"]["output_format"], "invalid-json")
+        for run in runs.values():
+            self.assertEqual(run["scoring_basis"], "unrecoverable-output")
+            self.assertFalse(run["full_contract_pass"])
+            self.assertIn("invalid-output", run["hard_failure_ids"])
+            self.assertNotIn("blocked", run["automatic_check_statuses"])
+        model = output["models"][0]
+        self.assertEqual(model["coverage"]["comparable_runs"], 2)
+        self.assertEqual(model["coverage"]["excluded_runs"], 0)
+        # Complete coverage from failures: ranked, at 0%, not hidden as unranked.
+        ranked = output["overall"]["ranked"][0]
+        self.assertEqual(ranked["status"], "provisional")
+        self.assertEqual(ranked["metrics"]["full_contract_pass_rate"], 0)
+        self.assertEqual(ranked["metrics"]["invalid_output_rate"], 1)
+
+    def test_infrastructure_failure_stays_excluded(self) -> None:
+        good = _atlas_control("ATLAS-02")
+        timeout = _strict_failure_overrides()
+        timeout.update({
+            "execution_status": "timed_out",
+            "failure_class": "timeout",
+            "resolution_status": "unresolved",
+            "model_resolved": "unresolved",
+            "provider_resolved": "unresolved",
+        })
+        output = self._build({"ATLAS-01": ("", timeout), "ATLAS-02": (good, {})})
+        runs = self._runs(output)
+        self.assertEqual(runs["ATLAS-01"]["scoring_basis"], "excluded-provider-or-identity")
+        model = output["models"][0]
+        self.assertEqual(model["coverage"]["comparable_runs"], 1)
+        self.assertEqual(model["coverage"]["excluded_runs"], 1)
+        self.assertEqual(output["aggregate"]["excluded_provider_or_identity_runs"], 1)
+        self.assertEqual(output["overall"]["unranked"][0]["model_id"], "model-a:free")
+
+    def test_failed_execution_with_unreadable_output_stays_excluded(self) -> None:
+        good = _atlas_control("ATLAS-02")
+        rate_limited = _strict_failure_overrides()
+        rate_limited.update({"execution_status": "failed", "failure_class": "process-nonzero"})
+        output = self._build({
+            "ATLAS-01": ("Provider rate-limited every attempt (HTTP 429).", rate_limited),
+            "ATLAS-02": (good, {}),
+        })
+        runs = self._runs(output)
+        self.assertEqual(runs["ATLAS-01"]["scoring_basis"], "excluded-infrastructure")
+        self.assertEqual(output["aggregate"]["blocked_or_unverified_runs"], 1)
+        self.assertEqual(output["aggregate"]["comparable_resolved_runs"], 1)
+
+    def test_strict_json_valid_rate_is_reported_separately_from_the_score(self) -> None:
+        good_one = _atlas_control("ATLAS-01")
+        good_two = _atlas_control("ATLAS-02")
+        output = self._build({
+            "ATLAS-01": (f"```json\n{good_one}\n```", _strict_failure_overrides()),
+            "ATLAS-02": (good_two, {}),
+        })
+        ranked = output["overall"]["ranked"][0]
+        self.assertEqual(ranked["metrics"]["full_contract_pass_rate"], 1)
+        self.assertEqual(ranked["metrics"]["strict_json_valid_rate"], 0.5)
+        self.assertEqual(output["profiles"]["atlas"]["ranked"][0]["metrics"]["strict_json_valid_rate"], 0.5)
+        self.assertEqual(output["aggregate"]["comparable_strict_json_valid_runs"], 1)
+        cells = {cell["task_id"]: cell for cell in output["models"][0]["task_cells"]}
+        self.assertEqual(cells["ATLAS-01"]["metrics"]["strict_json_valid_rate"], 0)
+        self.assertEqual(cells["ATLAS-02"]["metrics"]["strict_json_valid_rate"], 1)
+
+    def test_leaderboard_v1_policy_is_refused_not_reinterpreted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _build_atlas_input(root, {task: (_atlas_control(task), {}) for task in ATLAS_TASKS})
+            policy = _base_policy()
+            policy.update({"schema_version": "leaderboard-policy-v1", "policy_id": "leaderboard-v1", "policy_version": "1.0.0"})
+            del policy["output_scoring"]
+            _write_json(root / "policy.json", policy)
+            result = _run_builder(root)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("leaderboard policy", result.stderr)
+            self.assertFalse((root / "leaderboard.json").exists())
 
 
 if __name__ == "__main__":

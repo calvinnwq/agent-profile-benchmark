@@ -130,7 +130,7 @@ The release gate and sealed artifact lock must pass before any model matrix run.
 
 ## Versioned model leaderboard
 
-`data/leaderboard-policy.json` defines `leaderboard-v1` for benchmark version `0.4.1`.
+`data/leaderboard-policy.json` defines `leaderboard-v2` (policy `2.0.0`) for benchmark version `0.4.1`.
 The policy ranks models only on this frozen suite and must not be described as a universal intelligence ranking.
 
 A roster snapshot uses [`schemas/model-roster.schema.json`](schemas/model-roster.schema.json) and preserves the requested model ID, resolved model ID, provider identity, availability, and any exclusion reason.
@@ -156,13 +156,30 @@ python3 scripts/render_leaderboard_html.py \
 The renderer preserves the benchmark scope, status gates, metrics, exclusions, and evidence lineage without adding external assets or JavaScript.
 It also draws inline SVG efficiency charts: full-contract pass rate against median latency, and against mean output tokens per task when run usage records them. Each chart has one labelled point per eligible model and draws the Pareto frontier through ranked models. Provisional and unranked points are marked differently from confirmed ones, and excluded models are left off. The charts are scoped to the frozen suite and are not a general ranking.
 Planned cells and launch failures count eligible roster models only. Excluded roster models are planned-but-not-launched by design, so they are never counted as launch failures.
-The builder seals the default ledger, `leaderboard-v1` policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
+The builder seals the default ledger, `leaderboard-v2` policy, run schema, and release artifact fingerprints; custom paths require the explicit `--allow-untrusted-inputs` flag for controlled testing only.
 
 Overall ranking requires complete task coverage.
 Per-profile views are available independently, but incomplete profiles remain explicitly unranked.
 A model is `provisional` after the policy's minimum task coverage and `confirmed` only after the policy's minimum three comparable replicates per task.
 Excluded or unresolved provider identities remain visible without contributing to comparable quality metrics.
 Blocked or unverified-isolation evidence remains visible without contributing to comparable quality metrics, and is counted separately from provider or identity exclusions.
+
+### Output scoring under leaderboard-v2
+
+`leaderboard-v2` (policy `2.0.0`) scores an answer on its content when it breaks only the output format.
+The builder re-reads each run's preserved raw response with the conservative `tolerant-json-v1` parser in `scripts/tolerant_output.py`:
+
+- A bare JSON object is scored from the recorded frozen evaluation, unchanged.
+- One isolated JSON Markdown fence, or one JSON object with limited unambiguous surrounding prose, is recovered and evaluated with the frozen task evaluator, then counted like any other run.
+- An answer that cannot be read without guessing (several or ambiguous objects, truncated or invalid JSON, duplicate keys, a non-object value, or empty output) from an execution that completed counts as a failed run for that model. It is not dropped.
+- Provider and infrastructure failures stay excluded from quality metrics as before: unresolved identity, blocked or unverified-isolation execution, and failed or timed-out executions whose output cannot be read (for example HTTP 429 or 404, or a timeout with no output).
+
+Strict JSON validity is reported separately as `strict_json_valid_rate` (format compliance) on every model, profile, and task view, with `comparable_strict_json_valid_runs`, `comparable_format_recovered_runs`, and `comparable_unrecoverable_output_runs` in the aggregate.
+It does not change the ranking order.
+Each run trace records its `output_format` and `scoring_basis`.
+
+`leaderboard-v1` outputs are not reinterpreted.
+The builder refuses a `leaderboard-v1` policy, so a v1 artifact keeps the rules it was built under and a v2 artifact is a new output lineage.
 The generator is deterministic for a fixed policy, ledger, roster, and selected run set.
 
 Run a new eligible roster sweep through the existing isolated single-cell harness with:

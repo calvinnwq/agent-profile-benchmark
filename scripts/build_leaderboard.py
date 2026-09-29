@@ -50,6 +50,11 @@ try:
 except ImportError:  # pragma: no cover - package-style import
     from scripts.leaderboard_aggregate import validate_aggregate
 
+try:
+    from tolerant_output import PARSER_VERSION, parse_tolerant_output
+except ImportError:  # pragma: no cover - package-style import
+    from scripts.tolerant_output import PARSER_VERSION, parse_tolerant_output
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER = ROOT / "data" / "task-ledger.json"
@@ -59,8 +64,23 @@ ROSTER_SCHEMA = ROOT / "schemas" / "model-roster.schema.json"
 INPUT_SCHEMA = ROOT / "schemas" / "leaderboard-input.schema.json"
 OUTPUT_SCHEMA = ROOT / "schemas" / "leaderboard-output.schema.json"
 DEFAULT_RUN_SCHEMA = ROOT / "schemas" / "task-run-record.schema.json"
-SUPPORTED_POLICY_VERSION = "1.0.0"
-EXPECTED_POLICY_FINGERPRINT = "90bf1287eb073e352356e611ecc2eae71dd28c702250317b421ee9929fb23c3e"
+SUPPORTED_POLICY_SCHEMA = "leaderboard-policy-v2"
+SUPPORTED_POLICY_ID = "leaderboard-v2"
+SUPPORTED_POLICY_VERSION = "2.0.0"
+OUTPUT_SCHEMA_VERSION = "leaderboard-v2"
+EXPECTED_POLICY_FINGERPRINT = "f7a9ab8783456b210e22af28536a5a045b9ba7022385067feab6ac5c7f720ab6"
+# leaderboard-v2 output scoring. The parser is the conservative tolerant-json-v1
+# recovery from scripts/tolerant_output.py; it never repairs or chooses JSON.
+EXPECTED_OUTPUT_SCORING = {
+    "parser_version": PARSER_VERSION,
+    "recovered_classifications": ["markdown-fenced-json", "surrounded-json"],
+    "recovered_output": "evaluate-with-frozen-evaluator",
+    "unrecoverable_completed_output": "count-as-fail",
+    "unrecoverable_failed_execution_output": "exclude-as-infrastructure",
+    "format_compliance_metric": "strict_json_valid_rate",
+}
+RECOVERED_CLASSIFICATIONS = frozenset(EXPECTED_OUTPUT_SCORING["recovered_classifications"])
+INFRA_FAILURE_CLASSES = {"git-provenance", "unverified-isolation", "usage-resolution"}
 UNRESOLVED_IDENTITY_VALUES = {"", "none", "unresolved"}
 VALID_AVAILABILITY = {"eligible", "excluded"}
 VALID_RUN_STATUSES = {"passed", "failed", "blocked"}
@@ -195,16 +215,20 @@ def _validate_policy(policy: Any, benchmark_id: str, benchmark_version: str) -> 
         raise LeaderboardInputError("leaderboard policy must be an object")
     for key in ("schema_version", "policy_id", "policy_version", "benchmark_id", "benchmark_version", "scope", "status"):
         _required_string(policy.get(key), f"policy.{key}")
-    if policy["schema_version"] != "leaderboard-policy-v1":
-        raise LeaderboardInputError("policy.schema_version must be leaderboard-policy-v1")
+    # leaderboard-v1 artifacts stay what they were: this builder only speaks v2
+    # and refuses to reinterpret a v1 policy under the v2 scoring rules.
+    if policy["schema_version"] != SUPPORTED_POLICY_SCHEMA:
+        raise LeaderboardInputError(f"policy.schema_version must be {SUPPORTED_POLICY_SCHEMA}")
     if policy["policy_version"] != SUPPORTED_POLICY_VERSION:
         raise LeaderboardInputError(
-            f"policy.policy_version must be {SUPPORTED_POLICY_VERSION} for leaderboard-v1"
+            f"policy.policy_version must be {SUPPORTED_POLICY_VERSION} for {SUPPORTED_POLICY_ID}"
         )
     if policy["benchmark_id"] != benchmark_id or policy["benchmark_version"] != benchmark_version:
         raise LeaderboardInputError("policy benchmark identity does not match the input")
-    if policy["policy_id"] != "leaderboard-v1" or policy["scope"] != "benchmark-specific model leaderboard and routing aid" or policy["status"] != "active":
-        raise LeaderboardInputError("policy identity or scope is not supported by leaderboard-v1")
+    if policy["policy_id"] != SUPPORTED_POLICY_ID or policy["scope"] != "benchmark-specific model leaderboard and routing aid" or policy["status"] != "active":
+        raise LeaderboardInputError(f"policy identity or scope is not supported by {SUPPORTED_POLICY_ID}")
+    if policy.get("output_scoring") != EXPECTED_OUTPUT_SCORING:
+        raise LeaderboardInputError(f"policy.output_scoring does not match {SUPPORTED_POLICY_ID}")
     coverage = policy.get("coverage")
     if not isinstance(coverage, dict):
         raise LeaderboardInputError("policy.coverage must be an object")
@@ -228,7 +252,7 @@ def _validate_policy(policy: Any, benchmark_id: str, benchmark_version: str) -> 
         "median_latency_ms",
     ]
     if tie_breakers != expected_tie_breakers:
-        raise LeaderboardInputError("policy.ranking.tie_breakers do not match leaderboard-v1")
+        raise LeaderboardInputError(f"policy.ranking.tie_breakers do not match {SUPPORTED_POLICY_ID}")
     publication = policy.get("publication")
     if not isinstance(publication, dict):
         raise LeaderboardInputError("policy.publication must be an object")
@@ -419,12 +443,12 @@ def _record_model_id(record: dict[str, Any]) -> tuple[str, bool]:
 
 
 def _record_is_scoreable(record: dict[str, Any]) -> bool:
-    """Return whether a resolved record is eligible for comparison metrics."""
-    if record.get("status") == "blocked" or record.get("execution_status") == "blocked":
-        return False
-    if record.get("failure_class") in {"git-provenance", "unverified-isolation", "usage-resolution"}:
-        return False
-    if _as_unresolved(record.get("provider_resolved")):
+    """Return whether a record is comparable under the strict (v1) contract.
+
+    The tolerant diagnostic still reports this strict view; leaderboard-v2
+    scoring uses ``_apply_output_scoring`` instead.
+    """
+    if _infrastructure_blocked(record):
         return False
     checks = record.get("automatic_checks")
     if isinstance(checks, list) and any(
@@ -432,6 +456,107 @@ def _record_is_scoreable(record: dict[str, Any]) -> bool:
     ):
         return False
     return True
+
+
+def _infrastructure_blocked(record: dict[str, Any]) -> bool:
+    """Return whether execution evidence is blocked, unverified, or unresolved."""
+    if record.get("status") == "blocked" or record.get("execution_status") == "blocked":
+        return True
+    if record.get("failure_class") in INFRA_FAILURE_CLASSES:
+        return True
+    return _as_unresolved(record.get("provider_resolved"))
+
+
+def _recorded_evaluation(record: dict[str, Any]) -> dict[str, Any]:
+    checks = record.get("automatic_checks")
+    return {
+        "status": record.get("status"),
+        "check_statuses": [
+            item.get("status") for item in checks if isinstance(item, dict)
+        ] if isinstance(checks, list) else [],
+        "hard_failure_ids": [
+            item.get("id") for item in record.get("hard_failures", []) if isinstance(item, dict)
+        ],
+    }
+
+
+def _load_task_fixture(task_id: str, cache: dict[str, Any]) -> Any:
+    if task_id not in cache:
+        fixture_path = ROOT / expected_release_artifact_paths(task_id)["fixture"]
+        cache[task_id] = _load_json(fixture_path, f"{task_id} fixture")
+    return cache[task_id]
+
+
+def _evaluate_recovered(task_id: str, candidate: dict[str, Any], fixtures: dict[str, Any]) -> dict[str, Any] | None:
+    """Score a recovered object with the frozen evaluator; None means evaluator-blocked."""
+    try:
+        from evaluate_task import evaluate_task
+    except ImportError:  # pragma: no cover - package-style import
+        from scripts.evaluate_task import evaluate_task
+    try:
+        evaluation = evaluate_task(task_id, _load_task_fixture(task_id, fixtures), candidate, model_output=True)
+    except Exception:  # an evaluator error is never converted into a pass or a fail
+        return None
+    checks = evaluation.get("automatic_checks") if isinstance(evaluation, dict) else None
+    if not isinstance(checks, list):
+        return None
+    return {
+        "status": evaluation.get("status"),
+        "check_statuses": [item.get("status") for item in checks if isinstance(item, dict)],
+        "hard_failure_ids": [
+            item.get("id") for item in evaluation.get("hard_failures", []) if isinstance(item, dict)
+        ],
+    }
+
+
+def _apply_output_scoring(record: dict[str, Any], raw_path: Path, fixtures: dict[str, Any]) -> None:
+    """Attach the leaderboard-v2 scoring view of one run.
+
+    Sets ``_comparable``, ``_output_format``, ``_strict_json_valid``,
+    ``_scoring_basis`` and ``_evaluation``:
+
+    - strict JSON: the recorded frozen evaluation is used unchanged;
+    - one recovered object (fenced or limited prose): re-evaluated with the
+      frozen evaluator and counted normally;
+    - unrecoverable output from a completed execution: a failed run;
+    - unrecoverable output from a failed or timed-out execution, blocked or
+      unverified execution, and unresolved identity: excluded, as in v1.
+    """
+    parsed = parse_tolerant_output(raw_path.read_bytes())
+    record["_output_format"] = parsed.classification
+    record["_strict_json_valid"] = parsed.strict_contract_valid
+    evaluation: dict[str, Any] | None = None
+    basis = "excluded-infrastructure"
+    if not record["_identity_resolved"]:
+        basis = "excluded-provider-or-identity"
+    elif _infrastructure_blocked(record):
+        basis = "excluded-infrastructure"
+    elif parsed.strict_contract_valid:
+        evaluation = _recorded_evaluation(record)
+        basis = "strict-json"
+    elif parsed.recovered and parsed.classification in RECOVERED_CLASSIFICATIONS and parsed.candidate is not None:
+        evaluation = _evaluate_recovered(record["task_id"], parsed.candidate, fixtures)
+        basis = "format-recovered" if evaluation is not None else "excluded-evaluator-blocked"
+    elif record.get("execution_status") == "completed":
+        # The model finished and answered, but nothing can be read without
+        # guessing. That is the model's failure, not missing evidence.
+        recorded = _recorded_evaluation(record)
+        evaluation = {
+            "status": "failed",
+            "check_statuses": [
+                "fail" if status == "blocked" else status for status in recorded["check_statuses"]
+            ] or ["fail"],
+            "hard_failure_ids": sorted(set(recorded["hard_failure_ids"]) | {"invalid-output"}),
+        }
+        basis = "unrecoverable-output"
+    if evaluation is not None and (
+        not evaluation["check_statuses"] or "blocked" in evaluation["check_statuses"]
+    ):
+        evaluation = None
+        basis = "excluded-evaluator-blocked"
+    record["_evaluation"] = evaluation
+    record["_scoring_basis"] = basis
+    record["_comparable"] = evaluation is not None
 
 
 def _trusted_task_bindings(task_ids: Iterable[str]) -> dict[str, dict[str, str]]:
@@ -549,22 +674,23 @@ def _load_records(
         record["_identity_resolved"] = resolved and roster_model["availability"] == "eligible"
         record["_comparable"] = record["_identity_resolved"] and _record_is_scoreable(record)
         record["_raw_output_reference"] = raw_reference
+        record["_raw_output_path"] = raw_path
         record["_record_path"] = ref["record_path"]
         records.append(record)
     return records
 
 
 def _run_metrics(record: dict[str, Any]) -> dict[str, Any]:
-    checks = record.get("automatic_checks")
-    check_statuses = [item.get("status") for item in checks if isinstance(item, dict)] if isinstance(checks, list) else []
-    hard_failure_ids = [item.get("id") for item in record.get("hard_failures", []) if isinstance(item, dict)]
+    evaluation = record.get("_evaluation") or _recorded_evaluation(record)
+    check_statuses = evaluation["check_statuses"]
+    hard_failure_ids = evaluation["hard_failure_ids"]
     human_score, human_available = _human_score(record.get("human_scores"))
     full_pass = bool(
-        _record_is_scoreable(record)
+        record["_comparable"]
         and record.get("resolution_status") == "resolved"
         and record.get("provider_resolved") not in UNRESOLVED_IDENTITY_VALUES
         and record.get("execution_status") == "completed"
-        and record.get("status") == "passed"
+        and evaluation["status"] == "passed"
         and not hard_failure_ids
         and check_statuses
         and all(status == "pass" for status in check_statuses)
@@ -576,6 +702,9 @@ def _run_metrics(record: dict[str, Any]) -> dict[str, Any]:
         "hard_failure": bool(hard_failure_ids),
         "invalid_output": "invalid-output" in hard_failure_ids,
         "non_json_output": record.get("output_parse_status") == "invalid-json",
+        "strict_json_valid": bool(record.get("_strict_json_valid")),
+        "format_recovered": record.get("_scoring_basis") == "format-recovered",
+        "unrecoverable_output": record.get("_scoring_basis") == "unrecoverable-output",
         "human_quality_score": human_score,
         "human_score_available": human_available,
         "latency_ms": record.get("latency_ms") if _finite_number(record.get("latency_ms")) else None,
@@ -596,6 +725,7 @@ def _scope_metrics(records: list[dict[str, Any]]) -> dict[str, Any]:
         "human_score_coverage": round(len(human_scores) / len(metrics), 6) if metrics else 0.0,
         "hard_failure_rate": _mean(item["hard_failure"] for item in metrics),
         "invalid_output_rate": _mean(item["invalid_output"] for item in metrics),
+        "strict_json_valid_rate": _mean(item["strict_json_valid"] for item in metrics),
         "median_latency_ms": _median(latencies),
     }
 
@@ -635,6 +765,9 @@ def _run_trace(record: dict[str, Any]) -> dict[str, Any]:
         "status": record["status"],
         "execution_status": record["execution_status"],
         "failure_class": record["failure_class"],
+        "output_format": record["_output_format"],
+        "strict_json_valid": metrics["strict_json_valid"],
+        "scoring_basis": record["_scoring_basis"],
         "full_contract_pass": metrics["full_contract_pass"],
         "automatic_check_pass_rate": metrics["automatic_check_pass_rate"],
         "automatic_check_statuses": metrics["automatic_check_statuses"],
@@ -731,6 +864,9 @@ def _model_entry(
             "process_or_timeout_failures": sum(
                 record.get("execution_status") in {"failed", "timed_out"} for record in comparable
             ),
+            "comparable_strict_json_valid_runs": sum(item["strict_json_valid"] for item in comparable_metrics),
+            "comparable_format_recovered_runs": sum(item["format_recovered"] for item in comparable_metrics),
+            "comparable_unrecoverable_output_runs": sum(item["unrecoverable_output"] for item in comparable_metrics),
             "replicate_count": len(comparable),
             "coverage_status": "covered" if comparable else "missing",
             "metrics": _scope_metrics(task_records),
@@ -757,6 +893,7 @@ def _model_entry(
                     "human_quality_score",
                     "hard_failure_rate",
                     "invalid_output_rate",
+                    "strict_json_valid_rate",
                 )
             }
             for profile_cells in grouped.values()
@@ -804,6 +941,11 @@ def _model_entry(
                 item["invalid_output_rate"]
                 for item in profile_metrics
                 if item["invalid_output_rate"] is not None
+            ),
+            "strict_json_valid_rate": _mean(
+                item["strict_json_valid_rate"]
+                for item in profile_metrics
+                if item["strict_json_valid_rate"] is not None
             ),
             "median_latency_ms": _median(latencies),
         }
@@ -969,7 +1111,7 @@ def build_leaderboard(
             "custom ledger, policy, or run schema requires --allow-untrusted-inputs"
         )
     if trusted_paths and _canonical_fingerprint(policy_document) != EXPECTED_POLICY_FINGERPRINT:
-        raise LeaderboardInputError("leaderboard policy does not match the sealed leaderboard-v1 policy")
+        raise LeaderboardInputError(f"leaderboard policy does not match the sealed {SUPPORTED_POLICY_ID} policy")
     ordered_tasks, profile_tasks, task_profile = _load_ledger(
         ledger_path,
         benchmark_id,
@@ -987,6 +1129,9 @@ def build_leaderboard(
         policy,
         trusted_bindings,
     )
+    fixtures: dict[str, Any] = {}
+    for record in records:
+        _apply_output_scoring(record, record["_raw_output_path"], fixtures)
     roster_by_id = {model["model_id"]: model for model in roster["models"]}
     records_by_model: dict[str, list[dict[str, Any]]] = {model_id: [] for model_id in roster_by_id}
     for record in records:
@@ -1080,6 +1225,9 @@ def build_leaderboard(
         "hard_failure_runs": comparable_hard_failure_runs,
         "comparable_invalid_output_runs": comparable_invalid_output_runs,
         "invalid_output_runs": comparable_invalid_output_runs,
+        "comparable_strict_json_valid_runs": sum(item["strict_json_valid"] for item in comparable_metrics),
+        "comparable_format_recovered_runs": sum(item["format_recovered"] for item in comparable_metrics),
+        "comparable_unrecoverable_output_runs": sum(item["unrecoverable_output"] for item in comparable_metrics),
         "human_scores_assigned": any(item["human_score_available"] for item in comparable_metrics),
     }
     cell_totals = {
@@ -1102,6 +1250,13 @@ def build_leaderboard(
             )
         },
     }
+    format_counts = (
+        aggregate["comparable_strict_json_valid_runs"]
+        + aggregate["comparable_format_recovered_runs"]
+        + aggregate["comparable_unrecoverable_output_runs"]
+    )
+    if format_counts != aggregate["comparable_resolved_runs"]:
+        raise LeaderboardInputError("comparable output-format counts do not add up")
     try:
         validate_aggregate(
             aggregate,
@@ -1130,7 +1285,7 @@ def build_leaderboard(
         for view in profile_views.values()
     )
     output = {
-        "schema_version": "leaderboard-v1",
+        "schema_version": OUTPUT_SCHEMA_VERSION,
         "benchmark_id": benchmark_id,
         "benchmark_version": benchmark_version,
         "policy_id": policy["policy_id"],

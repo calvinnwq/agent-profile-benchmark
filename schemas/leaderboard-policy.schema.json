@@ -14,14 +14,15 @@
     "status",
     "coverage",
     "ranking",
+    "output_scoring",
     "publication"
   ],
   "properties": {
     "$schema": {"type": "string"},
     "$id": {"type": "string"},
-    "schema_version": {"type": "string", "const": "leaderboard-policy-v1"},
-    "policy_id": {"type": "string", "const": "leaderboard-v1"},
-    "policy_version": {"type": "string", "const": "1.0.0"},
+    "schema_version": {"type": "string", "const": "leaderboard-policy-v2"},
+    "policy_id": {"type": "string", "const": "leaderboard-v2"},
+    "policy_version": {"type": "string", "const": "2.0.0"},
     "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
     "benchmark_version": {"type": "string", "const": "0.4.1"},
     "scope": {"type": "string", "const": "benchmark-specific model leaderboard and routing aid"},
@@ -63,6 +64,30 @@
             ]
           }
         }
+      }
+    },
+    "output_scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parser_version",
+        "recovered_classifications",
+        "recovered_output",
+        "unrecoverable_completed_output",
+        "unrecoverable_failed_execution_output",
+        "format_compliance_metric"
+      ],
+      "properties": {
+        "parser_version": {"type": "string", "const": "tolerant-json-v1"},
+        "recovered_classifications": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["markdown-fenced-json", "surrounded-json"]}
+        },
+        "recovered_output": {"type": "string", "const": "evaluate-with-frozen-evaluator"},
+        "unrecoverable_completed_output": {"type": "string", "const": "count-as-fail"},
+        "unrecoverable_failed_execution_output": {"type": "string", "const": "exclude-as-infrastructure"},
+        "format_compliance_metric": {"type": "string", "const": "strict_json_valid_rate"}
       }
     },
     "publication": {

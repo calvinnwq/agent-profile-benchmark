@@ -24,11 +24,11 @@
   "properties": {
     "$schema": {"type": "string"},
     "$id": {"type": "string"},
-    "schema_version": {"type": "string", "const": "leaderboard-v1"},
+    "schema_version": {"type": "string", "const": "leaderboard-v2"},
     "benchmark_id": {"type": "string", "const": "agent-profile-benchmark"},
     "benchmark_version": {"type": "string", "const": "0.4.1"},
-    "policy_id": {"type": "string", "const": "leaderboard-v1"},
-    "policy_version": {"type": "string", "const": "1.0.0"},
+    "policy_id": {"type": "string", "const": "leaderboard-v2"},
+    "policy_version": {"type": "string", "const": "2.0.0"},
     "input_snapshot_id": {"type": "string", "minLength": 1},
     "roster_snapshot_id": {"type": "string", "minLength": 1},
     "generated_at": {"type": "string", "minLength": 1},
@@ -146,6 +146,9 @@
         "comparable_invalid_output_runs",
         "invalid_output_runs",
         "process_or_timeout_failures",
+        "comparable_strict_json_valid_runs",
+        "comparable_format_recovered_runs",
+        "comparable_unrecoverable_output_runs",
         "human_scores_assigned"
       ],
       "properties": {
@@ -176,6 +179,9 @@
         "comparable_invalid_output_runs": {"type": "integer", "exclusiveMinimum": -1},
         "invalid_output_runs": {"type": "integer", "exclusiveMinimum": -1},
         "process_or_timeout_failures": {"type": "integer", "exclusiveMinimum": -1},
+        "comparable_strict_json_valid_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "comparable_format_recovered_runs": {"type": "integer", "exclusiveMinimum": -1},
+        "comparable_unrecoverable_output_runs": {"type": "integer", "exclusiveMinimum": -1},
         "human_scores_assigned": {"type": "boolean"}
       }
     },

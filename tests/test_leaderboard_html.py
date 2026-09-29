@@ -57,11 +57,11 @@ def _leaderboard() -> dict[str, Any]:
     ranked = _entry("model<one>:free")
     unranked = _entry("model-two:free", "unranked")
     return {
-        "schema_version": "leaderboard-v1",
+        "schema_version": "leaderboard-v2",
         "benchmark_id": "agent-profile-benchmark",
         "benchmark_version": "0.4.1",
-        "policy_id": "leaderboard-v1",
-        "policy_version": "1.0.0",
+        "policy_id": "leaderboard-v2",
+        "policy_version": "2.0.0",
         "input_snapshot_id": "repeat-001",
         "roster_snapshot_id": "roster-001",
         "generated_at": "2026-09-01T00:00:00Z",
@@ -138,6 +138,9 @@ def _leaderboard() -> dict[str, Any]:
             "invalid_output_runs": 0,
             "comparable_invalid_output_runs": 0,
             "process_or_timeout_failures": 0,
+            "comparable_strict_json_valid_runs": 3,
+            "comparable_format_recovered_runs": 0,
+            "comparable_unrecoverable_output_runs": 0,
             "human_scores_assigned": False,
         },
         "overall": {
@@ -348,7 +351,7 @@ class LeaderboardHtmlTests(unittest.TestCase):
             input_path = root / "leaderboard.json"
             output_path = root / "index.html"
             input_path.write_text(
-                '{"schema_version":"leaderboard-v1","schema_version":"leaderboard-v1"}\n',
+                '{"schema_version":"leaderboard-v2","schema_version":"leaderboard-v2"}\n',
                 encoding="utf-8",
             )
             result = subprocess.run(
@@ -369,8 +372,8 @@ class LeaderboardHtmlTests(unittest.TestCase):
             output_path = root / "index.html"
             serialized = json.dumps(_leaderboard(), separators=(",", ":"))
             serialized = serialized.replace(
-                '"schema_version":"leaderboard-v1"',
-                '"overflow":1e9999,"schema_version":"leaderboard-v1"',
+                '"schema_version":"leaderboard-v2"',
+                '"overflow":1e9999,"schema_version":"leaderboard-v2"',
                 1,
             )
             input_path.write_text(serialized, encoding="utf-8")

@@ -150,8 +150,8 @@ The command does not publish scores or create a model matrix.
 
 ## Tolerant objective diagnostic
 
-The strict JSON contract remains the authoritative machine-interface metric for the benchmark release.
-It must not be overwritten or silently normalised when a tolerant analysis is run.
+The strict JSON contract remains the authoritative machine-interface metric for the benchmark release, reported on the leaderboard as format compliance.
+Run records are never overwritten or silently normalised when a tolerant analysis or a `leaderboard-v2` build is run.
 
 `scripts/analyze_tolerant_outputs.py` re-reads a frozen `leaderboard-input.json` manifest and the preserved raw responses without making new model calls.
 It writes a separately labelled `tolerant-analysis-v1` report and can render a Markdown handoff.
@@ -167,7 +167,7 @@ Neither diagnostic script changes run records, frozen task inputs, strict leader
 
 ## Re-runnable leaderboard workflow
 
-`data/leaderboard-policy.json` is the checked-in `leaderboard-v1` policy for benchmark version `0.4.1`.
+`data/leaderboard-policy.json` is the checked-in `leaderboard-v2` policy (version `2.0.0`) for benchmark version `0.4.1`.
 It defines a benchmark-specific model leaderboard and routing aid, not a universal intelligence ranking.
 
 Roster snapshots must conform to `schemas/model-roster.schema.json`.
@@ -205,9 +205,30 @@ It contains overall and per-profile views, explicit attempted/comparable/exclude
 Overall ranking requires every task to have at least one comparable run.
 A complete but not repeated model is `provisional`.
 A model with at least three comparable replicates for every task is `confirmed`.
-Incomplete, blocked, and unverified-isolation evidence is emitted under `unranked` rather than being intermingled with ranked entries.
+Incomplete coverage keeps a model under `unranked` rather than being intermingled with ranked entries; blocked and unverified-isolation evidence never counts toward coverage.
 The primary metric is full contract pass rate, followed by automatic-check pass rate, normalized human quality, hard-failure rate, invalid-output rate, and median latency.
 Human quality cannot rescue a hard contract failure.
+
+### Output scoring (leaderboard-v2)
+
+`leaderboard-v2` replaces the v1 rule that dropped any run with an evaluator-blocked check.
+Under v1 an unreadable answer blocked the content checks, so the run was treated as non-comparable and excluded; a model that broke the format looked better than one that answered and was wrong.
+The v2 policy's `output_scoring` block pins the rule, and the builder rejects any other value:
+
+| Raw response (`tolerant-json-v1` classification) | Execution | v2 treatment | `scoring_basis` |
+|---|---|---|---|
+| `strict-json-object` | completed | recorded frozen evaluation, unchanged | `strict-json` |
+| `markdown-fenced-json`, `surrounded-json` | completed | recovered object re-evaluated with the frozen evaluator, counted normally | `format-recovered` |
+| any other classification | completed | failed run with `invalid-output`; every blocked check becomes a fail | `unrecoverable-output` |
+| any other classification | failed or timed out | excluded as infrastructure evidence | `excluded-infrastructure` |
+| any | blocked, unverified isolation, or unresolved provider | excluded as in v1 | `excluded-infrastructure` |
+| any | unresolved or excluded identity | excluded as in v1 | `excluded-provider-or-identity` |
+
+A recovered object is only ever evaluated; it is never repaired, merged, or chosen from several candidates.
+If the frozen evaluator raises or still reports a blocked check for a recovered object, the run is excluded as `excluded-evaluator-blocked` rather than guessed.
+`strict_json_valid_rate` is the share of comparable runs whose raw response was one bare JSON object.
+It is reported as format compliance on every view and does not enter the ranking key.
+A `leaderboard-v1` artifact is never reinterpreted under these rules; the builder refuses a v1 policy, and a v2 build starts a new output lineage.
 
 For a fixed policy, benchmark ledger, roster, and selected run set, output generation must be byte-deterministic.
 The input manifest and generated output preserve the release-lock fingerprint and exact run references so each value can be audited back to raw evidence.

@@ -1,8 +1,8 @@
 {
   "$schema": "../schemas/leaderboard-policy.schema.json",
-  "schema_version": "leaderboard-policy-v1",
-  "policy_id": "leaderboard-v1",
-  "policy_version": "1.0.0",
+  "schema_version": "leaderboard-policy-v2",
+  "policy_id": "leaderboard-v2",
+  "policy_version": "2.0.0",
   "benchmark_id": "agent-profile-benchmark",
   "benchmark_version": "0.4.1",
   "scope": "benchmark-specific model leaderboard and routing aid",
@@ -20,6 +20,17 @@
       "invalid_output_rate",
       "median_latency_ms"
     ]
+  },
+  "output_scoring": {
+    "parser_version": "tolerant-json-v1",
+    "recovered_classifications": [
+      "markdown-fenced-json",
+      "surrounded-json"
+    ],
+    "recovered_output": "evaluate-with-frozen-evaluator",
+    "unrecoverable_completed_output": "count-as-fail",
+    "unrecoverable_failed_execution_output": "exclude-as-infrastructure",
+    "format_compliance_metric": "strict_json_valid_rate"
   },
   "publication": {
     "score_publishable_requires_complete_overall_coverage": true,

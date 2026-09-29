@@ -12,7 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "data" / "release-artifact-lock.json"
-EXPECTED_RELEASE_LOCK_FINGERPRINT = "2b50cf9549ed2ea649af522a55721204caebd9084be8539e10702621d9469d19"
+EXPECTED_RELEASE_LOCK_FINGERPRINT = "03aec1bae76c7c10c1fec90695374885a938ccb759ef487bbf20a791e5ff803b"
 LOCK_VERSION = "1"
 TASK_ARTIFACT_KEYS = (
     "manifest",
@@ -58,6 +58,7 @@ SHARED_ARTIFACT_KEYS = (
     "diagnostic_runner",
     "diagnostic_manifest_schema",
     "historical_snapshot_manifest",
+    "tolerant_parser",
 )
 SHARED_ARTIFACT_PATHS = {
     "ledger": "data/task-ledger.json",
@@ -91,6 +92,7 @@ SHARED_ARTIFACT_PATHS = {
     "diagnostic_runner": "scripts/run_diagnostic_matrix.py",
     "diagnostic_manifest_schema": "schemas/diagnostic-manifest.schema.json",
     "historical_snapshot_manifest": "data/historical-v03-snapshot-manifest.json",
+    "tolerant_parser": "scripts/tolerant_output.py",
 }
 
 
