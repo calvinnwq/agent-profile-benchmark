@@ -1,0 +1,78 @@
+{
+  "$id": "https://github.com/calvinnwq/agent-profile-benchmark/blob/main/schemas/model-roster.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "benchmark_id": "agent-profile-benchmark",
+  "benchmark_version": "0.4.1",
+  "captured_at": "2026-09-29T00:00:00Z",
+  "models": [
+    {
+      "availability": "eligible",
+      "model_id": "upstage/solar-pro4:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "upstage/solar-pro4:free",
+      "resolved_model_id": "upstage/solar-pro4:free"
+    },
+    {
+      "availability": "eligible",
+      "model_id": "meituan/longcat-2.5-preview:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "meituan/longcat-2.5-preview:free",
+      "resolved_model_id": "meituan/longcat-2.5-preview:free"
+    },
+    {
+      "availability": "eligible",
+      "model_id": "inclusionai/ling-3.0-flash-sante:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "inclusionai/ling-3.0-flash-sante:free",
+      "resolved_model_id": "inclusionai/ling-3.0-flash-sante:free"
+    },
+    {
+      "availability": "eligible",
+      "model_id": "poolside/laguna-xs-2.1:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "poolside/laguna-xs-2.1:free",
+      "resolved_model_id": "poolside/laguna-xs-2.1:free"
+    },
+    {
+      "availability": "eligible",
+      "model_id": "poolside/laguna-s-2.1:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "poolside/laguna-s-2.1:free",
+      "resolved_model_id": "poolside/laguna-s-2.1:free"
+    },
+    {
+      "availability": "eligible",
+      "model_id": "stepfun/step-3.7-flash:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "stepfun/step-3.7-flash:free",
+      "resolved_model_id": "stepfun/step-3.7-flash:free"
+    },
+    {
+      "availability": "excluded",
+      "exclusion_reason": "On Portal free list but live probe returned HTTP 404 (2026-09-29)",
+      "model_id": "inclusionai/ling-3.0-flash-fin:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "inclusionai/ling-3.0-flash-fin:free",
+      "resolved_model_id": "inclusionai/ling-3.0-flash-fin:free"
+    },
+    {
+      "availability": "excluded",
+      "exclusion_reason": "Not on Portal free list; calls return HTTP 404 'no longer free' (2026-09-29)",
+      "model_id": "meituan/longcat-2.0:free",
+      "provider_requested": "nous",
+      "provider_resolved": "nous",
+      "requested_model_id": "meituan/longcat-2.0:free",
+      "resolved_model_id": "meituan/longcat-2.0:free"
+    }
+  ],
+  "provider": "nous",
+  "schema_version": "model-roster-v1",
+  "snapshot_id": "nous-free-roster-20260929-v041-v2"
+}

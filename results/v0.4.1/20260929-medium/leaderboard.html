@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Source-backed Nous Portal free model leaderboard for the frozen Agent Profile Benchmark.">
+  <title>Nous Portal free model leaderboard</title>
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #f4f1e8;
+  --paper: #fffdf7;
+  --ink: #1e2823;
+  --muted: #617068;
+  --line: #d9ded7;
+  --accent: #176b59;
+  --accent-deep: #0f4b3e;
+  --accent-soft: #e3f0e9;
+  --amber: #91601b;
+  --amber-soft: #fff5d8;
+  --red: #9b3e39;
+  --red-soft: #f9e4e0;
+  --shadow: 0 14px 40px rgba(30, 40, 35, .08);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+body::before {
+  content: "";
+  display: block;
+  height: 7px;
+  background: var(--accent-deep);
+  border-bottom: 2px solid #c88938;
+}
+
+a {
+  color: var(--accent-deep);
+  font-weight: 750;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #c88938;
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.hero {
+  border-bottom: 1px solid var(--line);
+  background: #fbfaf4;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+  gap: 32px;
+  align-items: end;
+  padding: 52px 0 34px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent-deep);
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p { margin-top: 0; }
+
+h1 {
+  max-width: 850px;
+  margin-bottom: 16px;
+  font-size: clamp(2.4rem, 6vw, 5.4rem);
+  line-height: .97;
+  letter-spacing: -.045em;
+}
+
+.lede {
+  max-width: 760px;
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.62;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  padding: 0 14px;
+  text-decoration: none;
+}
+
+.button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  min-height: 102px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.stat strong {
+  display: block;
+  color: var(--accent-deep);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.stat span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.35;
+}
+
+main { padding: 32px 0 58px; }
+
+article {
+  display: grid;
+  gap: 34px;
+}
+
+section {
+  border-top: 1px solid var(--line);
+  padding-top: 28px;
+}
+
+section:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  letter-spacing: -.025em;
+}
+
+h3 {
+  margin-bottom: 8px;
+  font-size: 1.08rem;
+}
+
+p,
+li {
+  color: #38463f;
+  font-size: 1rem;
+  line-height: 1.68;
+}
+
+.notice {
+  border: 1px solid #d8bd68;
+  border-radius: 8px;
+  background: var(--amber-soft);
+  padding: 18px 20px;
+}
+
+.notice strong { color: #704912; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 17px;
+  box-shadow: 0 8px 25px rgba(30, 40, 35, .04);
+}
+
+.card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.table-shell {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+caption {
+  padding: 14px 16px;
+  color: var(--muted);
+  font-size: .9rem;
+  text-align: left;
+}
+
+th,
+td {
+  border-top: 1px solid var(--line);
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: .78rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.rank {
+  color: var(--accent-deep);
+  font-size: 1.25rem;
+  font-weight: 850;
+}
+
+.model {
+  display: block;
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.sub {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.status {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status.provisional {
+  border-color: #c9dfd2;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.status.confirmed {
+  border-color: #b6d5c0;
+  background: #d9eddd;
+  color: #245a37;
+}
+
+.status.unranked,
+.status.excluded {
+  border-color: #e1c5c0;
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.bar {
+  width: 130px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8ebe5;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.metric {
+  white-space: nowrap;
+}
+
+code {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #eef1eb;
+  padding: 2px 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: .84em;
+}
+
+.profile-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-card {
+  border-left: 4px solid var(--accent);
+  border-top: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  padding: 14px 15px;
+}
+
+.profile-card h3 {
+  margin-bottom: 5px;
+  color: var(--accent-deep);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: .9rem;
+  text-transform: uppercase;
+}
+
+.profile-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.48;
+}
+
+.profile-card .model { margin: 7px 0 3px; font-size: .82rem; }
+
+.meta-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 22px;
+  margin: 0;
+}
+
+.meta-list div {
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+.meta-list dt {
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.meta-list dd {
+  margin: 3px 0 0;
+  color: var(--ink);
+  font-size: .92rem;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  background: #fbfaf4;
+  padding: 22px 0;
+}
+
+footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.chart {
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.chart figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.chart .axis { stroke: #8d988f; stroke-width: 1; }
+.chart .grid-line { stroke: #e3e7e0; stroke-width: 1; }
+.chart .tick { fill: #4f5d56; font-size: 12px; }
+.chart .axis-title { fill: var(--ink); font-size: 13px; font-weight: 700; }
+.chart .frontier { fill: none; stroke: #b36f1c; stroke-width: 2.5; stroke-dasharray: 7 4; }
+.chart .leader { stroke: #aab3ad; stroke-width: 1; }
+.chart .point-label { fill: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; }
+.chart .point-label.unranked { fill: var(--red); }
+.chart .point.confirmed { fill: var(--accent-deep); stroke: var(--accent-deep); stroke-width: 1.5; }
+.chart .point.provisional { fill: var(--paper); stroke: var(--accent); stroke-width: 2.5; }
+.chart .point.unranked { fill: var(--red-soft); stroke: var(--red); stroke-width: 2; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: .85rem; }
+.chart .chart-legend svg { display: inline-block; width: 18px; height: 18px; vertical-align: -4px; }
+
+@media (max-width: 880px) {
+  .hero-grid,
+  .grid,
+  .profile-list {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .stats,
+  .meta-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  h1 { font-size: clamp(2.35rem, 14vw, 4rem); }
+  .wrap { width: min(100% - 24px, 1180px); }
+  .hero-grid { padding-top: 38px; }
+}
+
+@media print {
+  body { background: #fff; }
+  body::before { display: none; }
+  .button { display: none; }
+  .table-shell { overflow: visible; box-shadow: none; }
+  table { min-width: 0; }
+  .card,
+  .stat { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Nous Portal / Agent Profile Benchmark</p>
+        <h1>Which free models held the line?</h1>
+        <p class="lede">A benchmark-specific model leaderboard and routing aid for the frozen <code>0.4.1</code> task suite. It measures contract-following across fixed agent profiles, not general intelligence.</p>
+        <div class="actions">
+          <a class="button primary" href="#leaderboard">Read the ranking</a>
+          <a class="button" href="#method">How to read this</a>
+          <a class="button" href="https://github.com/calvinnwq/agent-profile-benchmark">Benchmark source</a>
+        </div>
+      </div>
+      <div class="stats" aria-label="Benchmark snapshot">
+        <div class="stat"><strong>5</strong><span>complete models ranked</span></div>
+        <div class="stat"><strong>1</strong><span>models held out</span></div>
+        <div class="stat"><strong>295/324</strong><span>comparable runs</span></div>
+        <div class="stat"><strong class="status confirmed">ON</strong><span>routing recommendations</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article>
+      <section>
+        <aside class="notice" aria-label="Important interpretation note">
+          <strong>Read this as a course scoreboard, not an IQ test.</strong>
+          The benchmark is strict: a full-contract pass means the model satisfied every required contract check for a task. One sweep creates provisional evidence; confirmation requires at least 3 comparable replicates per task. Human scores are not present in this snapshot. Routing recommendations are enabled for confirmed profiles in this snapshot.
+        </aside>
+      </section>
+
+      <section id="leaderboard">
+        <p class="eyebrow">Overall view</p>
+        <h2>Provisional ranking</h2>
+        <p>The primary order is full-contract pass rate, followed by automatic-check pass rate, human quality, hard failures, invalid output, and latency. Profile views are weighted equally in the overall score. Under leaderboard-v2 an answer wrapped in one JSON fence or brief prose is recovered and scored on its content; an unreadable answer counts as a failure. Strict JSON validity is reported separately as format compliance and does not change the rank.</p>
+        <div class="table-shell">
+          <table>
+            <caption>Snapshot <code>nous-free-roster-20260929-v041-v2</code> - 18 frozen tasks across 9 profiles</caption>
+            <thead>
+              <tr><th scope="col">Rank</th><th scope="col">Model</th><th scope="col">Full contract</th><th scope="col">Automatic checks</th><th scope="col">Hard failures</th><th scope="col">Invalid output</th><th scope="col">Strict JSON (format compliance)</th><th scope="col">Median latency</th></tr>
+            </thead>
+            <tbody><tr>
+  <td class="rank">1</td>
+  <td><span class="model">upstage/solar-pro4:free</span><span class="status confirmed">confirmed</span><span class="sub">18/18 tasks, 3 replicates</span></td>
+  <td><span class="metric">37.0%</span><div class="bar" aria-label="37.0%"><span style="width:37.0%"></span></div></td>
+  <td><span class="metric">83.0%</span></td>
+  <td><span class="metric">11.1%</span></td>
+  <td><span class="metric">0.0%</span></td>
+  <td><span class="metric">100.0%</span></td>
+  <td><span class="metric">19,988.5 ms</span></td>
+</tr>
+<tr>
+  <td class="rank">2</td>
+  <td><span class="model">meituan/longcat-2.5-preview:free</span><span class="status provisional">provisional</span><span class="sub">18/18 tasks, 2 replicates</span></td>
+  <td><span class="metric">35.2%</span><div class="bar" aria-label="35.2%"><span style="width:35.2%"></span></div></td>
+  <td><span class="metric">80.7%</span></td>
+  <td><span class="metric">14.8%</span></td>
+  <td><span class="metric">1.9%</span></td>
+  <td><span class="metric">98.1%</span></td>
+  <td><span class="metric">26,634 ms</span></td>
+</tr>
+<tr>
+  <td class="rank">3</td>
+  <td><span class="model">inclusionai/ling-3.0-flash-sante:free</span><span class="status confirmed">confirmed</span><span class="sub">18/18 tasks, 3 replicates</span></td>
+  <td><span class="metric">27.8%</span><div class="bar" aria-label="27.8%"><span style="width:27.8%"></span></div></td>
+  <td><span class="metric">78.1%</span></td>
+  <td><span class="metric">20.4%</span></td>
+  <td><span class="metric">3.7%</span></td>
+  <td><span class="metric">63.0%</span></td>
+  <td><span class="metric">7,850 ms</span></td>
+</tr>
+<tr>
+  <td class="rank">4</td>
+  <td><span class="model">poolside/laguna-s-2.1:free</span><span class="status provisional">provisional</span><span class="sub">18/18 tasks, 2 replicates</span></td>
+  <td><span class="metric">25.0%</span><div class="bar" aria-label="25.0%"><span style="width:25.0%"></span></div></td>
+  <td><span class="metric">66.4%</span></td>
+  <td><span class="metric">27.8%</span></td>
+  <td><span class="metric">13.0%</span></td>
+  <td><span class="metric">87.0%</span></td>
+  <td><span class="metric">11,698 ms</span></td>
+</tr>
+<tr>
+  <td class="rank">5</td>
+  <td><span class="model">poolside/laguna-xs-2.1:free</span><span class="status confirmed">confirmed</span><span class="sub">18/18 tasks, 3 replicates</span></td>
+  <td><span class="metric">13.0%</span><div class="bar" aria-label="13.0%"><span style="width:13.0%"></span></div></td>
+  <td><span class="metric">55.6%</span></td>
+  <td><span class="metric">35.2%</span></td>
+  <td><span class="metric">14.8%</span></td>
+  <td><span class="metric">81.5%</span></td>
+  <td><span class="metric">8,421.5 ms</span></td>
+</tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="efficiency">
+        <p class="eyebrow">Efficiency view</p>
+        <h2>Pass rate against time and output</h2>
+        <p>Each point is one eligible model. Excluded models are left off. The dashed line joins ranked models that no faster or leaner ranked model beats on full-contract pass rate. These charts are scoped to this frozen suite, not a general ranking.</p>
+        <figure class="chart"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" role="img" aria-labelledby="chart-latency-title" id="chart-latency"><title id="chart-latency-title">Full-contract pass rate against median latency per task</title><line class="grid-line" x1="70" y1="384" x2="936" y2="384"/><text class="tick" x="62" y="388" text-anchor="end">0%</text><line class="grid-line" x1="70" y1="311.2" x2="936" y2="311.2"/><text class="tick" x="62" y="315.2" text-anchor="end">10%</text><line class="grid-line" x1="70" y1="238.4" x2="936" y2="238.4"/><text class="tick" x="62" y="242.4" text-anchor="end">20%</text><line class="grid-line" x1="70" y1="165.6" x2="936" y2="165.6"/><text class="tick" x="62" y="169.6" text-anchor="end">30%</text><line class="grid-line" x1="70" y1="92.8" x2="936" y2="92.8"/><text class="tick" x="62" y="96.8" text-anchor="end">40%</text><line class="grid-line" x1="70" y1="20" x2="936" y2="20"/><text class="tick" x="62" y="24" text-anchor="end">50%</text><line class="grid-line" x1="70" y1="20" x2="70" y2="384"/><text class="tick" x="70" y="402" text-anchor="middle">5s</text><line class="grid-line" x1="232.72" y1="20" x2="232.72" y2="384"/><text class="tick" x="232.72" y="402" text-anchor="middle">10s</text><line class="grid-line" x1="395.45" y1="20" x2="395.45" y2="384"/><text class="tick" x="395.45" y="402" text-anchor="middle">20s</text><line class="grid-line" x1="610.55" y1="20" x2="610.55" y2="384"/><text class="tick" x="610.55" y="402" text-anchor="middle">50s</text><line class="grid-line" x1="773.28" y1="20" x2="773.28" y2="384"/><text class="tick" x="773.28" y="402" text-anchor="middle">100s</text><line class="grid-line" x1="936" y1="20" x2="936" y2="384"/><text class="tick" x="936" y="402" text-anchor="middle">200s</text><line class="axis" x1="70" y1="384" x2="936" y2="384"/><line class="axis" x1="70" y1="20" x2="70" y2="384"/><text class="axis-title" x="503" y="426" text-anchor="middle">median latency per task (log scale)</text><text class="axis-title" x="18" y="202" text-anchor="middle" transform="rotate(-90 18 202)">Full-contract pass rate</text><polyline class="frontier" data-frontier="inclusionai/ling-3.0-flash-sante:free upstage/solar-pro4:free" points="175.89,181.78 395.31,114.37"/><line class="leader" x1="175.89" y1="181.78" x2="215.89" y2="181.78"/><line class="leader" x1="192.39" y1="289.63" x2="204.39" y2="289.63"/><line class="leader" x1="269.54" y1="202" x2="281.54" y2="202"/><line class="leader" x1="395.31" y1="114.37" x2="355.31" y2="114.37"/><line class="leader" x1="462.69" y1="127.85" x2="474.69" y2="127.85"/><line class="leader" x1="796.83" y1="195.26" x2="784.83" y2="195.26"/><g class="model-point" data-model="inclusionai/ling-3.0-flash-sante:free" data-status="confirmed" data-frontier="true"><circle class="point confirmed" data-status="confirmed" cx="175.89" cy="181.78" r="6"><title>inclusionai/ling-3.0-flash-sante:free (confirmed): 27.8% full contract, 7,850 ms</title></circle><text class="point-label confirmed" x="215.89" y="185.78" text-anchor="start">inclusionai/ling-3.0-flash-sante</text></g><g class="model-point" data-model="poolside/laguna-xs-2.1:free" data-status="confirmed"><circle class="point confirmed" data-status="confirmed" cx="192.39" cy="289.63" r="6"><title>poolside/laguna-xs-2.1:free (confirmed): 13.0% full contract, 8,421.5 ms</title></circle><text class="point-label confirmed" x="204.39" y="293.63" text-anchor="start">poolside/laguna-xs-2.1</text></g><g class="model-point" data-model="poolside/laguna-s-2.1:free" data-status="provisional"><circle class="point provisional" data-status="provisional" cx="269.54" cy="202" r="5.5"><title>poolside/laguna-s-2.1:free (provisional): 25.0% full contract, 11,698 ms</title></circle><text class="point-label provisional" x="281.54" y="206" text-anchor="start">poolside/laguna-s-2.1</text></g><g class="model-point" data-model="upstage/solar-pro4:free" data-status="confirmed" data-frontier="true"><circle class="point confirmed" data-status="confirmed" cx="395.31" cy="114.37" r="6"><title>upstage/solar-pro4:free (confirmed): 37.0% full contract, 19,988.5 ms</title></circle><text class="point-label confirmed" x="355.31" y="118.37" text-anchor="end">upstage/solar-pro4</text></g><g class="model-point" data-model="meituan/longcat-2.5-preview:free" data-status="provisional"><circle class="point provisional" data-status="provisional" cx="462.69" cy="127.85" r="5.5"><title>meituan/longcat-2.5-preview:free (provisional): 35.2% full contract, 26,634 ms</title></circle><text class="point-label provisional" x="474.69" y="131.85" text-anchor="start">meituan/longcat-2.5-preview</text></g><g class="model-point" data-model="stepfun/step-3.7-flash:free" data-status="unranked"><polygon class="point unranked" data-status="unranked" points="796.83,188.26 803.83,195.26 796.83,202.26 789.83,195.26"><title>stepfun/step-3.7-flash:free (unranked): 25.9% full contract, 110,555 ms</title></polygon><text class="point-label unranked" x="784.83" y="199.26" text-anchor="end">stepfun/step-3.7-flash</text></g></svg><ul class="chart-legend"><li><svg viewBox="0 0 18 18" aria-hidden="true"><circle class="point confirmed" cx="9" cy="9" r="6"/></svg> confirmed</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><circle class="point provisional" cx="9" cy="9" r="5.5"/></svg> provisional (one sweep, not confirmed)</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><polygon class="point unranked" points="9,2 16,9 9,16 2,9"/></svg> unranked (incomplete coverage, never on the frontier)</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><line class="frontier" x1="0" y1="9" x2="18" y2="9"/></svg> efficiency frontier (ranked models)</li></ul><figcaption>Full-contract pass rate against median latency per task, scoped to this frozen suite, not a general ranking. Labels omit the :free suffix.</figcaption></figure><figure class="chart"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" role="img" aria-labelledby="chart-output-tokens-title" id="chart-output-tokens"><title id="chart-output-tokens-title">Full-contract pass rate against mean output tokens per task</title><line class="grid-line" x1="70" y1="384" x2="936" y2="384"/><text class="tick" x="62" y="388" text-anchor="end">0%</text><line class="grid-line" x1="70" y1="311.2" x2="936" y2="311.2"/><text class="tick" x="62" y="315.2" text-anchor="end">10%</text><line class="grid-line" x1="70" y1="238.4" x2="936" y2="238.4"/><text class="tick" x="62" y="242.4" text-anchor="end">20%</text><line class="grid-line" x1="70" y1="165.6" x2="936" y2="165.6"/><text class="tick" x="62" y="169.6" text-anchor="end">30%</text><line class="grid-line" x1="70" y1="92.8" x2="936" y2="92.8"/><text class="tick" x="62" y="96.8" text-anchor="end">40%</text><line class="grid-line" x1="70" y1="20" x2="936" y2="20"/><text class="tick" x="62" y="24" text-anchor="end">50%</text><line class="grid-line" x1="70" y1="20" x2="70" y2="384"/><text class="tick" x="70" y="402" text-anchor="middle">500</text><line class="grid-line" x1="330.69" y1="20" x2="330.69" y2="384"/><text class="tick" x="330.69" y="402" text-anchor="middle">1k</text><line class="grid-line" x1="591.38" y1="20" x2="591.38" y2="384"/><text class="tick" x="591.38" y="402" text-anchor="middle">2k</text><line class="grid-line" x1="936" y1="20" x2="936" y2="384"/><text class="tick" x="936" y="402" text-anchor="middle">5k</text><line class="axis" x1="70" y1="384" x2="936" y2="384"/><line class="axis" x1="70" y1="20" x2="70" y2="384"/><text class="axis-title" x="503" y="426" text-anchor="middle">mean output tokens per task (log scale)</text><text class="axis-title" x="18" y="202" text-anchor="middle" transform="rotate(-90 18 202)">Full-contract pass rate</text><polyline class="frontier" data-frontier="poolside/laguna-xs-2.1:free inclusionai/ling-3.0-flash-sante:free upstage/solar-pro4:free" points="257.76,289.63 431.54,181.78 503.98,114.37"/><line class="leader" x1="257.76" y1="289.63" x2="245.76" y2="289.63"/><line class="leader" x1="431.54" y1="181.78" x2="471.54" y2="181.78"/><line class="leader" x1="503.98" y1="114.37" x2="543.98" y2="114.37"/><line class="leader" x1="507.65" y1="127.85" x2="467.65" y2="127.85"/><line class="leader" x1="557.33" y1="202" x2="569.33" y2="218"/><line class="leader" x1="698.95" y1="195.26" x2="710.95" y2="195.26"/><g class="model-point" data-model="poolside/laguna-xs-2.1:free" data-status="confirmed" data-frontier="true"><circle class="point confirmed" data-status="confirmed" cx="257.76" cy="289.63" r="6"><title>poolside/laguna-xs-2.1:free (confirmed): 13.0% full contract, 824 tokens</title></circle><text class="point-label confirmed" x="245.76" y="293.63" text-anchor="end">poolside/laguna-xs-2.1</text></g><g class="model-point" data-model="inclusionai/ling-3.0-flash-sante:free" data-status="confirmed" data-frontier="true"><circle class="point confirmed" data-status="confirmed" cx="431.54" cy="181.78" r="6"><title>inclusionai/ling-3.0-flash-sante:free (confirmed): 27.8% full contract, 1,308 tokens</title></circle><text class="point-label confirmed" x="471.54" y="185.78" text-anchor="start">inclusionai/ling-3.0-flash-sante</text></g><g class="model-point" data-model="upstage/solar-pro4:free" data-status="confirmed" data-frontier="true"><circle class="point confirmed" data-status="confirmed" cx="503.98" cy="114.37" r="6"><title>upstage/solar-pro4:free (confirmed): 37.0% full contract, 1,585 tokens</title></circle><text class="point-label confirmed" x="543.98" y="118.37" text-anchor="start">upstage/solar-pro4</text></g><g class="model-point" data-model="meituan/longcat-2.5-preview:free" data-status="provisional"><circle class="point provisional" data-status="provisional" cx="507.65" cy="127.85" r="5.5"><title>meituan/longcat-2.5-preview:free (provisional): 35.2% full contract, 1,601 tokens</title></circle><text class="point-label provisional" x="467.65" y="131.85" text-anchor="end">meituan/longcat-2.5-preview</text></g><g class="model-point" data-model="poolside/laguna-s-2.1:free" data-status="provisional"><circle class="point provisional" data-status="provisional" cx="557.33" cy="202" r="5.5"><title>poolside/laguna-s-2.1:free (provisional): 25.0% full contract, 1,827 tokens</title></circle><text class="point-label provisional" x="569.33" y="222" text-anchor="start">poolside/laguna-s-2.1</text></g><g class="model-point" data-model="stepfun/step-3.7-flash:free" data-status="unranked"><polygon class="point unranked" data-status="unranked" points="698.95,188.26 705.95,195.26 698.95,202.26 691.95,195.26"><title>stepfun/step-3.7-flash:free (unranked): 25.9% full contract, 2,662 tokens</title></polygon><text class="point-label unranked" x="710.95" y="199.26" text-anchor="start">stepfun/step-3.7-flash</text></g></svg><ul class="chart-legend"><li><svg viewBox="0 0 18 18" aria-hidden="true"><circle class="point confirmed" cx="9" cy="9" r="6"/></svg> confirmed</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><circle class="point provisional" cx="9" cy="9" r="5.5"/></svg> provisional (one sweep, not confirmed)</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><polygon class="point unranked" points="9,2 16,9 9,16 2,9"/></svg> unranked (incomplete coverage, never on the frontier)</li><li><svg viewBox="0 0 18 18" aria-hidden="true"><line class="frontier" x1="0" y1="9" x2="18" y2="9"/></svg> efficiency frontier (ranked models)</li></ul><figcaption>Full-contract pass rate against mean output tokens per task, scoped to this frozen suite, not a general ranking. Labels omit the :free suffix.</figcaption></figure>
+      </section>
+
+      <section>
+        <p class="eyebrow">Profile signal</p>
+        <h2>Where each model looks strongest</h2>
+        <p>These profile views may inform routing recommendations for confirmed candidates in this snapshot.</p>
+        <div class="profile-list"><div class="profile-card">
+  <h3>aegis</h3>
+  <p>Top candidate: <span class="model">upstage/solar-pro4:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 86.7% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>arch</h3>
+  <p>Top candidate: <span class="model">upstage/solar-pro4:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 91.7% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>atlas</h3>
+  <p>Top candidate: <span class="model">meituan/longcat-2.5-preview:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 94.4% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>kody</h3>
+  <p>Top candidate: <span class="model">meituan/longcat-2.5-preview:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 73.3% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>morph</h3>
+  <p>Top candidate: <span class="model">poolside/laguna-s-2.1:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 93.3% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>oracle</h3>
+  <p>Top candidate: <span class="model">inclusionai/ling-3.0-flash-sante:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 80.0% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>sentinel</h3>
+  <p>Top candidate: <span class="model">meituan/longcat-2.5-preview:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 90.0% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>seraph</h3>
+  <p>Top candidate: <span class="model">meituan/longcat-2.5-preview:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 90.0% automatic checks</p>
+</div>
+<div class="profile-card">
+  <h3>tank</h3>
+  <p>Top candidate: <span class="model">upstage/solar-pro4:free</span></p>
+  <p><span class="status confirmed">confirmed</span> 73.3% automatic checks</p>
+</div></div>
+      </section>
+
+      <section>
+        <p class="eyebrow">Exceptions</p>
+        <h2>What is not ranked</h2>
+        <p>Incomplete and excluded evidence stays visible instead of being silently folded into a partial score.</p>
+        <div class="table-shell">
+          <table>
+            <caption>Held-out or excluded model records</caption>
+            <thead><tr><th scope="col">Model</th><th scope="col">Coverage</th><th scope="col">Reason</th></tr></thead>
+            <tbody><tr>
+  <td><span class="model">stepfun/step-3.7-flash:free</span><span class="status unranked">unranked</span></td>
+  <td>15/18 tasks, 0 replicates</td>
+  <td><span class="sub"><code>incomplete-task-coverage</code>, <code>missing-comparable-cells</code></span></td>
+</tr>
+<tr>
+  <td><span class="model">inclusionai/ling-3.0-flash-fin:free</span><span class="status excluded">excluded</span></td>
+  <td>0/18 tasks, 0 replicates</td>
+  <td><span class="sub"><code>roster-excluded</code></span></td>
+</tr>
+<tr>
+  <td><span class="model">meituan/longcat-2.0:free</span><span class="status excluded">excluded</span></td>
+  <td>0/18 tasks, 0 replicates</td>
+  <td><span class="sub"><code>roster-excluded</code></span></td>
+</tr></tbody>
+          </table>
+        </div>
+        <h3>Run-level provider and identity exclusions</h3>
+        <p>These attempts remain visible in the evidence ledger but do not contribute to comparable quality metrics.</p>
+        <div class="table-shell">
+          <table>
+            <caption>Excluded attempts by model and task</caption>
+            <thead><tr><th scope="col">Model</th><th scope="col">Task</th><th scope="col">Excluded runs</th></tr></thead>
+            <tbody><tr><td><span class="model">meituan/longcat-2.5-preview:free</span></td><td><code>TANK-01</code></td><td>1</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>AEGIS-01</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>AEGIS-02</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>ARCH-01</code></td><td>1</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>ATLAS-01</code></td><td>3</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>KODY-02</code></td><td>3</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>MORPH-01</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>MORPH-02</code></td><td>1</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>ORACLE-01</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>ORACLE-02</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>SENTINEL-01</code></td><td>1</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>SENTINEL-02</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>SERAPH-01</code></td><td>2</td></tr>
+<tr><td><span class="model">stepfun/step-3.7-flash:free</span></td><td><code>TANK-01</code></td><td>3</td></tr></tbody>
+          </table>
+        </div>
+<h3>Run-level blocked or unverified evidence</h3>
+        <p>These attempts remain visible but are excluded from comparable quality metrics because their execution or isolation was not verified.</p>
+        <div class="table-shell">
+          <table>
+            <caption>Blocked or unverified attempts by model and task</caption>
+            <thead><tr><th scope="col">Model</th><th scope="col">Task</th><th scope="col">Blocked or unverified runs</th></tr></thead>
+            <tbody><tr><td><span class="model">poolside/laguna-s-2.1:free</span></td><td><code>ORACLE-02</code></td><td>1</td></tr>
+<tr><td><span class="model">poolside/laguna-s-2.1:free</span></td><td><code>SENTINEL-02</code></td><td>1</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <p class="eyebrow">Evidence ledger</p>
+        <h2>What this snapshot contains</h2>
+        <div class="grid">
+          <div class="card"><h3>Attempts</h3><p>324 attempted runs (108 planned cells), 297 completed, and 295 comparable.</p></div>
+          <div class="card"><h3>Contract quality</h3><p>Comparable subset: 82 full-contract passes and 83 automatic-check passes.</p></div>
+          <div class="card"><h3>Failure visibility</h3><p>All attempts: 95 hard-failure runs and 45 invalid-output runs. Comparable subset: 66 hard-failure runs and 18 invalid-output runs.</p></div>
+        </div>
+      </section>
+
+      <section id="method">
+        <p class="eyebrow">Method</p>
+        <h2>How to use this page</h2>
+        <ol>
+          <li>Use the overall order as a signal for this exact frozen suite and harness.</li>
+          <li>Use profile cards to see where a model performed better or worse, not to infer general capability.</li>
+          <li>Ignore any model marked unranked or excluded when comparing quality metrics.</li>
+          <li>Do not automate routing until models are confirmed across repeated comparable runs.</li>
+        </ol>
+        <dl class="meta-list">
+          <div><dt>Benchmark</dt><dd>agent-profile-benchmark v0.4.1</dd></div>
+          <div><dt>Policy</dt><dd>leaderboard-v2 v2.0.0</dd></div>
+          <div><dt>Input snapshot</dt><dd><code>nous-free-roster-20260929-v041-v2</code></dd></div>
+          <div><dt>Roster snapshot</dt><dd><code>nous-free-roster-20260929-v041-v2</code></dd></div>
+          <div><dt>Generated</dt><dd><code>2026-09-29T00:00:00Z</code></dd></div>
+          <div><dt>Selected run records</dt><dd>324</dd></div>
+          <div><dt>Roster source</dt><dd><code>.model-evidence/leaderboard-20260929-v2-medium-r1/roster.json</code></dd></div>
+          <div><dt>Release lock</dt><dd><code>sha256:03aec1bae76c7c10c1fec90695374885a938ccb759ef487bbf20a791e5ff803b</code></dd></div>
+          <div><dt>Source JSON SHA-256</dt><dd><code>9620deaeca2d09170276adc5dd854ba8f4df24ee6c87d6c148ad3859fd72b570</code></dd></div>
+          <div><dt>Publication note</dt><dd>Every profile has a confirmed candidate.</dd></div>
+        </dl>
+        <p><strong>Scope:</strong> benchmark-specific model leaderboard and routing aid. Historical evidence remains append-only under the benchmark repository's local <code>.model-evidence/</code> roots.</p>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <div class="wrap"><p>Generated from a validated leaderboard artifact. This page reports evidence; it does not make a universal intelligence claim.</p></div>
+  </footer>
+</body>
+</html>
