@@ -54,7 +54,7 @@
     },
     "leaderboard_builder": {
       "path": "scripts/build_leaderboard.py",
-      "sha256": "sha256:415cccece357a93b86d5f322ae354b2ea2da3b32a6619c7b6775486447211cb3"
+      "sha256": "sha256:535ea57fbba11a599a3997fd362c858cbe9bc9dcc26534480d3190bc0ad6f7e1"
     },
     "leaderboard_input_schema": {
       "path": "schemas/leaderboard-input.schema.json",
@@ -62,19 +62,19 @@
     },
     "leaderboard_output_schema": {
       "path": "schemas/leaderboard-output.schema.json",
-      "sha256": "sha256:0c6d6bc383aae85009c1df670c2d708a6ac883c6399f0d0e7173b5cbee3b5ae6"
+      "sha256": "sha256:dbaf5d4a4f48800fe34a0a47d3b2266a78157862a041b667f0ca65bdf1a11453"
     },
     "leaderboard_policy": {
       "path": "data/leaderboard-policy.json",
-      "sha256": "sha256:4c5033c9faf130530b2a21ec622fedae013aa479ffcf22072e626572caf7008f"
+      "sha256": "sha256:3098d133f625f2b5c54a0138b93145d7840f11410544b1c690dd9b0f51363327"
     },
     "leaderboard_policy_schema": {
       "path": "schemas/leaderboard-policy.schema.json",
-      "sha256": "sha256:de8e1f10dd47cf0d37bb9623508caa18dbafc122683c7aa8b05e48d7cf20ab8c"
+      "sha256": "sha256:ccb155cad11d97e7e9d6a26774e79f67f5436d1dfd531b68fe8a6736afb10572"
     },
     "leaderboard_renderer": {
       "path": "scripts/render_leaderboard_html.py",
-      "sha256": "sha256:a155d89470c89ef37ae01b82cdf27c37ce06f257fce01b1891eeabd42a85270e"
+      "sha256": "sha256:66ee0909ff61a7ecb4bde639f7029b9d8f24436beeb5be635a648d8a713eb95d"
     },
     "ledger": {
       "path": "data/task-ledger.json",
@@ -94,11 +94,11 @@
     },
     "release_lock": {
       "path": "scripts/release_lock.py",
-      "sha256": "sha256:7d5fff7764634877dd68a8b857c899993ebfa7783c58df9f8a5a169fefdab7b2"
+      "sha256": "sha256:284c26d00793570817d8ac48341819855dc0c4ffc60d92a8ebd1206626a198c7"
     },
     "release_lock_schema": {
       "path": "schemas/release-artifact-lock.schema.json",
-      "sha256": "sha256:84e96fc7a15be15ea4306a2f7b81bf614b6805fefa80851c7c6e04a33f556ce8"
+      "sha256": "sha256:0e7963c09609a6a723a8875fc63d4a815125b4016d7c0a8a0f9fffa737c051d4"
     },
     "release_validator": {
       "path": "scripts/validate_benchmark_ready.py",
@@ -115,6 +115,10 @@
     "run_record_schema": {
       "path": "schemas/task-run-record.schema.json",
       "sha256": "sha256:2fed9f04fdf6706af521385465c8e2882554f2760373b08a3fde35baa529a221"
+    },
+    "tolerant_parser": {
+      "path": "scripts/tolerant_output.py",
+      "sha256": "sha256:f108b16d1a5f6e4a4007f982348a5ba44c1ec20edd71b1a0c4c575d72e9721f6"
     },
     "validity_gate": {
       "path": "scripts/validate_validity_probes.py",

@@ -627,6 +627,7 @@ def _ranked_row(item: dict[str, Any]) -> str:
   <td><span class="metric">{auto}</span></td>
   <td><span class="metric">{hard}</span></td>
   <td><span class="metric">{invalid}</span></td>
+  <td><span class="metric">{strict}</span></td>
   <td><span class="metric">{latency}</span></td>
 </tr>""".format(
         rank=_esc(rank_text),
@@ -638,6 +639,7 @@ def _ranked_row(item: dict[str, Any]) -> str:
         auto=_esc(_percentage(auto)),
         hard=_esc(_percentage(_metric(item, "hard_failure_rate"))),
         invalid=_esc(_percentage(_metric(item, "invalid_output_rate"))),
+        strict=_esc(_percentage(_metric(item, "strict_json_valid_rate"))),
         latency=_esc(_latency(_metric(item, "median_latency_ms"))),
     )
 
@@ -1124,8 +1126,9 @@ def _validate_metrics(value: Any, name: str) -> None:
         "human_score_coverage",
         "hard_failure_rate",
         "invalid_output_rate",
+        "strict_json_valid_rate",
     ):
-        value = metrics[key]
+        value = metrics.get(key)
         if value is not None and (not _finite_number(value) or not 0 <= float(value) <= 1):
             raise RenderError(f"{name}.{key} must be a number between 0 and 1 or null")
     latency = metrics["median_latency_ms"]
@@ -1526,8 +1529,8 @@ def render_html(
         "input",
     ):
         _required_text(data.get(key), f"leaderboard.{key}") if key not in {"aggregate", "overall", "profiles", "publication", "input"} else _required_mapping(data.get(key), f"leaderboard.{key}")
-    if data["schema_version"] != "leaderboard-v1":
-        raise RenderError("leaderboard.schema_version must be leaderboard-v1")
+    if data["schema_version"] != "leaderboard-v2":
+        raise RenderError("leaderboard.schema_version must be leaderboard-v2")
     if data["benchmark_id"] != "agent-profile-benchmark":
         raise RenderError("leaderboard.benchmark_id is not supported")
     if data["scope"] != "benchmark-specific model leaderboard and routing aid":
@@ -1688,12 +1691,12 @@ def render_html(
       <section id="leaderboard">
         <p class="eyebrow">Overall view</p>
         <h2>{'Provisional ranking' if ranking_available else 'No ranking yet'}</h2>
-        <p>The primary order is full-contract pass rate, followed by automatic-check pass rate, human quality, hard failures, invalid output, and latency. Profile views are weighted equally in the overall score.</p>
+        <p>The primary order is full-contract pass rate, followed by automatic-check pass rate, human quality, hard failures, invalid output, and latency. Profile views are weighted equally in the overall score. Under leaderboard-v2 an answer wrapped in one JSON fence or brief prose is recovered and scored on its content; an unreadable answer counts as a failure. Strict JSON validity is reported separately as format compliance and does not change the rank.</p>
         <div class="table-shell">
           <table>
             <caption>Snapshot <code>{_esc(data['input_snapshot_id'])}</code> - {tasks_total} frozen tasks across {len(profiles)} profiles</caption>
             <thead>
-              <tr><th scope="col">Rank</th><th scope="col">Model</th><th scope="col">Full contract</th><th scope="col">Automatic checks</th><th scope="col">Hard failures</th><th scope="col">Invalid output</th><th scope="col">Median latency</th></tr>
+              <tr><th scope="col">Rank</th><th scope="col">Model</th><th scope="col">Full contract</th><th scope="col">Automatic checks</th><th scope="col">Hard failures</th><th scope="col">Invalid output</th><th scope="col">Strict JSON (format compliance)</th><th scope="col">Median latency</th></tr>
             </thead>
             <tbody>{ranked_rows}</tbody>
           </table>

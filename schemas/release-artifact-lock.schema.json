@@ -44,7 +44,8 @@
         "aggregate_validator",
         "diagnostic_runner",
         "diagnostic_manifest_schema",
-        "historical_snapshot_manifest"
+        "historical_snapshot_manifest",
+        "tolerant_parser"
       ],
       "properties": {
         "ledger": {"$ref": "#/$defs/artifact"},
@@ -77,7 +78,8 @@
         "aggregate_validator": {"$ref": "#/$defs/artifact"},
         "diagnostic_runner": {"$ref": "#/$defs/artifact"},
         "diagnostic_manifest_schema": {"$ref": "#/$defs/artifact"},
-        "historical_snapshot_manifest": {"$ref": "#/$defs/artifact"}
+        "historical_snapshot_manifest": {"$ref": "#/$defs/artifact"},
+        "tolerant_parser": {"$ref": "#/$defs/artifact"}
       }
     },
     "tasks": {
